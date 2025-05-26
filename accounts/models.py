@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import datetime
 
 from exercises.models import Exercise
 
@@ -40,6 +41,8 @@ class UserProfile(models.Model):
     ])
     aura = models.PositiveBigIntegerField(default=0) #point
     
+    last_training_date = models.DateTimeField(null=True, blank=True, help_text='تاریخ آخرین تمرین کاربر')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -57,7 +60,9 @@ class TrainingSettings(models.Model):
     available_equipment = models.JSONField()
     preferred_location = models.CharField(max_length=20, choices=[('home', 'Home'), ('gym', 'Gym')])
     injuries = models.TextField(blank=True, null=True)
-    
+    split_type = models.CharField(max_length=20, choices=[('bro_split', 'Bro Split'), ('ppl', 'Push Pull Legs'), ('upper_lower', 'Upper Lower'), ('full_body', 'Full Body')], default='full_body')
+    split_rotation_weeks = models.PositiveIntegerField(default=4, help_text='تعداد هفته‌ها تا چرخش خودکار split')
+    split_last_updated = models.DateTimeField(default=datetime.datetime.now, help_text='زمان آخرین به‌روزرسانی split')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

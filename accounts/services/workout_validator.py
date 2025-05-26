@@ -1,34 +1,124 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
+from datetime import datetime, timedelta
 from accounts.models import UserProfile, TrainingSettings
 from exercises.models import Exercise
+from django.db.models import Q
 
 class WorkoutValidator:
+    """
+    اعتبارسنجی حرفه‌ای برنامه تمرینی
+    - بررسی تعادل و توالی تمرینات
+    - بررسی سازگاری با محدودیت‌های فیزیکی
+    - همگام‌سازی با سایر بخش‌های برنامه
+    - بررسی پیشرفت و ریکاوری
+    """
+    
+    # محدودیت‌های حجمی برای هر عضله (مجموع ست‌ها در هفته)
+    VOLUME_LIMITS = {
+        'chest': {'min': 8, 'max': 20},
+        'back': {'min': 8, 'max': 20},
+        'shoulders': {'min': 6, 'max': 15},
+        'biceps': {'min': 4, 'max': 12},
+        'triceps': {'min': 4, 'max': 12},
+        'quadriceps': {'min': 8, 'max': 20},
+        'hamstrings': {'min': 6, 'max': 15},
+        'calves': {'min': 4, 'max': 12},
+        'abs': {'min': 4, 'max': 12}
+    }
+    
+    # محدودیت‌های شدت برای هر نوع تمرین
+    INTENSITY_LIMITS = {
+        'compound': {'min': 3, 'max': 8},    # ست‌ها
+        'isolation': {'min': 2, 'max': 4},   # ست‌ها
+        'accessory': {'min': 2, 'max': 3}    # ست‌ها
+    }
+    
+    # محدوده تکرار برای هر هدف
+    REP_RANGES = {
+        'muscle_gain': {'min': 6, 'max': 12},
+        'strength': {'min': 3, 'max': 6},
+        'weight_loss': {'min': 12, 'max': 20},
+        'endurance': {'min': 15, 'max': 30}
+    }
+    
     def __init__(self, user: UserProfile, settings: TrainingSettings):
         self.user = user
         self.settings = settings
+        self.volume_manager = None
+        self.recovery_manager = None
+        self.mobility_manager = None
+        self.exercise_selector = None
+        self._validate_initialization()
         
-    def validate_program(self, program: Dict) -> Tuple[bool, List[str]]:
-        """اعتبارسنجی کامل برنامه تمرینی"""
-        errors = []
-        
-        # بررسی ساختار برنامه
-        if not self._validate_structure(program):
-            errors.append("ساختار برنامه نامعتبر است")
+    def _validate_initialization(self):
+        """اعتبارسنجی مقداردهی اولیه"""
+        if not self.user or not self.settings:
+            raise ValueError("کاربر و تنظیمات باید مقداردهی شوند")
             
-        # بررسی حجم تمرینات
-        volume_errors = self._validate_volume(program)
-        errors.extend(volume_errors)
-        
-        # بررسی توالی تمرینات
-        sequence_errors = self._validate_sequence(program)
-        errors.extend(sequence_errors)
-        
-        # بررسی محدودیت‌های فیزیکی
-        limitation_errors = self._validate_limitations(program)
-        errors.extend(limitation_errors)
-        
-        return len(errors) == 0, errors
-    
+    def set_managers(self, volume_manager, recovery_manager, mobility_manager, exercise_selector):
+        """تنظیم مدیران با اعتبارسنجی"""
+        try:
+            self.volume_manager = volume_manager
+            self.recovery_manager = recovery_manager
+            self.mobility_manager = mobility_manager
+            self.exercise_selector = exercise_selector
+            
+            # اعتبارسنجی مدیران
+            if not all([
+                self.volume_manager,
+                self.recovery_manager,
+                self.mobility_manager,
+                self.exercise_selector
+            ]):
+                raise ValueError("همه مدیران باید مقداردهی شوند")
+        except Exception as e:
+            raise ValueError(f"خطا در تنظیم مدیران: {str(e)}")
+            
+    def validate_program(self, program: Dict) -> Tuple[bool, List[str]]:
+        """اعتبارسنجی کامل برنامه تمرینی با مدیریت خطا"""
+        try:
+            errors = []
+            
+            # بررسی ساختار برنامه
+            if not self._validate_structure(program):
+                errors.append("ساختار برنامه نامعتبر است")
+                return False, errors
+                
+            # بررسی تعادل تمرینات
+            balance_errors = self._validate_exercise_balance(program)
+            errors.extend(balance_errors)
+            
+            # بررسی حجم تمرینات
+            volume_errors = self._validate_volume(program)
+            errors.extend(volume_errors)
+            
+            # بررسی توالی تمرینات
+            sequence_errors = self._validate_sequence(program)
+            errors.extend(sequence_errors)
+            
+            # بررسی محدودیت‌های فیزیکی
+            limitation_errors = self._validate_limitations(program)
+            errors.extend(limitation_errors)
+            
+            # بررسی ریکاوری
+            if self.recovery_manager:
+                recovery_errors = self._validate_recovery(program)
+                errors.extend(recovery_errors)
+            else:
+                errors.append("مدیر ریکاوری تنظیم نشده است")
+                
+            # بررسی موبیلیتی
+            if self.mobility_manager:
+                mobility_errors = self._validate_mobility(program)
+                errors.extend(mobility_errors)
+            else:
+                errors.append("مدیر موبیلیتی تنظیم نشده است")
+                
+            return len(errors) == 0, errors
+            
+        except Exception as e:
+            return False, [f"خطا در اعتبارسنجی برنامه: {str(e)}"]
+            
     def _validate_structure(self, program: Dict) -> bool:
         """اعتبارسنجی ساختار برنامه"""
         required_keys = ['weekly_plan']
@@ -50,8 +140,44 @@ class WorkoutValidator:
     
     def _validate_exercise_structure(self, exercise: Dict) -> bool:
         """اعتبارسنجی ساختار یک تمرین"""
-        required_keys = ['exercise_id', 'exercise_name', 'type', 'muscle_group', 'sets', 'reps']
+        required_keys = [
+            'exercise_id', 'exercise_name', 'type', 
+            'muscle_group', 'sets', 'reps', 'rest_seconds'
+        ]
         return all(key in exercise for key in required_keys)
+    
+    def _validate_exercise_balance(self, program: Dict) -> List[str]:
+        """بررسی تعادل تمرینات"""
+        errors = []
+        exercise_counts = {}
+        muscle_counts = {}
+        
+        for day, exercises in program['weekly_plan'].items():
+            # شمارش تمرینات هر نوع
+            for exercise in exercises:
+                ex_type = exercise['type']
+                muscle = exercise['muscle_group']
+                
+                exercise_counts[ex_type] = exercise_counts.get(ex_type, 0) + 1
+                muscle_counts[muscle] = muscle_counts.get(muscle, 0) + 1
+        
+        # بررسی تعادل نوع تمرینات
+        for ex_type, count in exercise_counts.items():
+            limits = self.INTENSITY_LIMITS.get(ex_type, {'min': 2, 'max': 5})
+            if count < limits['min']:
+                errors.append(f"تعداد تمرینات {ex_type} کمتر از حد مجاز است")
+            elif count > limits['max']:
+                errors.append(f"تعداد تمرینات {ex_type} بیشتر از حد مجاز است")
+        
+        # بررسی تعادل عضلات
+        for muscle, count in muscle_counts.items():
+            limits = self.VOLUME_LIMITS.get(muscle, {'min': 4, 'max': 12})
+            if count < limits['min']:
+                errors.append(f"تعداد تمرینات {muscle} کمتر از حد مجاز است")
+            elif count > limits['max']:
+                errors.append(f"تعداد تمرینات {muscle} بیشتر از حد مجاز است")
+        
+        return errors
     
     def _validate_volume(self, program: Dict) -> List[str]:
         """اعتبارسنجی حجم تمرینات"""
@@ -91,13 +217,16 @@ class WorkoutValidator:
         sets = exercise['sets']
         reps = exercise['reps']
         
+        # بررسی تعداد ست‌ها
         if not isinstance(sets, int) or sets < 1 or sets > 10:
             return False
             
+        # بررسی تعداد تکرارها
         if isinstance(reps, str):
             try:
                 min_reps, max_reps = map(int, reps.split('-'))
-                if min_reps < 1 or max_reps > 30 or min_reps > max_reps:
+                rep_range = self.REP_RANGES.get(self.user.goal, {'min': 8, 'max': 12})
+                if min_reps < rep_range['min'] or max_reps > rep_range['max']:
                     return False
             except:
                 return False
@@ -106,24 +235,23 @@ class WorkoutValidator:
     
     def _is_valid_muscle_volume(self, muscle: str, volume: int) -> bool:
         """بررسی اعتبار حجم کل یک عضله"""
-        max_volumes = {
-            'chest': 100,
-            'back': 100,
-            'shoulders': 80,
-            'biceps': 50,
-            'triceps': 50,
-            'quadriceps': 100,
-            'hamstrings': 80,
-            'calves': 50,
-            'abs': 50
-        }
-        return volume <= max_volumes.get(muscle, 80)
+        limits = self.VOLUME_LIMITS.get(muscle, {'min': 4, 'max': 12})
+        return limits['min'] <= volume <= limits['max']
     
     def _validate_sequence(self, program: Dict) -> List[str]:
         """اعتبارسنجی توالی تمرینات"""
         errors = []
         trained_muscles = {}
         
+        # بررسی توالی روزها
+        days = sorted(program['weekly_plan'].keys())
+        for i in range(1, len(days)):
+            prev_day = datetime.strptime(days[i-1], '%Y-%m-%d')
+            curr_day = datetime.strptime(days[i], '%Y-%m-%d')
+            if (curr_day - prev_day).days < 1:
+                errors.append("روزهای تمرین باید حداقل یک روز فاصله داشته باشند")
+        
+        # بررسی توالی عضلات
         for day, exercises in program['weekly_plan'].items():
             for exercise in exercises:
                 muscle = exercise['muscle_group']
@@ -134,9 +262,12 @@ class WorkoutValidator:
         for muscle, days in trained_muscles.items():
             if len(days) > 1:
                 for i in range(1, len(days)):
-                    if (days[i] - days[i-1]).days < self._get_min_recovery_days(muscle):
+                    prev_day = datetime.strptime(days[i-1], '%Y-%m-%d')
+                    curr_day = datetime.strptime(days[i], '%Y-%m-%d')
+                    min_recovery = self._get_min_recovery_days(muscle)
+                    if (curr_day - prev_day).days < min_recovery:
                         errors.append(f"زمان استراحت برای {muscle} کافی نیست")
-                        
+        
         return errors
     
     def _get_min_recovery_days(self, muscle: str) -> int:
@@ -177,5 +308,189 @@ class WorkoutValidator:
                 limitation in ex.contraindications
                 for limitation in self.user.physical_limitations
             )
+        except Exercise.DoesNotExist:
+            return False
+    
+    def _validate_recovery(self, program: Dict) -> List[str]:
+        """اعتبارسنجی ریکاوری"""
+        errors = []
+        
+        if not self.recovery_manager:
+            return errors
+            
+        for day, exercises in program['weekly_plan'].items():
+            target_muscles = [ex['muscle_group'] for ex in exercises]
+            if not self.recovery_manager.can_train(target_muscles, datetime.strptime(day, '%Y-%m-%d')):
+                errors.append(f"عضلات در تاریخ {day} نیاز به استراحت دارند")
+                
+        return errors
+    
+    def _validate_mobility(self, program: Dict) -> List[str]:
+        """اعتبارسنجی موبیلیتی"""
+        errors = []
+        
+        if not self.mobility_manager:
+            return errors
+            
+        for day, exercises in program['weekly_plan'].items():
+            # بررسی وجود تمرینات گرم کردن
+            if not any(ex['type'] == 'warmup' for ex in exercises):
+                errors.append(f"تمرینات گرم کردن در تاریخ {day} وجود ندارد")
+                
+            # بررسی وجود تمرینات سرد کردن
+            if not any(ex['type'] == 'cooldown' for ex in exercises):
+                errors.append(f"تمرینات سرد کردن در تاریخ {day} وجود ندارد")
+                
+        return errors
+    
+    def validate_workout(self, workout: Dict) -> Tuple[bool, List[str]]:
+        """اعتبارسنجی یک جلسه تمرین با مدیریت خطا"""
+        try:
+            errors = []
+            
+            # بررسی ساختار
+            if not self._validate_workout_structure(workout):
+                errors.append("ساختار جلسه تمرین نامعتبر است")
+                return False, errors
+                
+            # بررسی تمرینات اصلی
+            if 'exercises' in workout:
+                exercise_errors = self._validate_workout_exercises(workout['exercises'])
+                errors.extend(exercise_errors)
+                
+            # بررسی تمرینات گرم کردن
+            if 'warmup' in workout:
+                warmup_errors = self._validate_mobility_exercises(workout['warmup'], 'warmup')
+                errors.extend(warmup_errors)
+                
+            # بررسی تمرینات سرد کردن
+            if 'cooldown' in workout:
+                cooldown_errors = self._validate_mobility_exercises(workout['cooldown'], 'cooldown')
+                errors.extend(cooldown_errors)
+                
+            # بررسی ریکاوری
+            if self.recovery_manager:
+                target_muscles = [ex['muscle_group'] for ex in workout.get('exercises', [])]
+                if not self.recovery_manager.can_train(target_muscles, datetime.strptime(workout['date'], '%Y-%m-%d')):
+                    errors.append("عضلات هدف نیاز به استراحت دارند")
+            else:
+                errors.append("مدیر ریکاوری تنظیم نشده است")
+                
+            return len(errors) == 0, errors
+            
+        except Exception as e:
+            return False, [f"خطا در اعتبارسنجی جلسه تمرین: {str(e)}"]
+            
+    def _validate_workout_structure(self, workout: Dict) -> bool:
+        """اعتبارسنجی ساختار جلسه تمرین با جزئیات بیشتر"""
+        required_keys = ['date', 'target_muscles']
+        optional_keys = ['exercises', 'warmup', 'cooldown']
+        
+        # بررسی کلیدهای اجباری
+        if not all(key in workout for key in required_keys):
+            return False
+            
+        # بررسی نوع داده‌ها
+        if not isinstance(workout['date'], str):
+            return False
+        if not isinstance(workout['target_muscles'], list):
+            return False
+            
+        # بررسی تاریخ
+        try:
+            datetime.strptime(workout['date'], '%Y-%m-%d')
+        except ValueError:
+            return False
+            
+        # بررسی کلیدهای اختیاری
+        for key in optional_keys:
+            if key in workout and not isinstance(workout[key], list):
+                return False
+                
+        return True
+        
+    def _validate_workout_exercises(self, exercises: List[Dict]) -> List[str]:
+        """اعتبارسنجی تمرینات اصلی با جزئیات بیشتر"""
+        errors = []
+        
+        if not exercises:
+            errors.append("لیست تمرینات خالی است")
+            return errors
+            
+        for i, exercise in enumerate(exercises, 1):
+            # بررسی ساختار
+            if not self._validate_exercise_structure(exercise):
+                errors.append(f"ساختار تمرین {i} نامعتبر است")
+                continue
+                
+            # بررسی حجم
+            if not self._is_valid_exercise_volume(exercise):
+                errors.append(f"حجم تمرین {i} ({exercise['exercise_name']}) نامعتبر است")
+                
+            # بررسی محدودیت‌ها
+            if not self._is_exercise_safe(exercise):
+                errors.append(f"تمرین {i} ({exercise['exercise_name']}) با محدودیت‌های فیزیکی سازگار نیست")
+                
+            # بررسی توالی
+            if i > 1:
+                prev_exercise = exercises[i-2]
+                if not self._is_valid_exercise_sequence(prev_exercise, exercise):
+                    errors.append(f"توالی تمرینات {i-1} و {i} نامناسب است")
+                    
+        return errors
+        
+    def _is_valid_exercise_sequence(self, prev_exercise: Dict, curr_exercise: Dict) -> bool:
+        """بررسی توالی مناسب تمرینات"""
+        # تمرینات ترکیبی قبل از ایزوله
+        if (prev_exercise['type'] == 'isolation' and 
+            curr_exercise['type'] == 'compound'):
+            return False
+            
+        # تمرینات بزرگ قبل از کوچک
+        if (prev_exercise['muscle_group'] in ['biceps', 'triceps'] and 
+            curr_exercise['muscle_group'] in ['chest', 'back']):
+            return False
+            
+        return True
+        
+    def _validate_mobility_exercises(self, exercises: List[Dict], exercise_type: str) -> List[str]:
+        """اعتبارسنجی تمرینات موبیلیتی با جزئیات بیشتر"""
+        errors = []
+        
+        if not exercises:
+            errors.append(f"تمرینات {exercise_type} وجود ندارد")
+            return errors
+            
+        for i, exercise in enumerate(exercises, 1):
+            # بررسی ساختار
+            if not all(key in exercise for key in ['exercise_id', 'exercise_name', 'duration_seconds']):
+                errors.append(f"ساختار تمرین {exercise_type} {i} نامعتبر است")
+                continue
+                
+            # بررسی مدت زمان
+            duration = exercise['duration_seconds']
+            if exercise_type == 'warmup':
+                if duration < 30 or duration > 300:
+                    errors.append(f"مدت زمان تمرین گرم کردن {i} نامعتبر است")
+            else:  # cooldown
+                if duration < 20 or duration > 180:
+                    errors.append(f"مدت زمان تمرین سرد کردن {i} نامعتبر است")
+                    
+            # بررسی نوع تمرین
+            if not self._is_valid_mobility_exercise(exercise, exercise_type):
+                errors.append(f"نوع تمرین {exercise_type} {i} نامعتبر است")
+                
+        return errors
+        
+    def _is_valid_mobility_exercise(self, exercise: Dict, exercise_type: str) -> bool:
+        """بررسی اعتبار نوع تمرین موبیلیتی"""
+        try:
+            ex = Exercise.objects.get(id=exercise['exercise_id'])
+            
+            if exercise_type == 'warmup':
+                return ex.category in ['cardio', 'plyometrics', 'stretching']
+            else:  # cooldown
+                return ex.category in ['stretching', 'mobility']
+                
         except Exercise.DoesNotExist:
             return False 

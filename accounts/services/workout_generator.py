@@ -11,34 +11,98 @@ from .workout_utils import (
     calculate_intensity,
     get_exercise_notes
 )
+from .workout_validator import WorkoutValidator
 
 class WorkoutGenerator:
     def __init__(self, user: UserProfile, settings: TrainingSettings):
         self.user = user
         self.settings = settings
-        self.exercise_selector = ExerciseSelector(user, settings)
-        self.volume_manager = WorkoutVolumeManager(user, settings)
-        self.recovery_manager = RecoveryManager(user, settings)
-        self.mobility_manager = MobilityManager(user, settings)
+        self._initialize_managers()
+        self._validate_managers()
         
-    def generate_workout(self, target_muscles: List[str], week: int) -> Dict:
-        """تولید یک جلسه تمرین"""
-        # بررسی امکان تمرین
-        if not self.recovery_manager.can_train(target_muscles, datetime.now()):
-            raise ValueError("عضلات هدف نیاز به استراحت دارند")
+    def _initialize_managers(self):
+        """مقداردهی اولیه مدیران با مدیریت خطا"""
+        try:
+            self.exercise_selector = ExerciseSelector(self.user, self.settings)
+            self.volume_manager = WorkoutVolumeManager(self.user, self.settings)
+            self.recovery_manager = RecoveryManager(self.user, self.settings)
+            self.mobility_manager = MobilityManager(self.user, self.settings)
+            self.validator = WorkoutValidator(self.user, self.settings)
             
-        # دریافت تمرینات مناسب
-        exercises = self.exercise_selector.get_exercises(target_muscles, week)
-        
-        # تولید برنامه تمرین
-        workout = {
-            'date': datetime.now().strftime('%Y-%m-%d'),
-            'target_muscles': target_muscles,
-            'exercises': []
-        }
-        
-        # اضافه کردن تمرینات
-        for exercise in exercises:
+            # تنظیم مدیران در validator
+            self.validator.set_managers(
+                self.volume_manager,
+                self.recovery_manager,
+                self.mobility_manager,
+                self.exercise_selector
+            )
+        except Exception as e:
+            raise ValueError(f"خطا در مقداردهی مدیران: {str(e)}")
+            
+    def _validate_managers(self):
+        """اعتبارسنجی مدیران"""
+        if not all([
+            self.exercise_selector,
+            self.volume_manager,
+            self.recovery_manager,
+            self.mobility_manager,
+            self.validator
+        ]):
+            raise ValueError("برخی از مدیران مقداردهی نشده‌اند")
+            
+    def generate_workout(self, target_muscles: List[str], week: int) -> Dict:
+        """تولید یک جلسه تمرین با مدیریت خطا و همگام‌سازی"""
+        try:
+            # بررسی امکان تمرین
+            if not self.recovery_manager.can_train(target_muscles, datetime.now()):
+                raise ValueError("عضلات هدف نیاز به استراحت دارند")
+                
+            # دریافت تمرینات مناسب
+            exercises = self.exercise_selector.get_exercises(
+                target_muscles,
+                week,
+                include_warmup=True,
+                include_cooldown=True
+            )
+            
+            # تولید برنامه تمرین
+            workout = {
+                'date': datetime.now().strftime('%Y-%m-%d'),
+                'target_muscles': target_muscles,
+                'exercises': []
+            }
+            
+            # اضافه کردن تمرینات با همگام‌سازی
+            for exercise in exercises.get('main', []):
+                exercise_data = self._prepare_exercise_data(exercise, week)
+                workout['exercises'].append(exercise_data)
+                
+                # به‌روزرسانی تاریخچه
+                self.exercise_selector.update_history(exercise.id, week)
+                
+            # اضافه کردن تمرینات گرم کردن و سرد کردن
+            workout['warmup'] = self._format_mobility_exercises(
+                exercises.get('warmup', []),
+                'warmup'
+            )
+            workout['cooldown'] = self._format_mobility_exercises(
+                exercises.get('cooldown', []),
+                'cooldown'
+            )
+            
+            # اعتبارسنجی برنامه
+            is_valid, errors = self.validator.validate_workout(workout)
+            if not is_valid:
+                raise ValueError(f"برنامه نامعتبر است: {', '.join(errors)}")
+                
+            return workout
+            
+        except Exception as e:
+            raise ValueError(f"خطا در تولید برنامه تمرین: {str(e)}")
+            
+    def _prepare_exercise_data(self, exercise: Exercise, week: int) -> Dict:
+        """آماده‌سازی داده‌های تمرین با همگام‌سازی"""
+        try:
             # تنظیم حجم تمرین
             volume = self.volume_manager.adjust_volume(
                 exercise.primary_muscles[0],
@@ -54,8 +118,7 @@ class WorkoutGenerator:
             # دریافت نکات
             notes = get_exercise_notes(exercise, self.settings.experience_level)
             
-            # اضافه کردن به برنامه
-            workout['exercises'].append({
+            return {
                 'exercise_id': exercise.id,
                 'exercise_name': exercise.name,
                 'type': exercise.type,
@@ -65,39 +128,33 @@ class WorkoutGenerator:
                 'rest_seconds': rest_time,
                 'intensity': intensity,
                 'notes': notes
-            })
+            }
+        except Exception as e:
+            raise ValueError(f"خطا در آماده‌سازی داده‌های تمرین: {str(e)}")
             
-            # به‌روزرسانی تاریخچه
-            self.exercise_selector.update_history(exercise.id, week)
+    def _format_mobility_exercises(self, exercises: List[Exercise], exercise_type: str) -> List[Dict]:
+        """فرمت‌بندی تمرینات موبیلیتی با مدیریت خطا"""
+        try:
+            formatted = []
+            for exercise in exercises:
+                formatted.append({
+                    'exercise_id': exercise.id,
+                    'exercise_name': exercise.name,
+                    'type': exercise_type,
+                    'duration_seconds': self._get_mobility_duration(exercise_type),
+                    'notes': self._get_mobility_notes(exercise_type)
+                })
+            return formatted
+        except Exception as e:
+            raise ValueError(f"خطا در فرمت‌بندی تمرینات موبیلیتی: {str(e)}")
             
-        # اضافه کردن تمرینات گرم کردن
-        warmup_exercises = self.mobility_manager.get_warmup_exercises(
-            self.settings.split_type
-        )
-        workout['warmup'] = self._format_mobility_exercises(warmup_exercises)
+    def _get_mobility_duration(self, exercise_type: str) -> int:
+        """دریافت مدت زمان تمرینات موبیلیتی"""
+        return 60 if exercise_type == 'warmup' else 45
         
-        # اضافه کردن تمرینات سرد کردن
-        cooldown_exercises = self.mobility_manager.get_cooldown_exercises(
-            self.settings.split_type
-        )
-        workout['cooldown'] = self._format_mobility_exercises(cooldown_exercises)
-        
-        return workout
-        
-    def _format_mobility_exercises(self, exercises: List[Exercise]) -> List[Dict]:
-        """فرمت‌بندی تمرینات موبیلیتی"""
-        formatted = []
-        
-        for exercise in exercises:
-            formatted.append({
-                'exercise_id': exercise.id,
-                'exercise_name': exercise.name,
-                'type': 'mobility',
-                'duration_seconds': 60,  # مدت زمان پیش‌فرض
-                'notes': "روی فرم صحیح تمرکز کنید"
-            })
-            
-        return formatted
+    def _get_mobility_notes(self, exercise_type: str) -> str:
+        """دریافت نکات تمرینات موبیلیتی"""
+        return "روی فرم صحیح تمرکز کنید" if exercise_type == 'warmup' else "کشش ملایم و آرام"
         
     def adjust_workout(self, workout: Dict, feedback: Dict) -> Dict:
         """تنظیم تمرین بر اساس بازخورد"""
