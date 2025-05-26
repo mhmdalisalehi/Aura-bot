@@ -58,6 +58,7 @@ register_conv = ConversationHandler(
 
 # Add the conversation handler to the application
 application.add_handler(register_conv)
+application.add_handler(CommandHandler('start', start))
 
 # Start the bot
 if __name__ == '__main__':
