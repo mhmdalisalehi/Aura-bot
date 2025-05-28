@@ -9,6 +9,7 @@ from accounts.services.recovery_manager import RecoveryManager
 from accounts.services.volume_manager import WorkoutVolumeManager
 from accounts.services.exercise_selector import ExerciseSelector
 from accounts.services.mobility_manager import MobilityManager
+from accounts.services.date_converter import convert_day_to_date
 
 current_date = datetime.now()
 
@@ -23,6 +24,7 @@ class PushPullLegsSplitStrategy(SplitStrategy):
     - پشتیبانی از تمرینات جایگزین و اصلاحی
     - مدیریت پیشرفت و تنظیم خودکار برنامه
     """
+    current_week: int = 1  # مقدار پیش‌فرض
     
     # نگاشت گروه‌های عضلانی با جزئیات بیشتر
     MUSCLE_GROUPS = {
@@ -78,9 +80,16 @@ class PushPullLegsSplitStrategy(SplitStrategy):
         self._validate_split_schedule(program)
         self._add_warmup_cooldown(program)
         self._validate_volume(program)
-        return program
+        
+        # تبدیل کلیدها به تاریخ
+        dated_program = {}
+        base_date = datetime.now()
+        for day, exercises in program['weekly_plan'].items():
+            training_date = convert_day_to_date(day, base_date)
+            dated_program[training_date.strftime('%Y-%m-%d')] = exercises
+        return dated_program
     
-    def _build_day_plan(self, split_type: str, week: int) -> List[Dict]:
+    def _build_day_plan(self, split_type: str, week: int) -> List[Exercise]:
         exercises = []
         muscle_config = self.MUSCLE_GROUPS[split_type]
         
@@ -140,55 +149,26 @@ class PushPullLegsSplitStrategy(SplitStrategy):
             
         return base_counts
     
-    def _build_muscle_exercises(self, muscle: str, count: int, week: int, 
-                              is_primary: bool) -> List[Dict]:
-        """ساخت لیست تمرینات برای یک عضله"""
-        exercises = []
-        
-        # انتخاب تمرینات ترکیبی
-        compound_exercises = self.exercise_selector.get_exercises(
-            [muscle],
-            week,
-            mechanic='compound'
-        )
-        
-        # انتخاب تمرینات ایزوله
-        isolation_exercises = self.exercise_selector.get_exercises(
-            [muscle],
-            week,
-            mechanic='isolation'
-        )
-        
-        # ترکیب تمرینات
+    def _build_muscle_exercises(self, muscle: str, count: int, week: int, is_primary: bool) -> List[Exercise]:
+        available = self.exercise_selector.get_exercises([muscle], week)['main']
         if is_primary:
-            # اولویت با تمرینات ترکیبی برای عضلات اصلی
-            exercises.extend(compound_exercises[:min(2, len(compound_exercises))])
-            remaining = count - len(exercises)
-            exercises.extend(isolation_exercises[:remaining])
+            filtered = [ex for ex in available if ex.mechanic == 'compound']
         else:
-            # تمرکز روی تمرینات ایزوله برای عضلات ثانویه
-            exercises.extend(isolation_exercises[:count])
-            
-        return [self._create_exercise_entry(ex, is_primary) for ex in exercises]
+            filtered = [ex for ex in available if ex.mechanic == 'isolation']
+        return filtered[:count]
     
-    def _build_focus_area_exercises(self, focus_areas: List[str], week: int) -> List[Dict]:
-        """ساخت تمرینات برای نقاط تمرکز"""
+    def _build_focus_area_exercises(self, focus_areas: List[str], week: int) -> List[Exercise]:
         exercises = []
-        
         for area in focus_areas:
-            if random.random() < 0.6:  # 60% شانس اضافه کردن تمرین تمرکزی
-                available = self.exercise_selector.get_exercises(
-                    [area],
-                    week,
-                    mechanic='isolation'
-                )
-                if available:
-                    exercises.extend(available[:1])
-                    
-        return [self._create_exercise_entry(ex, False) for ex in exercises]
+            if random.random() < 0.6:
+                available = self.exercise_selector.get_exercises([area], week)['main']
+                filtered = [ex for ex in available if ex.mechanic == 'isolation']
+                if filtered:
+                    exercises.extend(filtered[:1])
+        return exercises
     
-    def _apply_advanced_techniques(self, exercises: List[Dict], 
-                                 available_techniques: List[str]) -> List[Dict]:
+    def _apply_advanced_techniques(self, exercises: List[Exercise], 
+                                 available_techniques: List[str]) -> List[Exercise]:
         """اعمال تکنیک‌های پیشرفته"""
         if not exercises:
             return exercises
@@ -206,8 +186,8 @@ class PushPullLegsSplitStrategy(SplitStrategy):
         for i in range(len(exercises)):
             if random.random() < 0.3:  # 30% شانس اعمال تکنیک
                 technique = random.choice(allowed_techniques)
-                exercises[i]['technique'] = technique
-                exercises[i]['technique_notes'] = self._get_technique_notes(technique)
+                exercises[i].technique = technique
+                exercises[i].technique_notes = self._get_technique_notes(technique)
                 
         return exercises
         
@@ -225,33 +205,28 @@ class PushPullLegsSplitStrategy(SplitStrategy):
         }
         return notes.get(technique, '')
         
-    def _adjust_exercise_volume(self, exercises: List[Dict], 
-                              multiplier: float) -> List[Dict]:
+    def _adjust_exercise_volume(self, exercises: List[Exercise], multiplier: float) -> List[Exercise]:
         """تنظیم حجم تمرینات"""
         for exercise in exercises:
+            muscle_group = (exercise.primary_muscles[0] if exercise.primary_muscles else
+                            (exercise.secondary_muscles[0] if exercise.secondary_muscles else 'full_body'))
             base_volume = self.volume_manager.adjust_volume(
-                exercise['muscle_group'],
+                muscle_group,
                 self.current_week
             )
-            
             # تنظیم حجم بر اساس ضریب
             adjusted_sets = math.ceil(base_volume['sets'] * multiplier)
-            
             # تنظیم بر اساس تیپ بدنی
             if self.user.body_type == 'ectomorph':
                 adjusted_sets = max(3, adjusted_sets - 1)
             elif self.user.body_type == 'mesomorph':
                 adjusted_sets = min(8, adjusted_sets + 1)
-                
-            exercise.update({
-                'sets': adjusted_sets,
-                'reps': base_volume['reps'],
-                'volume_multiplier': multiplier
-            })
-            
+            exercise.sets = adjusted_sets
+            exercise.reps = base_volume['reps']
+            exercise.volume_multiplier = multiplier
         return exercises
         
-    def _get_warmup(self, split_type: str) -> List[Dict]:
+    def _get_warmup(self, split_type: str) -> List[Exercise]:
         """انتخاب گرم کردن اختصاصی برای هر نوع جلسه"""
         warmups = {
             'push': [{
@@ -284,7 +259,7 @@ class PushPullLegsSplitStrategy(SplitStrategy):
         }
         return warmups.get(split_type, [])
         
-    def _get_cooldown(self, split_type: str) -> List[Dict]:
+    def _get_cooldown(self, split_type: str) -> List[Exercise]:
         """انتخاب سرد کردن اختصاصی برای هر نوع جلسه"""
         cooldowns = {
             'push': [{
@@ -317,64 +292,19 @@ class PushPullLegsSplitStrategy(SplitStrategy):
         }
         return cooldowns.get(split_type, [])
         
-    def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> Dict:
-        """ساخت ورودی استاندارد برای تمرین با جزئیات بیشتر"""
-        return {
-            'exercise_id': exercise.id,
-            'exercise_name': exercise.name,
-            'type': 'compound' if is_primary else 'isolation',
-            'muscle_group': exercise.primary_muscles[0],
-            'secondary_muscles': exercise.secondary_muscles,
-            'mechanic': exercise.mechanic,
-            'equipment': exercise.equipment,
-            'difficulty': exercise.difficulty,
-            'sets': self._get_default_sets(is_primary),
-            'reps': self._get_default_reps(),
-            'rest_seconds': self._calculate_rest_time(exercise, is_primary),
-            'technique': None,
-            'technique_notes': None,
-            'notes': self._generate_exercise_notes(exercise, is_primary),
-            'progression': self._get_progression_notes(),
-            'alternatives': self.get_exercise_alternatives(exercise)
-        }
-        
-    def _get_default_sets(self, is_primary: bool) -> int:
-        """دریافت تعداد ست‌های پیش‌فرض"""
-        base_sets = 4 if is_primary else 3
-        
-        # تنظیم بر اساس سطح تجربه
-        if self.settings.experience_level == 'beginner':
-            base_sets = max(3, base_sets - 1)
-        elif self.settings.experience_level == 'expert':
-            base_sets = min(6, base_sets + 1)
-            
-        return base_sets
-        
-    def _get_default_reps(self) -> str:
-        """دریافت تعداد تکرارهای پیش‌فرض"""
-        ranges = self.REP_RANGES.get(self.user.goal, {'min': 8, 'max': 12})
-        return f"{ranges['min']}-{ranges['max']}"
-        
-    def _get_progression_notes(self) -> str:
-        """دریافت نکات پیشرفت"""
-        if self.settings.experience_level == 'beginner':
-            return "Focus on form and technique. Increase weight when 12 reps become easy."
-        elif self.settings.experience_level == 'intermediate':
-            return "Progressive overload: Increase weight or reps each week."
-        else:
-            return "Advanced progression: Use various techniques and periodization."
-    
     def _validate_split_schedule(self, program: Dict):
         # اطمینان از توالی مناسب بین جلسات
         trained_muscles = defaultdict(list)
         for day, exercises in program['weekly_plan'].items():
+            # اطمینان از اینکه day تاریخ است
+            training_date = convert_day_to_date(day, datetime.now())
             for ex in exercises:
                 if 'primary_muscles' in ex:
                     for muscle in ex['primary_muscles']:
-                        trained_muscles[muscle].append(day)
+                        trained_muscles[muscle].append(training_date)
         
         for muscle, days in trained_muscles.items():
-            min_recovery = RecoveryManager.MIN_RECOVERY_DAYS.get(muscle, 2)
+            min_recovery = RecoveryManager.BASE_RECOVERY_DAYS.get(muscle, 2)
             for i in range(1, len(days)):
                 if (days[i] - days[i-1]).days < min_recovery:
                     self._adjust_exercise_scheduling(program, muscle)
@@ -404,3 +334,22 @@ class PushPullLegsSplitStrategy(SplitStrategy):
             for exercise in program['weekly_plan'][day]:
                 if isinstance(exercise, dict) and 'sets' in exercise:
                     exercise['sets'] = math.ceil(exercise['sets'] * adjustment_factor)
+
+    def _add_exercise(self, program: Dict, day: str):
+        # اطمینان از اینکه day تاریخ است
+        training_date = convert_day_to_date(day, datetime.now())
+        available_muscles = [m for m in self.MUSCLE_GROUPS['primary'].values() 
+                           if self.recovery_manager.can_train(m, training_date)]
+        if available_muscles:
+            muscle = random.choice(available_muscles)
+            exercises = self._build_muscle_exercises(muscle, 1, self.current_week, True)
+            if exercises:
+                program['weekly_plan'][day].extend(exercises)
+
+    def _adjust_exercise_scheduling(self, program: Dict, muscle: str):
+        """
+        پیاده‌سازی موقت: زمان‌بندی تمرینات را برای ریکاوری بهتر تنظیم می‌کند (موقت)
+        این متد فعلاً فقط یک پیاده‌سازی ساده است و هیچ تغییری ایجاد نمی‌کند.
+        بعداً باید منطق کامل اضافه شود.
+        """
+        pass

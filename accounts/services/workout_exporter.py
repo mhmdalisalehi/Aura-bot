@@ -6,6 +6,7 @@ import pandas as pd
 from accounts.models import UserProfile, TrainingSettings, BotUser
 from exercises.models import Exercise
 from .workout_utils import get_exercise_notes
+from datetime import timedelta
 
 class WorkoutExportError(Exception):
     """خطای مخصوص خروجی گرفتن برنامه"""
@@ -242,39 +243,59 @@ class WorkoutExporter:
         return text
     
     def _get_sleep_recommendation(self) -> Dict:
-        """دریافت توصیه‌های خواب"""
+        """دریافت توصیه‌های خواب
+        
+        Returns:
+            اطلاعات توصیه‌های خواب
+        """
         return {
             'hours': 7-9,
-            'tips': [
-                "قبل از خواب از نور آبی خودداری کنید",
-                "دمای اتاق را خنک نگه دارید",
-                "از مصرف کافئین بعد از ساعت 4 عصر خودداری کنید",
-                "یک برنامه خواب منظم داشته باشید"
+            'quality_tips': [
+                'خواب منظم داشته باشید',
+                'از کافئین بعد از ظهر پرهیز کنید',
+                'اتاق خواب را خنک و تاریک نگه دارید'
             ]
         }
     
     def _get_active_recovery_days(self, program: Dict) -> List[str]:
-        """تعیین روزهای ریکاوری فعال"""
+        """دریافت روزهای ریکاوری فعال
+        
+        Args:
+            program: برنامه تمرینی
+            
+        Returns:
+            لیست روزهای ریکاوری فعال
+        """
         training_days = set(program['weekly_plan'].keys())
-        all_days = {'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'}
+        all_days = set(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
         return list(all_days - training_days)
     
-    def _get_stretching_routine(self) -> Dict:
-        """دریافت برنامه کشش"""
-        return {
-            'daily': [
-                "کشش گردن",
-                "کشش شانه",
-                "کشش مچ دست",
-                "کشش کمر",
-                "کشش همسترینگ"
-            ],
-            'post_workout': [
-                "کشش عضلات تمرین داده شده",
-                "کشش پویا برای بهبود ریکاوری",
-                "تمرینات تنفسی"
-            ]
-        }
+    def _get_stretching_routine(self) -> List[Dict]:
+        """دریافت برنامه کشش
+        
+        Returns:
+            لیست تمرینات کشش
+        """
+        return [
+            {
+                'name': 'کشش همسترینگ',
+                'duration': '30-45 seconds',
+                'sets': 2,
+                'notes': 'کشش ملایم و بدون درد'
+            },
+            {
+                'name': 'کشش شانه',
+                'duration': '30-45 seconds',
+                'sets': 2,
+                'notes': 'کشش ملایم و بدون درد'
+            },
+            {
+                'name': 'کشش کمر',
+                'duration': '30-45 seconds',
+                'sets': 2,
+                'notes': 'کشش ملایم و بدون درد'
+            }
+        ]
     
     def _get_recovery_techniques(self) -> List[str]:
         """دریافت تکنیک‌های ریکاوری"""

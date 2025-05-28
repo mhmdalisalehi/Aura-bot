@@ -1,7 +1,8 @@
-from typing import List, Dict, Optional
+from typing import List, Optional
 from exercises.models import Exercise
 from accounts.models import UserProfile, TrainingSettings
 from django.db.models import Q
+import logging
 
 class MobilityManager:
     """
@@ -65,37 +66,29 @@ class MobilityManager:
         """
         # دریافت دسته‌بندی‌های مناسب
         categories = self.MOBILITY_CATEGORIES.get(exercise_type, ['mobility'])
-        
-        # ساخت کوئری پایه
-        query = Q(category__in=categories)
-        
-        # اضافه کردن تمرینات اختصاصی split
-        if split_type and split_type in self.SPLIT_SPECIFIC_EXERCISES:
-            specific_exercises = self.SPLIT_SPECIFIC_EXERCISES[split_type][exercise_type]
-            query |= Q(name__in=specific_exercises)
-        
-        # فیلتر بر اساس نواحی هدف
-        if target_areas:
-            query &= (
-                Q(primary_muscles__overlap=target_areas) |
-                Q(secondary_muscles__overlap=target_areas)
+        # کوئری ساده فقط روی category
+        qs = Exercise.objects.filter(category__in=categories)
+        # فیلتر پایتونی روی بقیه شرط‌ها
+        exercises = [
+            ex for ex in qs
+            if (
+                (not split_type or (split_type in self.SPLIT_SPECIFIC_EXERCISES and ex.name in self.SPLIT_SPECIFIC_EXERCISES[split_type][exercise_type]))
+            ) and (
+                not target_areas or
+                (ex.primary_muscles and any(m in ex.primary_muscles for m in target_areas)) or
+                (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_areas))
+            ) and (
+                ex.level <= self._get_max_difficulty()
             )
-        
-        # فیلتر بر اساس سطح تجربه
-        query &= Q(level__lte=self._get_max_difficulty())
-        
-        # دریافت تمرینات
-        exercises = Exercise.objects.filter(query)
-        
+        ]
         # فیلتر بر اساس محدودیت‌های فیزیکی
         exercises = self._filter_by_limitations(exercises)
-        
         # تنظیم بر اساس سن و جنسیت
         exercises = self._adjust_for_demographics(exercises)
-        
         # اولویت‌بندی بر اساس تاریخچه و نیازهای ریکاوری
         exercises = self._prioritize_exercises(exercises, target_areas)
-        
+        if not exercises:
+            logging.warning(f"هیچ تمرین موبیلیتی برای {target_areas} و نوع {exercise_type} پیدا نشد!")
         return list(exercises)
     
     def get_warmup_exercises(self, split_type: str) -> List[Exercise]:

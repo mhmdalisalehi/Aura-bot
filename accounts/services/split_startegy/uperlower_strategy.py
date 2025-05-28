@@ -9,6 +9,7 @@ from accounts.services.recovery_manager import RecoveryManager
 from accounts.services.volume_manager import WorkoutVolumeManager
 from accounts.services.exercise_selector import ExerciseSelector
 from accounts.services.mobility_manager import MobilityManager
+from accounts.services.date_converter import convert_day_to_date
 
 current_date = datetime.now()
 
@@ -23,6 +24,8 @@ class UpperLowerSplitStrategy(SplitStrategy):
     - پشتیبانی از تمرینات جایگزین و اصلاحی
     - مدیریت پیشرفت و تنظیم خودکار برنامه
     """
+    
+    current_week: int = 1  # مقدار پیش‌فرض
     
     # نگاشت گروه‌های عضلانی با جزئیات بیشتر
     MUSCLE_GROUPS = {
@@ -54,6 +57,8 @@ class UpperLowerSplitStrategy(SplitStrategy):
         }
     }
     
+    DAY_SEQUENCE = ['upper', 'lower', 'upper', 'lower']
+    
     # تکنیک‌های پیشرفته برای هر سطح تجربه
     ADVANCED_TECHNIQUES = {
         'beginner': ['drop_sets', 'rest_pause'],
@@ -64,20 +69,13 @@ class UpperLowerSplitStrategy(SplitStrategy):
     
     def generate(self, week: int) -> Dict:
         """تولید برنامه تمرینی با ویژگی‌های حرفه‌ای"""
+        self.current_week = week  # مقداردهی هفته جاری
         program = {'weekly_plan': {}}
         day_counter = 0
         
-        # اولویت‌بندی روزها بر اساس ریکاوری
-        prioritized_days = self._prioritize_days_by_recovery(list(self.settings.training_days.keys()))
-        
-        for day in prioritized_days:
+        for day in self.settings.training_days.keys():
             split_type = 'upper' if day_counter % 2 == 0 else 'lower'
             
-            # بررسی ریکاوری قبل از تولید برنامه
-            if not self._check_recovery_for_day(split_type, day):
-                # تنظیم مجدد روز در صورت نیاز به استراحت
-                day = self._find_next_available_day(prioritized_days[day_counter:], split_type)
-                
             program['weekly_plan'][day] = self._build_day_plan(split_type, week)
             self.split_map[day] = split_type
             day_counter += 1
@@ -85,60 +83,10 @@ class UpperLowerSplitStrategy(SplitStrategy):
         self._validate_split_schedule(program)
         self._add_warmup_cooldown(program)
         self._validate_volume(program)
+        
         return program
     
-    def _prioritize_days_by_recovery(self, available_days: List[str]) -> List[str]:
-        """اولویت‌بندی روزها بر اساس ریکاوری"""
-        prioritized = []
-        remaining_days = available_days.copy()
-        
-        while remaining_days:
-            best_day = None
-            best_recovery_score = -1
-            
-            for day in remaining_days:
-                score = self._calculate_recovery_score(day)
-                if score > best_recovery_score:
-                    best_recovery_score = score
-                    best_day = day
-                    
-            if best_day:
-                prioritized.append(best_day)
-                remaining_days.remove(best_day)
-                
-        return prioritized
-        
-    def _calculate_recovery_score(self, day: str) -> float:
-        """محاسبه امتیاز ریکاوری برای یک روز"""
-        score = 1.0
-        
-        # کاهش امتیاز برای روزهای پشت سر هم
-        if self.user.last_training_date:
-            days_since_last = (datetime.strptime(day, '%Y-%m-%d') - self.user.last_training_date).days
-            score *= min(1.0, days_since_last / 2)
-            
-        # تنظیم بر اساس تیپ بدنی
-        if self.user.body_type == 'ectomorph':
-            score *= 1.2  # نیاز به ریکاوری بیشتر
-        elif self.user.body_type == 'mesomorph':
-            score *= 0.9  # ریکاوری سریع‌تر
-            
-        return score
-        
-    def _check_recovery_for_day(self, split_type: str, day: str) -> bool:
-        """بررسی ریکاوری برای یک روز تمرین"""
-        muscles = self.MUSCLE_GROUPS[split_type]['primary']
-        return all(self.recovery_manager.can_train(muscle, datetime.strptime(day, '%Y-%m-%d')) 
-                  for muscle in muscles)
-        
-    def _find_next_available_day(self, available_days: List[str], split_type: str) -> str:
-        """یافتن روز بعدی مناسب برای تمرین"""
-        for day in available_days:
-            if self._check_recovery_for_day(split_type, day):
-                return day
-        return available_days[0]  # اگر روز مناسب پیدا نشد
-        
-    def _build_day_plan(self, split_type: str, week: int) -> List[Dict]:
+    def _build_day_plan(self, split_type: str, week: int) -> List[Exercise]:
         """ساخت برنامه حرفه‌ای برای یک روز تمرین"""
         exercises = []
         muscle_config = self.MUSCLE_GROUPS[split_type]
@@ -184,26 +132,15 @@ class UpperLowerSplitStrategy(SplitStrategy):
                 
         return exercises
     
-    def _build_priority_exercises(self, muscle: str, priority_exercises: List[str], 
-                                count: int, week: int, is_primary: bool) -> List[Dict]:
-        """ساخت تمرینات با اولویت‌بندی"""
+    def _build_priority_exercises(self, muscle: str, priority_exercises: List[str], count: int, week: int, is_primary: bool) -> List[Exercise]:
         exercises = []
-        
-        # تلاش برای استفاده از تمرینات اولویت‌دار
+        available = self.exercise_selector.get_exercises([muscle], week)['main']
         for exercise_name in priority_exercises:
             if len(exercises) >= count:
                 break
-                
-            available = self.exercise_selector.get_exercises(
-                [muscle],
-                week,
-                name_pattern=exercise_name
-            )
-            
-            if available:
-                exercises.extend(available[:1])
-                
-        # تکمیل با تمرینات دیگر در صورت نیاز
+            matching_exercises = [ex for ex in available if exercise_name.lower() in ex.name.lower() and (ex.mechanic == 'compound' if is_primary else ex.mechanic == 'isolation')]
+            if matching_exercises:
+                exercises.extend(matching_exercises[:1])
         if len(exercises) < count:
             remaining = self._build_muscle_exercises(
                 muscle,
@@ -212,8 +149,7 @@ class UpperLowerSplitStrategy(SplitStrategy):
                 is_primary
             )
             exercises.extend(remaining)
-            
-        return [self._create_exercise_entry(ex, is_primary) for ex in exercises]
+        return exercises
         
     def _get_exercise_counts(self, split_type: str) -> Dict[str, int]:
         """دریافت تعداد تمرینات برای هر نوع"""
@@ -231,55 +167,26 @@ class UpperLowerSplitStrategy(SplitStrategy):
             
         return base_counts
         
-    def _build_muscle_exercises(self, muscle: str, count: int, week: int, 
-                              is_primary: bool) -> List[Dict]:
-        """ساخت لیست تمرینات برای یک عضله"""
-        exercises = []
-        
-        # انتخاب تمرینات ترکیبی
-        compound_exercises = self.exercise_selector.get_exercises(
-            [muscle],
-            week,
-            mechanic='compound'
-        )
-        
-        # انتخاب تمرینات ایزوله
-        isolation_exercises = self.exercise_selector.get_exercises(
-            [muscle],
-            week,
-            mechanic='isolation'
-        )
-        
-        # ترکیب تمرینات
+    def _build_muscle_exercises(self, muscle: str, count: int, week: int, is_primary: bool) -> List[Exercise]:
+        available = self.exercise_selector.get_exercises([muscle], week)['main']
         if is_primary:
-            # اولویت با تمرینات ترکیبی برای عضلات اصلی
-            exercises.extend(compound_exercises[:min(2, len(compound_exercises))])
-            remaining = count - len(exercises)
-            exercises.extend(isolation_exercises[:remaining])
+            filtered = [ex for ex in available if ex.mechanic == 'compound']
         else:
-            # تمرکز روی تمرینات ایزوله برای عضلات ثانویه
-            exercises.extend(isolation_exercises[:count])
-            
-        return [self._create_exercise_entry(ex, is_primary) for ex in exercises]
+            filtered = [ex for ex in available if ex.mechanic == 'isolation']
+        return filtered[:count]
         
-    def _build_focus_area_exercises(self, focus_areas: List[str], week: int) -> List[Dict]:
-        """ساخت تمرینات برای نقاط تمرکز"""
+    def _build_focus_area_exercises(self, focus_areas: List[str], week: int) -> List[Exercise]:
         exercises = []
-        
         for area in focus_areas:
-            if random.random() < 0.6:  # 60% شانس اضافه کردن تمرین تمرکزی
-                available = self.exercise_selector.get_exercises(
-                    [area],
-                    week,
-                    mechanic='isolation'
-                )
-                if available:
-                    exercises.extend(available[:1])
-                    
-        return [self._create_exercise_entry(ex, False) for ex in exercises]
+            if random.random() < 0.6:
+                available = self.exercise_selector.get_exercises([area], week)['main']
+                filtered = [ex for ex in available if ex.mechanic == 'isolation']
+                if filtered:
+                    exercises.extend(filtered[:1])
+        return exercises
         
-    def _apply_advanced_techniques(self, exercises: List[Dict], 
-                                 available_techniques: List[str]) -> List[Dict]:
+    def _apply_advanced_techniques(self, exercises: List[Exercise], 
+                                 available_techniques: List[str]) -> List[Exercise]:
         """اعمال تکنیک‌های پیشرفته"""
         if not exercises:
             return exercises
@@ -297,8 +204,8 @@ class UpperLowerSplitStrategy(SplitStrategy):
         for i in range(len(exercises)):
             if random.random() < 0.3:  # 30% شانس اعمال تکنیک
                 technique = random.choice(allowed_techniques)
-                exercises[i]['technique'] = technique
-                exercises[i]['technique_notes'] = self._get_technique_notes(technique)
+                exercises[i].technique = technique
+                exercises[i].technique_notes = self._get_technique_notes(technique)
                 
         return exercises
         
@@ -316,33 +223,28 @@ class UpperLowerSplitStrategy(SplitStrategy):
         }
         return notes.get(technique, '')
         
-    def _adjust_exercise_volume(self, exercises: List[Dict], 
-                              multiplier: float) -> List[Dict]:
+    def _adjust_exercise_volume(self, exercises: List[Exercise], multiplier: float) -> List[Exercise]:
         """تنظیم حجم تمرینات"""
         for exercise in exercises:
+            muscle_group = (exercise.primary_muscles[0] if exercise.primary_muscles else
+                            (exercise.secondary_muscles[0] if exercise.secondary_muscles else 'full_body'))
             base_volume = self.volume_manager.adjust_volume(
-                exercise['muscle_group'],
+                muscle_group,
                 self.current_week
             )
-            
             # تنظیم حجم بر اساس ضریب
             adjusted_sets = math.ceil(base_volume['sets'] * multiplier)
-            
             # تنظیم بر اساس تیپ بدنی
             if self.user.body_type == 'ectomorph':
                 adjusted_sets = max(3, adjusted_sets - 1)
             elif self.user.body_type == 'mesomorph':
                 adjusted_sets = min(8, adjusted_sets + 1)
-                
-            exercise.update({
-                'sets': adjusted_sets,
-                'reps': base_volume['reps'],
-                'volume_multiplier': multiplier
-            })
-            
+            exercise.sets = adjusted_sets
+            exercise.reps = base_volume['reps']
+            exercise.volume_multiplier = multiplier
         return exercises
             
-    def _get_warmup(self, split_type: str) -> List[Dict]:
+    def _get_warmup(self, split_type: str) -> List[Exercise]:
         """انتخاب گرم کردن اختصاصی برای هر نوع جلسه"""
         warmups = {
             'upper': [{
@@ -370,7 +272,7 @@ class UpperLowerSplitStrategy(SplitStrategy):
         }
         return warmups.get(split_type, [])
         
-    def _get_cooldown(self, split_type: str) -> List[Dict]:
+    def _get_cooldown(self, split_type: str) -> List[Exercise]:
         """انتخاب سرد کردن اختصاصی برای هر نوع جلسه"""
         cooldowns = {
             'upper': [{
@@ -398,44 +300,66 @@ class UpperLowerSplitStrategy(SplitStrategy):
         }
         return cooldowns.get(split_type, [])
         
-    def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> Dict:
-        """ساخت ورودی استاندارد برای تمرین با جزئیات بیشتر"""
+    def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> dict:
+        if isinstance(exercise, dict):
+            raise TypeError('Only Exercise model instances are allowed, not dict')
+        muscles = exercise.primary_muscles if is_primary else exercise.secondary_muscles
+        muscle_group = muscles[0] if muscles else 'full_body'
         return {
             'exercise_id': exercise.id,
             'exercise_name': exercise.name,
             'type': 'compound' if is_primary else 'isolation',
-            'muscle_group': exercise.primary_muscles[0],
-            'secondary_muscles': exercise.secondary_muscles,
+            'muscle_group': muscle_group,
+            'secondary_muscles': exercise.secondary_muscles if not is_primary else [],
             'mechanic': exercise.mechanic,
             'equipment': exercise.equipment,
-            'difficulty': exercise.difficulty,
-            'sets': self._get_default_sets(is_primary),
-            'reps': self._get_default_reps(),
+            'difficulty': getattr(exercise, 'difficulty', ''),
+            'sets': getattr(exercise, 'sets', 4) if is_primary else getattr(exercise, 'sets', 3),
+            'reps': getattr(exercise, 'reps', '8-12'),
             'rest_seconds': self._calculate_rest_time(exercise, is_primary),
-            'technique': None,
-            'technique_notes': None,
+            'technique': getattr(exercise, 'technique', None),
+            'technique_notes': getattr(exercise, 'technique_notes', None),
             'notes': self._generate_exercise_notes(exercise, is_primary),
             'progression': self._get_progression_notes(),
             'alternatives': self.get_exercise_alternatives(exercise)
         }
         
-    def _get_default_sets(self, is_primary: bool) -> int:
-        """دریافت تعداد ست‌های پیش‌فرض"""
-        base_sets = 4 if is_primary else 3
+    def _calculate_rest_time(self, exercise, is_primary: bool) -> int:
+        """محاسبه زمان استراحت بین ست‌ها"""
+        # زمان پایه بر اساس نوع تمرین
+        base_rest = 90 if is_primary else 60
         
+        # تنظیم بر اساس هدف
+        if self.user.goal == 'strength':
+            base_rest += 30
+        elif self.user.goal == 'endurance':
+            base_rest -= 30
+        elif self.user.goal == 'weight_loss':
+            base_rest -= 15
+            
         # تنظیم بر اساس سطح تجربه
         if self.settings.experience_level == 'beginner':
-            base_sets = max(3, base_sets - 1)
+            base_rest += 30  # استراحت بیشتر برای مبتدیان
         elif self.settings.experience_level == 'expert':
-            base_sets = min(6, base_sets + 1)
+            base_rest -= 15  # استراحت کمتر برای حرفه‌ای‌ها
             
-        return base_sets
-        
-    def _get_default_reps(self) -> str:
-        """دریافت تعداد تکرارهای پیش‌فرض"""
-        ranges = self.REP_RANGES.get(self.user.goal, {'min': 8, 'max': 12})
-        return f"{ranges['min']}-{ranges['max']}"
-        
+        # تنظیم بر اساس مکانیک تمرین
+        if getattr(exercise, 'mechanic', '') == 'compound':
+            base_rest += 15
+        elif getattr(exercise, 'mechanic', '') == 'isolation':
+            base_rest -= 15
+            
+        # محدود کردن زمان استراحت در محدوده منطقی
+        return max(45, min(180, base_rest))
+
+    def _add_warmup_cooldown(self, program: Dict):
+        """افزودن گرم کردن و سرد کردن متناسب برای هر جلسه"""
+        for day, exercises in program['weekly_plan'].items():
+            split_type = self.DAY_SEQUENCE[list(program['weekly_plan'].keys()).index(day) % len(self.DAY_SEQUENCE)]
+            warmup = self._get_warmup(split_type)
+            cooldown = self._get_cooldown(split_type)
+            program['weekly_plan'][day] = warmup + exercises + cooldown
+            
     def _get_progression_notes(self) -> str:
         """دریافت نکات پیشرفت"""
         if self.settings.experience_level == 'beginner':
@@ -444,7 +368,37 @@ class UpperLowerSplitStrategy(SplitStrategy):
             return "Progressive overload: Increase weight or reps each week."
         else:
             return "Advanced progression: Use various techniques and periodization."
-            
+
+    def _generate_exercise_notes(self, exercise: Exercise, is_primary: bool) -> str:
+        """تولید توضیحات تمرین بر اساس نوع و سطح تجربه"""
+        if is_primary:
+            if self.settings.experience_level == 'beginner':
+                return "روی فرم صحیح حرکت تمرکز کنید و با وزنه سبک شروع کنید."
+            elif self.settings.experience_level == 'intermediate':
+                return "وزنه را به تدریج افزایش دهید و روی کنترل حرکت تمرکز کنید."
+            else:
+                return "از تکنیک‌های پیشرفته مانند drop set یا rest-pause استفاده کنید."
+        else:
+            return "حرکت را با کنترل کامل و دامنه حرکتی مناسب انجام دهید."
+
+    def _adjust_program(self, program: Dict, increase: bool):
+        # تنظیم برنامه بر اساس حجم کلی
+        adjustment_factor = 1.1 if increase else 0.9
+        for day in program['weekly_plan']:
+            for exercise in program['weekly_plan'][day]:
+                if isinstance(exercise, dict) and 'sets' in exercise:
+                    exercise['sets'] = math.ceil(exercise['sets'] * adjustment_factor)
+
+    def _validate_volume(self, program: Dict):
+        # اعتبارسنجی حجم کلی برنامه
+        total_volume = sum(self.volume_manager.muscle_volume.values())
+        volume_range = self.volume_manager.VOLUME_TARGETS[self.user.goal][self.settings.experience_level]
+        target = (volume_range[0] + volume_range[1]) / 2  # میانگین محدوده حجم
+        if total_volume < target * 0.8:
+            self._adjust_program(program, increase=True)
+        elif total_volume > target * 1.2:
+            self._adjust_program(program, increase=False)
+           
     def _validate_split_schedule(self, program: Dict):
         """اعتبارسنجی برنامه هفتگی"""
         trained_muscles = defaultdict(list)
@@ -455,10 +409,21 @@ class UpperLowerSplitStrategy(SplitStrategy):
                     trained_muscles[muscle].append(day)
                     
         for muscle, days in trained_muscles.items():
-            min_recovery = RecoveryManager.MIN_RECOVERY_DAYS.get(muscle, 2)
+            min_recovery = RecoveryManager.BASE_RECOVERY_DAYS.get(muscle, 2)
             for i in range(1, len(days)):
-                if (datetime.strptime(days[i], '%Y-%m-%d') - 
-                    datetime.strptime(days[i-1], '%Y-%m-%d')).days < min_recovery:
+                # اگر مقدار day به فرمت تاریخ نبود، آن را به تاریخ تبدیل کن
+                day1 = days[i-1]
+                day2 = days[i]
+                try:
+                    date1 = datetime.strptime(day1, '%Y-%m-%d')
+                except ValueError:
+                    date1 = convert_day_to_date(day1, datetime.now())
+                try:
+                    date2 = datetime.strptime(day2, '%Y-%m-%d')
+                except ValueError:
+                    date2 = convert_day_to_date(day2, datetime.now())
+                # حالا مقایسه بر اساس تاریخ انجام می‌شود
+                if (date2 - date1).days < min_recovery:
                     self._adjust_exercise_scheduling(program, muscle)
                     
     def _adjust_exercise_scheduling(self, program: Dict, muscle: str):
@@ -470,9 +435,17 @@ class UpperLowerSplitStrategy(SplitStrategy):
                     if random.random() < 0.5:
                         ex['sets'] = max(2, ex['sets'] - 1)
                     else:
-                        alternatives = self.get_exercise_alternatives(
-                            Exercise.objects.get(id=ex['exercise_id'])
-                        )
-                        if alternatives:
-                            alt = random.choice(alternatives)
-                            ex.update(self._create_exercise_entry(alt, ex['type'] == 'compound'))
+                        exercise_id = ex.get('exercise_id') if isinstance(ex, dict) else getattr(ex, 'id', None)
+                        if exercise_id:
+                            try:
+                                exercise_obj = Exercise.objects.get(id=exercise_id)
+                                alternatives = self.get_exercise_alternatives(exercise_obj)
+                                if alternatives:
+                                    alt = random.choice(alternatives)
+                                    ex.update(self._create_exercise_entry(alt, ex['type'] == 'compound'))
+                            except Exercise.DoesNotExist:
+                                print(f'Exercise with id {exercise_id} does not exist.')
+                                continue
+                        else:
+                            
+                            continue

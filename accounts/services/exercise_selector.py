@@ -3,6 +3,7 @@ import random
 from exercises.models import Exercise
 from accounts.models import UserProfile, TrainingSettings, InjuryExerciseClassification
 from django.db.models import Q
+import logging
 
 class ExerciseScorer:
     """سیستم امتیازدهی هوشمند به تمرینات با وزن‌های حرفه‌ای"""
@@ -28,7 +29,7 @@ class ExerciseScorer:
     ) -> float:
         """محاسبه امتیاز نهایی با وزن‌های حرفه‌ای"""
         scores = {
-            'safety': ExerciseScorer._safety_score(exercise, settings.injuries, user.physical_limitations),
+            'safety': ExerciseScorer._safety_score(exercise, settings.injuries),
             'effectiveness': ExerciseScorer._effectiveness_score(exercise, user),
             'experience': ExerciseScorer._experience_score(exercise, settings.experience_level),
             'demographics': ExerciseScorer._demographic_score(exercise, user.age, user.gender),
@@ -47,32 +48,22 @@ class ExerciseScorer:
         return final_score / sum(ExerciseScorer.WEIGHTS.values())
     
     @staticmethod
-    def _safety_score(exercise: Exercise, injuries: List[str], limitations: List[str]) -> float:
+    def _safety_score(exercise: Exercise, injuries: List[str]) -> float:
         """
         محاسبه امتیاز ایمنی (وزن: 3.0)
-        - بررسی آسیب‌ها و محدودیت‌های فیزیکی
+        - بررسی آسیب‌ها
         - اگر تمرین ناایمن باشد، امتیاز کل صفر می‌شود
         """
-        if not injuries and not limitations:
+        if not injuries:
             return 1.0
-            
-        # بررسی آسیب‌ها
         injury_classifications = InjuryExerciseClassification.objects.filter(
             exercise=exercise,
             injury__in=injuries
         )
-        
         if injury_classifications.filter(classification='avoid').exists():
             return 0.0  # تمرین ممنوع است
-            
         if injury_classifications.filter(classification='safe').exists():
             return 0.8  # جایگزین امن
-            
-        # بررسی محدودیت‌های فیزیکی
-        if limitations and exercise.contraindications:
-            if any(lim in exercise.contraindications for lim in limitations):
-                return 0.0
-                
         return 1.0
     
     @staticmethod
@@ -275,7 +266,8 @@ class ExerciseSelector:
         self.settings = settings
         self.exercise_history = {}
         self.scorer = ExerciseScorer()
-        
+        self.current_week = 1
+
     def get_exercises(
         self,
         target_muscles: List[str],
@@ -284,125 +276,76 @@ class ExerciseSelector:
         include_complementary: bool = True,
         include_warmup: bool = True,
         include_cooldown: bool = True
-    ) -> Dict[str, List[Tuple[Exercise, float]]]:
+    ) -> Dict[str, List[Exercise]]:
         """
         دریافت تمرینات مناسب برای عضلات هدف با ساختار حرفه‌ای
-        شامل: گرم‌کننده، تمرینات اصلی، تمرینات مکمل، و سردکننده
+        فقط مدل‌ها در زنجیره
         """
         workout_structure = {}
-        
-        # 1. تمرینات گرم‌کننده
         if include_warmup:
-            workout_structure['warmup'] = self._get_warmup_exercises(target_muscles, week)
-        
-        # 2. تمرینات اصلی
+            workout_structure['warmup'] = [ex for ex, _ in self._get_warmup_exercises(target_muscles, week)]
         main_exercises = self._get_main_exercises(target_muscles, week)
         scored_main = self._score_and_select_exercises(main_exercises, week, count)
-        
-        # توزیع تمرینات ترکیبی و ایزوله
-        workout_structure['main'] = self._distribute_exercises(scored_main)
-        
-        # 3. تمرینات مکمل
+        workout_structure['main'] = [ex for ex, _ in scored_main]
         if include_complementary:
-            workout_structure['complementary'] = self._get_complementary_exercises(
-                [ex[0] for ex in scored_main],
-                week
-            )
-            
-            # اضافه کردن تمرینات تثبیت‌کننده
-            workout_structure['stabilization'] = self._get_stabilization_exercises(
-                target_muscles,
-                week
-            )
-        
-        # 4. تمرینات سردکننده
+            workout_structure['complementary'] = [ex for ex, _ in self._get_complementary_exercises([ex for ex, _ in scored_main], week)]
+            workout_structure['stabilization'] = [ex for ex, _ in self._get_stabilization_exercises(target_muscles, week)]
         if include_cooldown:
-            workout_structure['cooldown'] = self._get_cooldown_exercises(target_muscles, week)
-        
+            workout_structure['cooldown'] = [ex for ex, _ in self._get_cooldown_exercises(target_muscles, week)]
         return workout_structure
-    
+
     def _get_warmup_exercises(self, target_muscles: List[str], week: int) -> List[Tuple[Exercise, float]]:
-        """
-        انتخاب تمرینات گرم‌کننده از دیتابیس موجود
-        - استفاده از تمرینات سبک و پویا
-        - تمرینات با تجهیزات سبک یا بدون تجهیزات
-        """
-        query = Q(
-            # تمرینات سبک و پویا
-            Q(category__in=['cardio', 'plyometrics']) |
-            # تمرینات کششی پویا
-            Q(category='stretching', level='beginner') |
-            # تمرینات با وزن بدن
-            Q(category='weighted_bodyweight', equipment='body')
-        )
-        
-        # فیلتر بر اساس عضلات هدف
-        if target_muscles:
-            query &= (
-                Q(primary_muscles__overlap=target_muscles) |
-                Q(secondary_muscles__overlap=target_muscles)
+        qs = Exercise.objects.filter(level='beginner')
+        warmup_exercises = [
+            ex for ex in qs
+            if (
+                (ex.category in ['cardio', 'plyometrics']) or
+                (ex.category == 'stretching') or
+                (ex.category == 'weighted_bodyweight' and ex.equipment == 'body')
+            ) and (
+                not target_muscles or
+                (ex.primary_muscles and any(m in ex.primary_muscles for m in target_muscles)) or
+                (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
             )
-        
-        # اولویت با تمرینات سبک‌تر
-        warmup_exercises = Exercise.objects.filter(query).order_by('level')
+        ]
         return self._score_and_select_exercises(warmup_exercises, week, count=3)
-    
+
     def _get_cooldown_exercises(self, target_muscles: List[str], week: int) -> List[Tuple[Exercise, float]]:
-        """
-        انتخاب تمرینات سردکننده از دیتابیس موجود
-        - استفاده از تمرینات کششی
-        - تمرینات سبک
-        - تمرینات با وزن بدن
-        """
-        query = Q(
-            # تمرینات کششی
-            Q(category='stretching') |
-            # تمرینات سبک با وزن بدن
-            Q(category='weighted_bodyweight', equipment='body', level='beginner') |
-            # تمرینات موبایلیتی
-            Q(category='strength', mechanic='isolation', level='beginner')
-        )
-        
-        # فیلتر بر اساس عضلات هدف
-        if target_muscles:
-            query &= (
-                Q(primary_muscles__overlap=target_muscles) |
-                Q(secondary_muscles__overlap=target_muscles)
+        qs = Exercise.objects.filter(level='beginner')
+        cooldown_exercises = [
+            ex for ex in qs
+            if (
+                (ex.category == 'stretching') or
+                (ex.category == 'weighted_bodyweight' and ex.equipment == 'body') or
+                (ex.category == 'strength' and ex.mechanic == 'isolation')
+            ) and (
+                not target_muscles or
+                (ex.primary_muscles and any(m in ex.primary_muscles for m in target_muscles)) or
+                (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
             )
-        
-        cooldown_exercises = Exercise.objects.filter(query)
+        ]
         return self._score_and_select_exercises(cooldown_exercises, week, count=3)
-    
+
     def _get_stabilization_exercises(self, target_muscles: List[str], week: int) -> List[Tuple[Exercise, float]]:
-        """
-        انتخاب تمرینات تثبیت‌کننده از دیتابیس موجود
-        - استفاده از تمرینات هسته
-        - تمرینات تعادلی
-        - تمرینات با وزن بدن
-        """
-        query = Q(
-            # تمرینات هسته
-            Q(primary_muscles__contains=['abs', 'core', 'lower_back']) |
-            # تمرینات تعادلی
-            Q(category='weighted_bodyweight', equipment='body') |
-            # تمرینات پایداری
-            Q(category='strength', mechanic='isolation', level__in=['beginner', 'intermediate'])
-        )
-        
-        # فیلتر تجهیزات
-        if self.settings.available_equipment:
-            query &= Q(equipment__in=self.settings.available_equipment)
-        
-        stabilization_exercises = Exercise.objects.filter(query)
+        qs = Exercise.objects.filter(level__in=['beginner', 'intermediate'])
+        stabilization_exercises = [
+            ex for ex in qs
+            if (
+                (ex.primary_muscles and any(m in ['abs', 'core', 'lower_back'] for m in ex.primary_muscles)) or
+                (ex.category == 'weighted_bodyweight' and ex.equipment == 'body') or
+                (ex.category == 'strength' and ex.mechanic == 'isolation')
+            ) and (
+                not self.settings.available_equipment or ex.equipment in self.settings.available_equipment
+            )
+        ]
         return self._score_and_select_exercises(stabilization_exercises, week, count=2)
-    
+
     def _score_and_select_exercises(
         self,
         exercises: List[Exercise],
         week: int,
         count: int
     ) -> List[Tuple[Exercise, float]]:
-        """امتیازدهی و انتخاب بهترین تمرینات"""
         scored_exercises = []
         for exercise in exercises:
             last_trained = self.exercise_history.get(exercise.id)
@@ -414,157 +357,161 @@ class ExerciseSelector:
                 last_trained
             )
             scored_exercises.append((exercise, score))
-        
         scored_exercises.sort(key=lambda x: x[1], reverse=True)
         return scored_exercises[:count]
-    
+
     def _distribute_exercises(
         self,
-        scored_exercises: List[Tuple[Exercise, float]]
+        exercises: List[Tuple[Exercise, float]]
     ) -> List[Tuple[Exercise, float]]:
-        """
-        توزیع هوشمند تمرینات ترکیبی و ایزوله
-        - تمرینات ترکیبی اولویت دارند
-        - توزیع مناسب بر اساس سطح تجربه
+        """توزیع تمرینات ترکیبی و ایزوله
+        
+        Args:
+            exercises: لیست تمرینات با امتیاز
+            
+        Returns:
+            لیست توزیع شده تمرینات
         """
         compound_exercises = []
         isolation_exercises = []
         
-        # جداسازی تمرینات ترکیبی و ایزوله
-        for exercise, score in scored_exercises:
+        for exercise, score in exercises:
             if exercise.mechanic == 'compound':
                 compound_exercises.append((exercise, score))
             else:
                 isolation_exercises.append((exercise, score))
-        
-        # توزیع بر اساس سطح تجربه
-        if self.settings.experience_level == 'beginner':
-            # برای مبتدیان: 60% ترکیبی، 40% ایزوله
-            compound_count = min(3, len(compound_exercises))
-            isolation_count = min(2, len(isolation_exercises))
-        elif self.settings.experience_level == 'intermediate':
-            # برای متوسط: 50% ترکیبی، 50% ایزوله
-            compound_count = min(2, len(compound_exercises))
-            isolation_count = min(3, len(isolation_exercises))
-        else:
-            # برای حرفه‌ای: 40% ترکیبی، 60% ایزوله
-            compound_count = min(2, len(compound_exercises))
-            isolation_count = min(3, len(isolation_exercises))
-        
-        # ترکیب تمرینات با اولویت ترکیبی
-        distributed_exercises = compound_exercises[:compound_count]
-        distributed_exercises.extend(isolation_exercises[:isolation_count])
-        
-        return distributed_exercises
+            
+        # اولویت با تمرینات ترکیبی
+        return compound_exercises + isolation_exercises
     
-    def _get_main_exercises(self, target_muscles: List[str], week: int) -> List[Exercise]:
+    def _get_main_exercises(self, target_muscles: List[str], week: int):
         """
         انتخاب تمرینات اصلی با فیلترهای حرفه‌ای
         - تمرینات ترکیبی برای مبتدیان
         - ترکیب مناسب تمرینات بر اساس هدف
         """
-        query = Q(primary_muscles__overlap=target_muscles)
-        
+        # کوئری ساده فقط روی عضلات هدف
+        qs = Exercise.objects.all()
+        exercises = [
+            ex for ex in qs
+            if (
+                (ex.primary_muscles and any(m in ex.primary_muscles for m in target_muscles)) or
+                (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
+            )
+        ]
         # فیلتر تجهیزات
         if self.settings.available_equipment:
-            query &= Q(equipment__in=self.settings.available_equipment)
-        
+            exercises = [ex for ex in exercises if ex.equipment in self.settings.available_equipment]
         # فیلتر سطح تجربه
         if self.settings.experience_level == 'beginner':
-            query &= (
-                Q(level='beginner') |
-                # برخی تمرینات متوسط برای مبتدیان پیشرفته
-                Q(level='intermediate', mechanic='compound')
-            )
+            exercises = [ex for ex in exercises if ex.level == 'beginner' or (ex.level == 'intermediate' and ex.mechanic == 'compound')]
         elif self.settings.experience_level == 'intermediate':
-            query &= Q(level__in=['beginner', 'intermediate'])
-        
+            exercises = [ex for ex in exercises if ex.level in ['beginner', 'intermediate', 'expert']]
         # فیلتر بر اساس هدف
-        if self.user.goal == 'muscle_gain':
-            query &= (
-                # تمرینات ترکیبی و قدرتی
-                Q(mechanic='compound', category__in=['strength', 'powerlifting']) |
-                # تمرینات ایزوله برای حجم
-                Q(mechanic='isolation', category='strength')
-            )
-        elif self.user.goal == 'strength':
-            query &= (
-                # تمرینات ترکیبی قدرتی
-                Q(mechanic='compound', category__in=['strength', 'powerlifting']) |
-                # تمرینات المپیک
-                Q(category='olympic_weightlifting')
-            )
-        elif self.user.goal == 'weight_loss':
-            query &= (
-                # تمرینات ترکیبی با شدت بالا
-                Q(mechanic='compound', category__in=['strength', 'crossfit']) |
-                # تمرینات کاردیو
-                Q(category='cardio') |
-                # تمرینات متابولیک
-                Q(category='plyometrics')
-            )
-        elif self.user.goal == 'endurance':
-            query &= (
-                # تمرینات کاردیو
-                Q(category='cardio') |
-                # تمرینات استقامتی
-                Q(category__in=['strength', 'crossfit'], mechanic='compound')
-            )
-        
-        # فیلتر محدودیت‌های فیزیکی
-        if hasattr(self.user, 'physical_limitations') and self.user.physical_limitations:
-            query &= ~Q(contraindications__overlap=self.user.physical_limitations)
-        
-        return Exercise.objects.filter(query)
+        if self.user.goal:
+            if self.user.goal == 'muscle_gain':
+                exercises = [ex for ex in exercises if (
+                    ex.category in ['strength', 'powerlifting', 'weighted_bodyweight'] or
+                    ex.mechanic == 'compound' or
+                    (ex.mechanic == 'isolation' and ex.category == 'strength')
+                )]
+            elif self.user.goal == 'strength':
+                exercises = [ex for ex in exercises if (
+                    ex.category in ['strength', 'powerlifting', 'weighted_bodyweight', 'olympic_weightlifting'] or
+                    ex.mechanic == 'compound'
+                )]
+            elif self.user.goal == 'weight_loss':
+                exercises = [ex for ex in exercises if (
+                    ex.category in ['strength', 'crossfit', 'weighted_bodyweight', 'cardio', 'plyometrics'] or
+                    ex.mechanic == 'compound'
+                )]
+            elif self.user.goal == 'endurance':
+                exercises = [ex for ex in exercises if (
+                    ex.category in ['cardio', 'plyometrics', 'strength', 'crossfit', 'weighted_bodyweight'] or
+                    ex.mechanic == 'compound'
+                )]
+        return list(exercises)
     
     def _get_complementary_exercises(
         self,
-        main_exercises: List[Exercise],
+        main_exercises: List,
         week: int,
         count: int = 2
     ) -> List[Tuple[Exercise, float]]:
-        """
-        انتخاب تمرینات مکمل حرفه‌ای
-        - تمرینات آنتاگونیست
-        - تمرینات تثبیت‌کننده
-        - تمرینات تعادلی
-        """
         complementary_muscles = set()
-        
-        # جمع‌آوری عضلات ثانویه و آنتاگونیست
         for exercise in main_exercises:
-            if exercise.secondary_muscles:
-                complementary_muscles.update(exercise.secondary_muscles)
-            
-            # اضافه کردن عضلات آنتاگونیست بر اساس نوع حرکت
-            if exercise.force == 'push':
+            ex = exercise
+            if hasattr(self, 'exercise_to_dict'):
+                ex = self.exercise_to_dict(ex, 'complementary')
+            if ex.secondary_muscles:
+                complementary_muscles.update(ex.secondary_muscles)
+            if ex.force == 'push':
                 complementary_muscles.update(['back', 'biceps', 'rear_deltoids'])
-            elif exercise.force == 'pull':
+            elif ex.force == 'pull':
                 complementary_muscles.update(['chest', 'triceps', 'front_deltoids'])
-            elif exercise.force == 'static':
+            elif ex.force == 'static':
                 complementary_muscles.update(['core', 'lower_back'])
-        
         if not complementary_muscles:
             return []
-        
-        # ساخت کوئری برای تمرینات مکمل
-        query = Q(
-            # تمرینات آنتاگونیست
-            Q(primary_muscles__overlap=list(complementary_muscles)) |
-            # تمرینات تثبیت‌کننده
-            Q(category__in=['strength', 'weighted_bodyweight'], mechanic='isolation') |
-            # تمرینات تعادلی
-            Q(category='plyometrics', level__in=['beginner', 'intermediate'])
-        )
-        
-        # فیلتر تجهیزات
-        if self.settings.available_equipment:
-            query &= Q(equipment__in=self.settings.available_equipment)
-        
-        # دریافت و امتیازدهی به تمرینات مکمل
-        complementary = Exercise.objects.filter(query)
-        return self._score_and_select_exercises(complementary, week, count)
+        qs = Exercise.objects.all()
+        complementary = [
+            ex for ex in qs
+            if (
+                (ex.primary_muscles and any(m in ex.primary_muscles for m in complementary_muscles)) or
+                (ex.category in ['strength', 'weighted_bodyweight'] and ex.mechanic == 'isolation') or
+                (ex.category == 'plyometrics' and ex.level in ['beginner', 'intermediate'])
+            ) and (
+                not self.settings.available_equipment or ex.equipment in self.settings.available_equipment
+            )
+        ]
+        scored = self._score_and_select_exercises(complementary, week, count)
+        return scored
     
     def update_history(self, exercise_id: int, week: int):
-        """به‌روزرسانی تاریخچه تمرینات"""
-        self.exercise_history[exercise_id] = week 
+        """به‌روزرسانی تاریخچه تمرینات
+        
+        Args:
+            exercise_id: شناسه تمرین
+            week: شماره هفته
+        """
+        self.exercise_history[exercise_id] = week
+
+    def get_alternative_exercises(self, exercise_id: int, physical_limitations=None) -> List[Exercise]:
+        """
+        دریافت لیست تمرینات جایگزین مناسب
+        - تمرینات با همان گروه عضلانی
+        - تمرینات با سطح دشواری مشابه
+        - تمرینات سازگار با محدودیت‌های فیزیکی
+        """
+        try:
+            main_exercise = Exercise.objects.get(id=exercise_id)
+            qs = Exercise.objects.filter(level=main_exercise.level)
+            alternatives = [
+                ex for ex in qs
+                if (
+                    (ex.primary_muscles and any(m in ex.primary_muscles for m in main_exercise.primary_muscles)) or
+                    (ex.secondary_muscles and any(m in ex.secondary_muscles for m in main_exercise.secondary_muscles))) and (
+                    not self.settings.available_equipment or ex.equipment in self.settings.available_equipment
+                ) and (
+                    not physical_limitations or not any(injury in (ex.injuries or []) for injury in physical_limitations)
+                )
+            ]
+            # مقداردهی current_week اگر به صورت داینامیک ست شده باشد
+            week = getattr(self, 'current_week', 1)
+            scored_alternatives = self._score_and_select_exercises(
+                alternatives,
+                week,
+                count=5
+            )
+            return [ex[0] for ex in scored_alternatives]
+        except Exercise.DoesNotExist:
+            return []
+        except Exception as e:
+            print(f"خطا در دریافت تمرینات جایگزین: {str(e)}")
+            return []
+
+    def get_mobility_exercises(self, target_areas: list = None, exercise_type: str = 'warmup', split_type: str = None) -> list:
+        exercises = super().get_mobility_exercises(target_areas, exercise_type, split_type)
+        if not exercises:
+            logging.warning(f"هیچ تمرین موبیلیتی برای {target_areas} و نوع {exercise_type} پیدا نشد!")
+        return exercises

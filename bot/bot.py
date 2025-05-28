@@ -20,28 +20,28 @@ async def start(update, context):
     return None
 
 async def register(update, context):
-    await update.message.reply_text('جنسیت خود را وارد کنید (male/female):')
+    await update.message.reply_text('Please enter your gender (male/female):')
     print('user send start')
     return GENDER
 
 async def gender_handler(update, context):
     context.user_data['gender'] = update.message.text
-    await update.message.reply_text('قد (cm):')
+    await update.message.reply_text('Height (cm):')
     return HEIGHT
 
 async def height_handler(update, context):
     context.user_data['height'] = float(update.message.text)
-    await update.message.reply_text('وزن (kg):')
+    await update.message.reply_text('Weight (kg):')
     return WEIGHT
 
 async def weight_handler(update, context):
     context.user_data['weight'] = float(update.message.text)
-    await update.message.reply_text('سن:')
+    await update.message.reply_text('Age:')
     return AGE
 
 async def age_handler(update, context):
     context.user_data['age'] = int(update.message.text)
-    await update.message.reply_text('ثبت‌نام انجام شد ✅')
+    await update.message.reply_text('Registration completed ✅')
     return ConversationHandler.END
 
 # Define the conversation handler

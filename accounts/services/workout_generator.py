@@ -37,7 +37,7 @@ class WorkoutGenerator:
                 self.exercise_selector
             )
         except Exception as e:
-            raise ValueError(f"خطا در مقداردهی مدیران: {str(e)}")
+            raise ValueError(f"Error in initializing managers: {str(e)}")
             
     def _validate_managers(self):
         """اعتبارسنجی مدیران"""
@@ -48,14 +48,14 @@ class WorkoutGenerator:
             self.mobility_manager,
             self.validator
         ]):
-            raise ValueError("برخی از مدیران مقداردهی نشده‌اند")
+            raise ValueError("Some managers are not initialized")
             
     def generate_workout(self, target_muscles: List[str], week: int) -> Dict:
         """تولید یک جلسه تمرین با مدیریت خطا و همگام‌سازی"""
         try:
             # بررسی امکان تمرین
             if not self.recovery_manager.can_train(target_muscles, datetime.now()):
-                raise ValueError("عضلات هدف نیاز به استراحت دارند")
+                raise ValueError("Target muscles need rest")
                 
             # دریافت تمرینات مناسب
             exercises = self.exercise_selector.get_exercises(
@@ -73,32 +73,31 @@ class WorkoutGenerator:
             }
             
             # اضافه کردن تمرینات با همگام‌سازی
-            for exercise in exercises.get('main', []):
+            for exercise_tuple in exercises.get('main', []):
+                exercise = exercise_tuple[0] if isinstance(exercise_tuple, tuple) else exercise_tuple
                 exercise_data = self._prepare_exercise_data(exercise, week)
                 workout['exercises'].append(exercise_data)
-                
-                # به‌روزرسانی تاریخچه
-                self.exercise_selector.update_history(exercise.id, week)
-                
+                if hasattr(exercise, 'id'):
+                    self.exercise_selector.update_history(exercise.id, week)
             # اضافه کردن تمرینات گرم کردن و سرد کردن
             workout['warmup'] = self._format_mobility_exercises(
-                exercises.get('warmup', []),
+                [item[0] if isinstance(item, tuple) else item for item in exercises.get('warmup', [])],
                 'warmup'
             )
             workout['cooldown'] = self._format_mobility_exercises(
-                exercises.get('cooldown', []),
+                [item[0] if isinstance(item, tuple) else item for item in exercises.get('cooldown', [])],
                 'cooldown'
             )
             
             # اعتبارسنجی برنامه
             is_valid, errors = self.validator.validate_workout(workout)
             if not is_valid:
-                raise ValueError(f"برنامه نامعتبر است: {', '.join(errors)}")
+                raise ValueError(f"Workout is not valid: {', '.join(errors)}")
                 
             return workout
             
         except Exception as e:
-            raise ValueError(f"خطا در تولید برنامه تمرین: {str(e)}")
+            raise ValueError(f"Error in generating workout: {str(e)}")
             
     def _prepare_exercise_data(self, exercise: Exercise, week: int) -> Dict:
         """آماده‌سازی داده‌های تمرین با همگام‌سازی"""
@@ -130,13 +129,14 @@ class WorkoutGenerator:
                 'notes': notes
             }
         except Exception as e:
-            raise ValueError(f"خطا در آماده‌سازی داده‌های تمرین: {str(e)}")
+            raise ValueError(f"Error in preparing exercise data: {str(e)}")
             
-    def _format_mobility_exercises(self, exercises: List[Exercise], exercise_type: str) -> List[Dict]:
+    def _format_mobility_exercises(self, exercises: List, exercise_type: str) -> List[Dict]:
         """فرمت‌بندی تمرینات موبیلیتی با مدیریت خطا"""
         try:
             formatted = []
-            for exercise in exercises:
+            for item in exercises:
+                exercise = item[0] if isinstance(item, tuple) else item
                 formatted.append({
                     'exercise_id': exercise.id,
                     'exercise_name': exercise.name,
@@ -146,7 +146,7 @@ class WorkoutGenerator:
                 })
             return formatted
         except Exception as e:
-            raise ValueError(f"خطا در فرمت‌بندی تمرینات موبیلیتی: {str(e)}")
+            raise ValueError(f"Error in formatting mobility exercises: {str(e)}")
             
     def _get_mobility_duration(self, exercise_type: str) -> int:
         """دریافت مدت زمان تمرینات موبیلیتی"""

@@ -3,27 +3,28 @@ from datetime import datetime, timedelta
 from accounts.models import UserProfile, TrainingSettings
 from exercises.models import Exercise
 from ..workout_validator import WorkoutValidator
+import logging
 
 class SplitStrategy:
     """
-    کلاس پایه برای استراتژی‌های تقسیم‌بندی تمرین
-    این کلاس به عنوان یک مربی شخصی حرفه‌ای عمل می‌کند و ویژگی‌های زیر را ارائه می‌دهد:
-    - مدیریت پیشرفته تمرینات
-    - تنظیم هوشمند حجم و شدت
-    - پشتیبانی از پیشرفت تدریجی
-    - مدیریت خستگی و ریکاوری
-    - سازگاری با محدودیت‌های فیزیکی
-    - پشتیبانی از تمرینات جایگزین
+    Base class for workout splitting strategies
+    This class acts as a professional personal trainer and provides the following features:
+    - Advanced workout management
+    - Smart adjustment of volume and intensity
+    - Support for progressive progression
+    - Management of fatigue and recovery
+    - Compatibility with physical limitations
+    - Support for alternative workouts
     """
     
-    # محدودیت‌های پیش‌فرض برای هر نوع تمرین
+    # Default limits for each type of exercise
     EXERCISE_LIMITS = {
-        'compound': {'min': 3, 'max': 6},    # تعداد تمرینات ترکیبی
-        'isolation': {'min': 2, 'max': 4},   # تعداد تمرینات ایزوله
-        'accessory': {'min': 1, 'max': 3}    # تعداد تمرینات کمکی
+        'compound': {'min': 3, 'max': 6},    # Number of compound exercises
+        'isolation': {'min': 2, 'max': 4},   # Number of isolation exercises
+        'accessory': {'min': 1, 'max': 3}    # Number of accessory exercises
     }
     
-    # محدوده تکرار برای هر هدف
+    # Rep ranges for each goal
     REP_RANGES = {
         'muscle_gain': {'min': 6, 'max': 12},
         'strength': {'min': 3, 'max': 6},
@@ -34,14 +35,14 @@ class SplitStrategy:
     def __init__(self, user: UserProfile, settings: TrainingSettings, 
                  exercise_selector, volume_manager, recovery_manager):
         """
-        مقداردهی اولیه استراتژی تقسیم‌بندی
+        Initialize the workout splitting strategy
         
         Args:
-            user: پروفایل کاربر
-            settings: تنظیمات تمرین
-            exercise_selector: انتخاب‌گر تمرینات
-            volume_manager: مدیر حجم تمرین
-            recovery_manager: مدیر ریکاوری
+            user: User profile
+            settings: Workout settings
+            exercise_selector: Exercise selector
+            volume_manager: Volume manager
+            recovery_manager: Recovery manager
         """
         self.user = user
         self.settings = settings
@@ -53,153 +54,144 @@ class SplitStrategy:
         self._validate_initialization()
         
     def _validate_initialization(self):
-        """اعتبارسنجی مقداردهی اولیه"""
+        """Validation of initial value"""
         if not all([self.user, self.settings, self.exercise_selector, 
                    self.volume_manager, self.recovery_manager]):
-            raise ValueError("همه پارامترهای مورد نیاز باید مقداردهی شوند")
+            raise ValueError("All required parameters must be provided")
             
     def generate(self, week: int) -> Dict:
         """
-        تولید برنامه تمرینی برای هفته مشخص
+        Generate a workout program for a specific week
         
         Args:
-            week: شماره هفته
+            week: Week number
             
         Returns:
-            Dict: برنامه تمرینی تولید شده
+            Dict: Generated workout program
             
         Raises:
-            ValueError: در صورت خطا در تولید برنامه
+            ValueError: If there is an error in generating the program
         """
         try:
-            # بررسی نیاز به کاهش بار
             if self._should_deload(week):
                 return self._generate_deload_week(week)
-                
-            # تولید برنامه اصلی
             program = self._generate_base_program(week)
-            
-            # تنظیم حجم و شدت
             program = self._adjust_volume_and_intensity(program, week)
-            
-            # اضافه کردن تمرینات موبیلیتی
             program = self._add_mobility_exercises(program)
-            
-            # اعتبارسنجی برنامه
+            # Warning if no exercises generated for a day
+            for day, exercises in program.items():
+                if not exercises:
+                    logging.warning(f"No exercises generated for day {day}!")
             is_valid, errors = self.validator.validate_program({'weekly_plan': program})
             if not is_valid:
-                raise ValueError(f"برنامه نامعتبر است: {', '.join(errors)}")
-                
+                raise ValueError(f"Program is not valid: {', '.join(errors)}")
             return program
-            
         except Exception as e:
-            raise ValueError(f"خطا در تولید برنامه: {str(e)}")
+            raise ValueError(f"Error in generating program: {str(e)}")
             
     def _should_deload(self, week: int) -> bool:
         """
-        بررسی نیاز به کاهش بار
+        Check if a deload is needed
         
         Args:
-            week: شماره هفته
+            week: Week number
             
         Returns:
-            bool: آیا نیاز به کاهش بار است
+            bool: Whether a deload is needed
         """
-        # کاهش بار هر 4-6 هفته
+        # Deload every 4-6 weeks
         return week % 4 == 0 and week > 0
         
     def _generate_deload_week(self, week: int) -> Dict:
         """
-        تولید هفته کاهش بار
+        Generate a deload week
         
         Args:
-            week: شماره هفته
+            week: Week number
             
         Returns:
-            Dict: برنامه کاهش بار
+            Dict: Deload program
         """
         base_program = self._generate_base_program(week)
         deload_program = {}
-        
         for day, exercises in base_program.items():
             deload_exercises = []
             for exercise in exercises:
-                deload_exercise = exercise.copy()
-                # کاهش حجم به 50-60%
-                deload_exercise['sets'] = max(1, int(exercise['sets'] * 0.5))
-                # افزایش تکرارها برای تمرکز روی فرم
-                deload_exercise['reps'] = '12-15'
+                if not hasattr(exercise, 'id'):
+                    logging.warning(f"Invalid item in day {day} for deload: {exercise}")
+                    continue
+                # Convert model to dict only at this point
+                deload_exercise = {
+                    'exercise_id': exercise.id,
+                    'exercise_name': exercise.name,
+                    'type': getattr(exercise, 'type', 'compound'),
+                    'muscle_group': exercise.primary_muscles[0] if exercise.primary_muscles else 'full_body',
+                    'sets': max(1, getattr(exercise, 'sets', 3) // 2),
+                    'reps': '12-15',
+                    'rest_seconds': getattr(exercise, 'rest_seconds', 60),
+                    'intensity': getattr(exercise, 'intensity', 0.7),
+                    'notes': getattr(exercise, 'notes', '')
+                }
                 deload_exercises.append(deload_exercise)
+            if not deload_exercises:
+                logging.warning(f"No deload exercise generated for day {day}!")
             deload_program[day] = deload_exercises
-            
         return deload_program
         
     def _generate_base_program(self, week: int) -> Dict:
         """
-        تولید برنامه پایه
+        Generate a base program
         
         Args:
-            week: شماره هفته
+            week: Week number
             
         Returns:
-            Dict: برنامه پایه
+            Dict: Base program
         """
-        raise NotImplementedError("این متد باید در کلاس‌های فرزند پیاده‌سازی شود")
+        raise NotImplementedError("This method must be implemented in child classes")
         
     def _adjust_volume_and_intensity(self, program: Dict, week: int) -> Dict:
         """
-        تنظیم حجم و شدت تمرینات
+        Adjust volume and intensity of exercises
         
         Args:
-            program: برنامه تمرینی
-            week: شماره هفته
+            program: Workout program
+            week: Week number
             
         Returns:
-            Dict: برنامه تنظیم شده
+            Dict: Adjusted program
         """
         adjusted_program = {}
-        
         for day, exercises in program.items():
             adjusted_exercises = []
             for exercise in exercises:
-                # تنظیم حجم بر اساس پیشرفت
-                adjusted_volume = self.volume_manager.adjust_volume(
-                    exercise['muscle_group'],
-                    week
-                )
-                
-                # تنظیم شدت بر اساس سطح تجربه
-                intensity = self._calculate_intensity(exercise, week)
-                
-                adjusted_exercise = exercise.copy()
-                adjusted_exercise.update({
-                    'sets': adjusted_volume['sets'],
-                    'reps': adjusted_volume['reps'],
-                    'intensity': intensity
-                })
-                adjusted_exercises.append(adjusted_exercise)
-                
+                if not hasattr(exercise, 'id'):
+                    logging.warning(f"Invalid item in day {day}: {exercise}")
+                    continue
+                # Only model
+                adjusted_exercises.append(exercise)
+            if not adjusted_exercises:
+                logging.warning(f"No adjusted exercise generated for day {day}!")
             adjusted_program[day] = adjusted_exercises
-            
         return adjusted_program
         
     def _calculate_intensity(self, exercise: Dict, week: int) -> float:
         """
-        محاسبه شدت تمرین
+        Calculate exercise intensity
         
         Args:
-            exercise: اطلاعات تمرین
-            week: شماره هفته
+            exercise: Exercise information
+            week: Week number
             
         Returns:
-            float: شدت تمرین (0-1)
+            float: Exercise intensity (0-1)
         """
-        base_intensity = 0.7  # شدت پایه
+        base_intensity = 0.7  # Base intensity
         
-        # افزایش تدریجی شدت
+        # Gradual intensity increase
         week_factor = min(1.0, 0.7 + (week * 0.05))
         
-        # تنظیم بر اساس نوع تمرین
+        # Adjust based on exercise type
         type_factor = {
             'compound': 1.0,
             'isolation': 0.8,
@@ -210,70 +202,126 @@ class SplitStrategy:
         
     def _add_mobility_exercises(self, program: Dict) -> Dict:
         """
-        اضافه کردن تمرینات موبیلیتی
+        Add mobility exercises
         
         Args:
-            program: برنامه تمرینی
+            program: Workout program
             
         Returns:
-            Dict: برنامه با تمرینات موبیلیتی
+            Dict: Program with mobility exercises
         """
         for day, exercises in program.items():
-            # اضافه کردن گرم کردن
+            if not exercises:
+                logging.warning(f"No main exercise for adding mobility in day {day}!")
+                continue
+            # Assuming get_mobility_exercises returns a model
             warmup = self.exercise_selector.get_mobility_exercises(
-                target_areas=exercises[0]['muscle_group'],
+                target_areas=exercises[0].primary_muscles if hasattr(exercises[0], 'primary_muscles') else [],
                 exercise_type='warmup'
             )
-            
-            # اضافه کردن سرد کردن
             cooldown = self.exercise_selector.get_mobility_exercises(
-                target_areas=exercises[-1]['muscle_group'],
+                target_areas=exercises[-1].primary_muscles if hasattr(exercises[-1], 'primary_muscles') else [],
                 exercise_type='cooldown'
             )
-            
-            program[day] = warmup + exercises + cooldown
-            
+            program[day] = list(warmup) + list(exercises) + list(cooldown)
         return program
         
-    def get_exercise_alternatives(self, exercise: Dict) -> List[Dict]:
+    def get_exercise_alternatives(self, exercise):
         """
-        دریافت تمرینات جایگزین
+        Get exercise alternatives
         
         Args:
-            exercise: تمرین اصلی
+            exercise: Original exercise
             
         Returns:
-            List[Dict]: لیست تمرینات جایگزین
+            List[Dict]: List of exercise alternatives
         """
+        exercise_id = exercise['exercise_id'] if isinstance(exercise, dict) else exercise.id
         return self.exercise_selector.get_alternative_exercises(
-            exercise['exercise_id'],
+            exercise_id,
             self.user.physical_limitations
         )
         
     def _validate_exercise_balance(self, exercises: List[Dict]) -> Tuple[bool, List[str]]:
         """
-        بررسی تعادل تمرینات
+        Check exercise balance
         
         Args:
-            exercises: لیست تمرینات
+            exercises: List of exercises
             
         Returns:
-            Tuple[bool, List[str]]: (اعتبار, لیست خطاها)
+            Tuple[bool, List[str]]: (Validity, List of errors)
         """
         errors = []
         exercise_counts = {}
         
-        # شمارش تمرینات هر نوع
+        # Count exercises of each type
         for exercise in exercises:
             ex_type = exercise['type']
             exercise_counts[ex_type] = exercise_counts.get(ex_type, 0) + 1
             
-        # بررسی محدودیت‌ها
+        # Check limits
         for ex_type, count in exercise_counts.items():
             limits = self.EXERCISE_LIMITS.get(ex_type, {'min': 2, 'max': 5})
             if count < limits['min']:
-                errors.append(f"تعداد تمرینات {ex_type} کمتر از حد مجاز است")
+                errors.append(f"Number of {ex_type} exercises is less than the allowed limit")
             elif count > limits['max']:
-                errors.append(f"تعداد تمرینات {ex_type} بیشتر از حد مجاز است")
+                errors.append(f"Number of {ex_type} exercises exceeds the allowed limit")
                 
         return len(errors) == 0, errors
+
+    def _prioritize_days_by_recovery(self, available_days: List[str]) -> List[str]:
+        """Prioritize days based on recovery score"""
+        prioritized = []
+        remaining_days = available_days.copy()
+        while remaining_days:
+            best_day = None
+            best_recovery_score = -1
+            for day in remaining_days:
+                score = self._calculate_recovery_score(day)
+                if score > best_recovery_score:
+                    best_recovery_score = score
+                    best_day = day
+            if best_day:
+                prioritized.append(best_day)
+                remaining_days.remove(best_day)
+        return prioritized
+
+    def _calculate_recovery_score(self, day: str) -> float:
+        """Calculate recovery score for a day"""
+        from accounts.services.date_converter import convert_day_to_date
+        training_date = convert_day_to_date(day, datetime.now())
+        score = 1.0
+        if hasattr(self.user, 'last_training_date') and self.user.last_training_date:
+            days_since_last = (training_date - self.user.last_training_date).days
+            score *= min(1.0, days_since_last / 2)
+        if hasattr(self.user, 'body_type'):
+            if self.user.body_type == 'ectomorph':
+                score *= 1.2
+            elif self.user.body_type == 'mesomorph':
+                score *= 0.9
+        return score
+
+    def _check_recovery_for_day(self, day: str, primary_muscles: List[str] = None) -> bool:
+        """Check recovery for a training day"""
+        from accounts.services.date_converter import convert_day_to_date
+        training_date = convert_day_to_date(day, datetime.now())
+        if primary_muscles is None and hasattr(self, 'MUSCLE_GROUPS'):
+            # تلاش برای استخراج عضلات اصلی از MUSCLE_GROUPS
+            primary_muscles = []
+            if isinstance(self.MUSCLE_GROUPS, dict):
+                for group in self.MUSCLE_GROUPS.values():
+                    if isinstance(group, dict) and 'primary' in group:
+                        primary_muscles.extend(group['primary'])
+                    elif isinstance(group, list):
+                        primary_muscles.extend(group)
+        if not primary_muscles:
+            primary_muscles = ['full_body']
+        return all(self.recovery_manager.can_train(muscle, training_date) for muscle in primary_muscles)
+
+    def _find_next_available_day(self, available_days: List[str], primary_muscles: List[str] = None) -> str:
+        """Find the next available day for training"""
+        for day in available_days:
+            if self._check_recovery_for_day(day, primary_muscles):
+                return day
+        return available_days[0]  # fallback if none found

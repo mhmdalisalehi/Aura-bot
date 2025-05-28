@@ -32,6 +32,7 @@ class UserProfile(models.Model):
         ('endurance', 'Endurance'),])
     body_fat_percentage = models.FloatField(null=True, blank=True)
     body_fat_percentage_interd_by_user = models.FloatField(null=True, blank=True)
+    physical_limitations = models.JSONField(default=list, blank=True, help_text='List of physical limitations or injuries')
     
     body_type = models.CharField(max_length=20, choices=[('ectomorph', 'Ectomorph'), ('mesomorph', 'Mesomorph'), ('endomorph', 'Endomorph')], null=True, blank=True)
     daily_activity_level = models.CharField(max_length=10, choices=[

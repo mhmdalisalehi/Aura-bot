@@ -23,6 +23,7 @@ class BroSplitStrategy(SplitStrategy):
     - پشتیبانی از تمرینات جایگزین و اصلاحی
     - مدیریت پیشرفت و تنظیم خودکار برنامه
     """
+    current_week: int = 1  # مقدار پیش‌فرض
     
     # نگاشت عضلات برای هر روز تمرین با جزئیات بیشتر
     MUSCLE_DAY_MAPPING = {
@@ -114,8 +115,13 @@ class BroSplitStrategy(SplitStrategy):
             extra_days = available_days[len(self.DAY_PRIORITY):]
             for day in extra_days:
                 program[day] = self._build_hybrid_day(week)
-                
-        return program
+        # تبدیل کلیدها به تاریخ
+        dated_program = {}
+        base_date = datetime.now()
+        for day, exercises in program.items():
+            training_date = convert_day_to_date(day, base_date)
+            dated_program[training_date.strftime('%Y-%m-%d')] = exercises
+        return dated_program
         
     def _prioritize_days_by_recovery(self, available_days: List[str]) -> List[str]:
         """اولویت‌بندی روزها بر اساس ریکاوری"""
@@ -140,11 +146,12 @@ class BroSplitStrategy(SplitStrategy):
         
     def _calculate_recovery_score(self, day: str) -> float:
         """محاسبه امتیاز ریکاوری برای یک روز"""
+        training_date = convert_day_to_date(day, datetime.now())
         score = 1.0
         
         # کاهش امتیاز برای روزهای پشت سر هم
         if self.user.last_training_date:
-            days_since_last = (datetime.now() - self.user.last_training_date).days
+            days_since_last = (training_date - self.user.last_training_date).days
             score *= min(1.0, days_since_last / 2)
             
         # تنظیم بر اساس تیپ بدنی
@@ -157,9 +164,9 @@ class BroSplitStrategy(SplitStrategy):
         
     def _check_recovery_for_day(self, muscle_day: str, day: str) -> bool:
         """بررسی ریکاوری برای یک روز تمرین"""
-        muscles = self.MUSCLE_DAY_MAPPING[muscle_day]['primary']
         training_date = convert_day_to_date(day, datetime.now())
-        return self.recovery_manager.can_train(muscles, training_date)
+        muscles = self.MUSCLE_DAY_MAPPING[muscle_day]['primary']
+        return all(self.recovery_manager.can_train(muscle, training_date) for muscle in muscles)
         
     def _find_next_available_day(self, available_days: List[str], muscle_day: str) -> str:
         """یافتن روز بعدی مناسب برای تمرین"""
@@ -168,7 +175,7 @@ class BroSplitStrategy(SplitStrategy):
                 return day
         return available_days[0]  # اگر روز مناسب پیدا نشد
         
-    def _build_muscle_day(self, muscle_day: str, week: int) -> List[Dict]:
+    def _build_muscle_day(self, muscle_day: str, week: int) -> List[Exercise]:
         """ساخت برنامه حرفه‌ای برای یک روز تمرین"""
         exercises = []
         muscle_config = self.MUSCLE_DAY_MAPPING[muscle_day]
@@ -219,39 +226,16 @@ class BroSplitStrategy(SplitStrategy):
             
         return base_counts
         
-    def _build_muscle_exercises(self, muscle: str, count: int, week: int, 
-                              is_primary: bool) -> List[Dict]:
-        """ساخت لیست تمرینات برای یک عضله"""
-        exercises = []
-        
-        # انتخاب تمرینات ترکیبی
-        compound_exercises = self.exercise_selector.get_exercises(
-            [muscle],
-            week,
-            mechanic='compound'
-        )
-        
-        # انتخاب تمرینات ایزوله
-        isolation_exercises = self.exercise_selector.get_exercises(
-            [muscle],
-            week,
-            mechanic='isolation'
-        )
-        
-        # ترکیب تمرینات
+    def _build_muscle_exercises(self, muscle: str, count: int, week: int, is_primary: bool) -> List[Exercise]:
+        available = self.exercise_selector.get_exercises([muscle], week)['main']
         if is_primary:
-            # اولویت با تمرینات ترکیبی برای عضلات اصلی
-            exercises.extend(compound_exercises[:min(2, len(compound_exercises))])
-            remaining = count - len(exercises)
-            exercises.extend(isolation_exercises[:remaining])
+            filtered = [ex for ex in available if ex.mechanic == 'compound']
         else:
-            # تمرکز روی تمرینات ایزوله برای عضلات ثانویه
-            exercises.extend(isolation_exercises[:count])
-            
-        return [self._create_exercise_entry(ex, is_primary) for ex in exercises]
+            filtered = [ex for ex in available if ex.mechanic == 'isolation']
+        return filtered[:count]
         
-    def _apply_advanced_techniques(self, exercises: List[Dict], 
-                                 available_techniques: List[str]) -> List[Dict]:
+    def _apply_advanced_techniques(self, exercises: List[Exercise], 
+                                 available_techniques: List[str]) -> List[Exercise]:
         """اعمال تکنیک‌های پیشرفته"""
         if not exercises:
             return exercises
@@ -269,8 +253,8 @@ class BroSplitStrategy(SplitStrategy):
         for i in range(len(exercises)):
             if random.random() < 0.3:  # 30% شانس اعمال تکنیک
                 technique = random.choice(allowed_techniques)
-                exercises[i]['technique'] = technique
-                exercises[i]['technique_notes'] = self._get_technique_notes(technique)
+                exercises[i].technique = technique
+                exercises[i].technique_notes = self._get_technique_notes(technique)
                 
         return exercises
         
@@ -287,33 +271,28 @@ class BroSplitStrategy(SplitStrategy):
         }
         return notes.get(technique, '')
         
-    def _adjust_exercise_volume(self, exercises: List[Dict], 
-                              multiplier: float) -> List[Dict]:
+    def _adjust_exercise_volume(self, exercises: List[Exercise], multiplier: float) -> List[Exercise]:
         """تنظیم حجم تمرینات"""
         for exercise in exercises:
+            muscle_group = (exercise.primary_muscles[0] if exercise.primary_muscles else
+                            (exercise.secondary_muscles[0] if exercise.secondary_muscles else 'full_body'))
             base_volume = self.volume_manager.adjust_volume(
-                exercise['muscle_group'],
+                muscle_group,
                 self.current_week
             )
-            
             # تنظیم حجم بر اساس ضریب
             adjusted_sets = math.ceil(base_volume['sets'] * multiplier)
-            
             # تنظیم بر اساس تیپ بدنی
             if self.user.body_type == 'ectomorph':
                 adjusted_sets = max(3, adjusted_sets - 1)
             elif self.user.body_type == 'mesomorph':
                 adjusted_sets = min(8, adjusted_sets + 1)
-                
-            exercise.update({
-                'sets': adjusted_sets,
-                'reps': base_volume['reps'],
-                'volume_multiplier': multiplier
-            })
-            
+            exercise.sets = adjusted_sets
+            exercise.reps = base_volume['reps']
+            exercise.volume_multiplier = multiplier
         return exercises
         
-    def _build_hybrid_day(self, week: int) -> List[Dict]:
+    def _build_hybrid_day(self, week: int) -> List[Exercise]:
         """ساخت روزهای ترکیبی پیشرفته"""
         focus_areas = self._determine_hybrid_focus()
         exercises = []
@@ -359,43 +338,26 @@ class BroSplitStrategy(SplitStrategy):
         focus_areas.sort(key=lambda x: x['priority'])
         return focus_areas
         
-    def _build_weak_point_exercises(self, muscles: List[str], week: int) -> List[Dict]:
-        """ساخت تمرینات برای نقاط ضعف"""
+    def _build_weak_point_exercises(self, muscles: List[str], week: int) -> List[Exercise]:
         exercises = []
         for muscle in muscles:
-            # تمرینات ترکیبی
-            compound_exercises = self.exercise_selector.get_exercises(
-                [muscle],
-                week,
-                mechanic='compound'
-            )
-            
-            # تمرینات ایزوله
-            isolation_exercises = self.exercise_selector.get_exercises(
-                [muscle],
-                week,
-                mechanic='isolation'
-            )
-            
-            # ترکیب تمرینات
-            exercises.extend(compound_exercises[:1])
-            exercises.extend(isolation_exercises[:2])
-            
-        return [self._create_exercise_entry(ex, True) for ex in exercises]
+            available = self.exercise_selector.get_exercises([muscle], week)['main']
+            compound = [ex for ex in available if ex.mechanic == 'compound']
+            isolation = [ex for ex in available if ex.mechanic == 'isolation']
+            exercises.extend(compound[:1])
+            exercises.extend(isolation[:2])
+        return exercises
         
-    def _build_core_exercises(self, week: int) -> List[Dict]:
-        """ساخت تمرینات مرکزی"""
+    def _build_core_exercises(self, week: int) -> List[Exercise]:
         core_muscles = ['abs', 'obliques', 'lower_back']
         exercises = []
-        
         for muscle in core_muscles:
-            available = self.exercise_selector.get_exercises([muscle], week)
+            available = self.exercise_selector.get_exercises([muscle], week)['main']
             if available:
                 exercises.extend(available[:2])
-                
-        return [self._create_exercise_entry(ex, False) for ex in exercises]
+        return exercises
         
-    def _build_cardio_protocol(self) -> List[Dict]:
+    def _build_cardio_protocol(self) -> List[Exercise]:
         """ساخت پروتکل کاردیو"""
         if self.user.goal == 'weight_loss':
             return [{
@@ -418,43 +380,29 @@ class BroSplitStrategy(SplitStrategy):
                 'notes': 'Maintain heart rate at 60-70% of max'
             }]
             
-    def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> Dict:
-        """ساخت ورودی استاندارد برای تمرین با جزئیات بیشتر"""
+    def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> dict:
+        if isinstance(exercise, dict):
+            raise TypeError('Only Exercise model instances are allowed, not dict')
+        muscles = exercise.primary_muscles if is_primary else exercise.secondary_muscles
+        muscle_group = muscles[0] if muscles else 'full_body'
         return {
             'exercise_id': exercise.id,
             'exercise_name': exercise.name,
             'type': 'compound' if is_primary else 'isolation',
-            'muscle_group': exercise.primary_muscles[0],
-            'secondary_muscles': exercise.secondary_muscles,
+            'muscle_group': muscle_group,
+            'secondary_muscles': exercise.secondary_muscles if not is_primary else [],
             'mechanic': exercise.mechanic,
             'equipment': exercise.equipment,
-            'difficulty': exercise.difficulty,
-            'sets': self._get_default_sets(is_primary),
-            'reps': self._get_default_reps(),
+            'difficulty': getattr(exercise, 'difficulty', ''),
+            'sets': getattr(exercise, 'sets', 4) if is_primary else 3,
+            'reps': getattr(exercise, 'reps', '8-12'),
             'rest_seconds': self._calculate_rest_time(exercise, is_primary),
-            'technique': None,
-            'technique_notes': None,
+            'technique': getattr(exercise, 'technique', None),
+            'technique_notes': getattr(exercise, 'technique_notes', None),
             'notes': self._generate_exercise_notes(exercise, is_primary),
             'progression': self._get_progression_notes(),
             'alternatives': self.get_exercise_alternatives(exercise)
         }
-        
-    def _get_default_sets(self, is_primary: bool) -> int:
-        """دریافت تعداد ست‌های پیش‌فرض"""
-        base_sets = 4 if is_primary else 3
-        
-        # تنظیم بر اساس سطح تجربه
-        if self.settings.experience_level == 'beginner':
-            base_sets = max(3, base_sets - 1)
-        elif self.settings.experience_level == 'expert':
-            base_sets = min(6, base_sets + 1)
-            
-        return base_sets
-        
-    def _get_default_reps(self) -> str:
-        """دریافت تعداد تکرارهای پیش‌فرض"""
-        ranges = self.REP_RANGES.get(self.user.goal, {'min': 8, 'max': 12})
-        return f"{ranges['min']}-{ranges['max']}"
         
     def _get_progression_notes(self) -> str:
         """دریافت نکات پیشرفت"""
