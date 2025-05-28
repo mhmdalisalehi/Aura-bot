@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
 %% === Utility Functions ===
 subgraph "workout_utils.py"
@@ -263,3 +264,4 @@ end
     classDef class fill:#bbf,stroke:#333,stroke-width:1px
     classDef method fill:#fff,stroke:#333,stroke-width:1px
     class WU_calculate_rest_time,WU_calculate_intensity,WU_convert_persian_to_english_weekday,WU_get_next_training_day,WU_convert_day_to_date,WU_get_muscle_groups_for_split,WU_get_exercise_notes,DC_convert_persian_to_english_weekday,DC_convert_day_to_date,DC_get_next_training_day util
+```
