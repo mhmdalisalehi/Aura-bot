@@ -4,6 +4,7 @@ from accounts.models import UserProfile, TrainingSettings
 from exercises.models import Exercise
 from ..workout_validator import WorkoutValidator
 import logging
+import math
 
 class SplitStrategy:
     """
@@ -325,3 +326,37 @@ class SplitStrategy:
             if self._check_recovery_for_day(day, primary_muscles):
                 return day
         return available_days[0]  # fallback if none found
+    
+    def _get_warmup(self, split_type: str, warmup_map: dict) -> list:
+        """Generic warmup getter for a split type using a provided mapping."""
+        return warmup_map.get(split_type, [])
+
+    def _get_cooldown(self, split_type: str, cooldown_map: dict) -> list:
+        """Generic cooldown getter for a split type using a provided mapping."""
+        return cooldown_map.get(split_type, [])
+
+    def _add_warmup_cooldown(self, program: Dict, warmup_map: dict, cooldown_map: dict, day_sequence: list):
+        """Add warmup and cooldown to each session using provided mappings and sequence."""
+        for idx, (day, exercises) in enumerate(program['weekly_plan'].items()):
+            split_type = day_sequence[idx % len(day_sequence)]
+            warmup = self._get_warmup(split_type, warmup_map)
+            cooldown = self._get_cooldown(split_type, cooldown_map)
+            program['weekly_plan'][day] = warmup + exercises + cooldown
+
+    def _validate_volume(self, program: Dict):
+        """Validate total program volume and auto-adjust if needed."""
+        total_volume = sum(self.volume_manager.muscle_volume.values())
+        volume_range = self.volume_manager.VOLUME_TARGETS[self.user.goal][self.settings.experience_level]
+        target = (volume_range[0] + volume_range[1]) / 2
+        if total_volume < target * 0.8:
+            self._adjust_program(program, increase=True)
+        elif total_volume > target * 1.2:
+            self._adjust_program(program, increase=False)
+
+    def _adjust_program(self, program: Dict, increase: bool):
+        """Adjust all sets in the program up or down by 10%."""
+        adjustment_factor = 1.1 if increase else 0.9
+        for day in program['weekly_plan']:
+            for exercise in program['weekly_plan'][day]:
+                if isinstance(exercise, dict) and 'sets' in exercise:
+                    exercise['sets'] = math.ceil(exercise['sets'] * adjustment_factor)

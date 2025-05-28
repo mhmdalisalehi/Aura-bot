@@ -12,49 +12,18 @@ from .workout_utils import (
     get_exercise_notes
 )
 from .workout_validator import WorkoutValidator
+from .base_manager import BaseWorkoutManager
 
-class WorkoutGenerator:
+class WorkoutGenerator(BaseWorkoutManager):
     def __init__(self, user: UserProfile, settings: TrainingSettings):
-        self.user = user
-        self.settings = settings
-        self._initialize_managers()
-        self._validate_managers()
+        super().__init__(user, settings)
         
-    def _initialize_managers(self):
-        """مقداردهی اولیه مدیران با مدیریت خطا"""
-        try:
-            self.exercise_selector = ExerciseSelector(self.user, self.settings)
-            self.volume_manager = WorkoutVolumeManager(self.user, self.settings)
-            self.recovery_manager = RecoveryManager(self.user, self.settings)
-            self.mobility_manager = MobilityManager(self.user, self.settings)
-            self.validator = WorkoutValidator(self.user, self.settings)
-            
-            # تنظیم مدیران در validator
-            self.validator.set_managers(
-                self.volume_manager,
-                self.recovery_manager,
-                self.mobility_manager,
-                self.exercise_selector
-            )
-        except Exception as e:
-            raise ValueError(f"Error in initializing managers: {str(e)}")
-            
-    def _validate_managers(self):
-        """اعتبارسنجی مدیران"""
-        if not all([
-            self.exercise_selector,
-            self.volume_manager,
-            self.recovery_manager,
-            self.mobility_manager,
-            self.validator
-        ]):
-            raise ValueError("Some managers are not initialized")
-            
     def generate_workout(self, target_muscles: List[str], week: int) -> Dict:
-        """تولید یک جلسه تمرین با مدیریت خطا و همگام‌سازی"""
+        print(f"[DEBUG] Generating workout for muscles: {target_muscles}, week: {week}")
         try:
             # بررسی امکان تمرین
             if not self.recovery_manager.can_train(target_muscles, datetime.now()):
+                print(f"[ERROR] Target muscles {target_muscles} need rest.")
                 raise ValueError("Target muscles need rest")
                 
             # دریافت تمرینات مناسب
@@ -64,7 +33,7 @@ class WorkoutGenerator:
                 include_warmup=True,
                 include_cooldown=True
             )
-            
+            print(f"[DEBUG] Selected exercises: {exercises}")
             # تولید برنامه تمرین
             workout = {
                 'date': datetime.now().strftime('%Y-%m-%d'),
@@ -75,6 +44,7 @@ class WorkoutGenerator:
             # اضافه کردن تمرینات با همگام‌سازی
             for exercise_tuple in exercises.get('main', []):
                 exercise = exercise_tuple[0] if isinstance(exercise_tuple, tuple) else exercise_tuple
+                print(f"[DEBUG] Preparing exercise data for: {getattr(exercise, 'name', str(exercise))}")
                 exercise_data = self._prepare_exercise_data(exercise, week)
                 workout['exercises'].append(exercise_data)
                 if hasattr(exercise, 'id'):
@@ -91,23 +61,26 @@ class WorkoutGenerator:
             
             # اعتبارسنجی برنامه
             is_valid, errors = self.validator.validate_workout(workout)
+            print(f"[DEBUG] Workout validation result: {is_valid}, errors: {errors}")
             if not is_valid:
+                print(f"[ERROR] Workout is not valid: {errors}")
                 raise ValueError(f"Workout is not valid: {', '.join(errors)}")
-                
+            print(f"[DEBUG] Generated workout: {workout}")
             return workout
             
         except Exception as e:
+            print(f"[ERROR] Exception in generate_workout: {str(e)}")
             raise ValueError(f"Error in generating workout: {str(e)}")
             
     def _prepare_exercise_data(self, exercise: Exercise, week: int) -> Dict:
-        """آماده‌سازی داده‌های تمرین با همگام‌سازی"""
+        print(f"[DEBUG] _prepare_exercise_data for: {getattr(exercise, 'name', str(exercise))}, week: {week}")
         try:
             # تنظیم حجم تمرین
             volume = self.volume_manager.adjust_volume(
                 exercise.primary_muscles[0],
                 week
             )
-            
+            print(f"[DEBUG] Volume for {exercise.name}: {volume}")
             # محاسبه زمان استراحت
             rest_time = calculate_rest_time(exercise, self.settings.experience_level)
             
@@ -116,7 +89,7 @@ class WorkoutGenerator:
             
             # دریافت نکات
             notes = get_exercise_notes(exercise, self.settings.experience_level)
-            
+            print(f"[DEBUG] rest_time: {rest_time}, intensity: {intensity}, notes: {notes}")
             return {
                 'exercise_id': exercise.id,
                 'exercise_name': exercise.name,
@@ -129,6 +102,7 @@ class WorkoutGenerator:
                 'notes': notes
             }
         except Exception as e:
+            print(f"[ERROR] Exception in _prepare_exercise_data: {str(e)}")
             raise ValueError(f"Error in preparing exercise data: {str(e)}")
             
     def _format_mobility_exercises(self, exercises: List, exercise_type: str) -> List[Dict]:
@@ -199,4 +173,4 @@ class WorkoutGenerator:
             # جابجایی تمرینات
             workout['exercises'] = [
                 workout['exercises'][i] for i in feedback['new_sequence']
-            ] 
+            ]

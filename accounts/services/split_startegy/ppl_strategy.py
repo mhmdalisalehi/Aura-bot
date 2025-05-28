@@ -7,9 +7,10 @@ from accounts.services.split_startegy.base import SplitStrategy
 from accounts.models import Exercise, UserProfile, TrainingSettings
 from accounts.services.recovery_manager import RecoveryManager
 from accounts.services.volume_manager import WorkoutVolumeManager
-from accounts.services.exercise_selector import ExerciseSelector
+from accounts.services.exercise_selector import ExerciseSelector, map_muscle_names
 from accounts.services.mobility_manager import MobilityManager
 from accounts.services.date_converter import convert_day_to_date
+from accounts.services.workout_utils import get_progression_notes, get_exercise_notes, calculate_rest_time
 
 current_date = datetime.now()
 
@@ -65,22 +66,78 @@ class PushPullLegsSplitStrategy(SplitStrategy):
                   'pyramids', 'negatives', 'forced_reps', 'cluster_sets']
     }
     
+    # Warmup and cooldown mappings for DRY base usage
+    WARMUP_MAP = {
+        'push': [{
+            'type': 'mobility',
+            'content': [
+                {'name': 'Band Shoulder Dislocates', 'sets': 2, 'reps': '10-12'},
+                {'name': 'Scapular Wall Slides', 'sets': 2, 'reps': '12-15'},
+                {'name': 'Dynamic Chest Stretch', 'sets': 2, 'duration': '30s'}
+            ],
+            'notes': 'Focus on shoulder mobility and chest activation'
+        }],
+        'pull': [{
+            'type': 'mobility',
+            'content': [
+                {'name': 'Band Pull-Aparts', 'sets': 2, 'reps': '15-20'},
+                {'name': 'Cat-Cow Stretch', 'sets': 2, 'reps': '10-12'},
+                {'name': 'Lat Stretch', 'sets': 2, 'duration': '30s'}
+            ],
+            'notes': 'Focus on upper back mobility and lat activation'
+        }],
+        'legs': [{
+            'type': 'mobility',
+            'content': [
+                {'name': 'Hip Circle Walks', 'sets': 2, 'reps': '10 each direction'},
+                {'name': 'Bodyweight Squats with Pause', 'sets': 2, 'reps': '12-15'},
+                {'name': 'Dynamic Hamstring Stretch', 'sets': 2, 'duration': '30s'}
+            ],
+            'notes': 'Focus on hip mobility and leg activation'
+        }]
+    }
+    COOLDOWN_MAP = {
+        'push': [{
+            'type': 'cooldown',
+            'content': [
+                {'name': 'Chest Stretch', 'duration': '60s', 'notes': 'Focus on pec minor'},
+                {'name': 'Shoulder Stretch', 'duration': '45s each side', 'notes': 'Include internal rotation'},
+                {'name': 'Foam Roll Upper Back', 'duration': '90s', 'notes': 'Focus on tight spots'}
+            ],
+            'notes': 'Emphasize chest and shoulder recovery'
+        }],
+        'pull': [{
+            'type': 'cooldown',
+            'content': [
+                {'name': 'Lat Stretch', 'duration': '60s each side', 'notes': 'Include overhead reach'},
+                {'name': 'Biceps Stretch', 'duration': '45s each arm', 'notes': 'Include shoulder extension'},
+                {'name': 'Foam Roll Upper Back', 'duration': '90s', 'notes': 'Focus on rhomboids'}
+            ],
+            'notes': 'Emphasize back and biceps recovery'
+        }],
+        'legs': [{
+            'type': 'cooldown',
+            'content': [
+                {'name': 'Quad Stretch', 'duration': '60s each leg', 'notes': 'Include hip flexor'},
+                {'name': 'Hamstring Stretch', 'duration': '45s each leg', 'notes': 'Include sciatic nerve glides'},
+                {'name': 'Foam Roll Calves', 'duration': '90s each leg', 'notes': 'Focus on medial head'}
+            ],
+            'notes': 'Emphasize leg recovery and mobility'
+        }]
+    }
+
     def generate(self, week: int) -> Dict:
         program = {'weekly_plan': {}}
         sequence_idx = 0
-        
         for day in self.settings.training_days:
             if sequence_idx >= len(self.DAY_SEQUENCE):
                 sequence_idx = 0
-                
             split_type = self.DAY_SEQUENCE[sequence_idx]
             program['weekly_plan'][day] = self._build_day_plan(split_type, week)
             sequence_idx += 1
-            
         self._validate_split_schedule(program)
-        self._add_warmup_cooldown(program)
+        self._add_warmup_cooldown(program, self.WARMUP_MAP, self.COOLDOWN_MAP, self.DAY_SEQUENCE)
         self._validate_volume(program)
-        
         # تبدیل کلیدها به تاریخ
         dated_program = {}
         base_date = datetime.now()
@@ -150,7 +207,7 @@ class PushPullLegsSplitStrategy(SplitStrategy):
         return base_counts
     
     def _build_muscle_exercises(self, muscle: str, count: int, week: int, is_primary: bool) -> List[Exercise]:
-        available = self.exercise_selector.get_exercises([muscle], week)['main']
+        available = self.exercise_selector.get_exercises(map_muscle_names([muscle]), week)['main']
         if is_primary:
             filtered = [ex for ex in available if ex.mechanic == 'compound']
         else:
@@ -161,7 +218,7 @@ class PushPullLegsSplitStrategy(SplitStrategy):
         exercises = []
         for area in focus_areas:
             if random.random() < 0.6:
-                available = self.exercise_selector.get_exercises([area], week)['main']
+                available = self.exercise_selector.get_exercises(map_muscle_names([area]), week)['main']
                 filtered = [ex for ex in available if ex.mechanic == 'isolation']
                 if filtered:
                     exercises.extend(filtered[:1])
@@ -226,72 +283,6 @@ class PushPullLegsSplitStrategy(SplitStrategy):
             exercise.volume_multiplier = multiplier
         return exercises
         
-    def _get_warmup(self, split_type: str) -> List[Exercise]:
-        """انتخاب گرم کردن اختصاصی برای هر نوع جلسه"""
-        warmups = {
-            'push': [{
-                'type': 'mobility',
-                'content': [
-                    {'name': 'Band Shoulder Dislocates', 'sets': 2, 'reps': '10-12'},
-                    {'name': 'Scapular Wall Slides', 'sets': 2, 'reps': '12-15'},
-                    {'name': 'Dynamic Chest Stretch', 'sets': 2, 'duration': '30s'}
-                ],
-                'notes': 'Focus on shoulder mobility and chest activation'
-            }],
-            'pull': [{
-                'type': 'mobility',
-                'content': [
-                    {'name': 'Band Pull-Aparts', 'sets': 2, 'reps': '15-20'},
-                    {'name': 'Cat-Cow Stretch', 'sets': 2, 'reps': '10-12'},
-                    {'name': 'Lat Stretch', 'sets': 2, 'duration': '30s'}
-                ],
-                'notes': 'Focus on upper back mobility and lat activation'
-            }],
-            'legs': [{
-                'type': 'mobility',
-                'content': [
-                    {'name': 'Hip Circle Walks', 'sets': 2, 'reps': '10 each direction'},
-                    {'name': 'Bodyweight Squats with Pause', 'sets': 2, 'reps': '12-15'},
-                    {'name': 'Dynamic Hamstring Stretch', 'sets': 2, 'duration': '30s'}
-                ],
-                'notes': 'Focus on hip mobility and leg activation'
-            }]
-        }
-        return warmups.get(split_type, [])
-        
-    def _get_cooldown(self, split_type: str) -> List[Exercise]:
-        """انتخاب سرد کردن اختصاصی برای هر نوع جلسه"""
-        cooldowns = {
-            'push': [{
-                'type': 'cooldown',
-                'content': [
-                    {'name': 'Chest Stretch', 'duration': '60s', 'notes': 'Focus on pec minor'},
-                    {'name': 'Shoulder Stretch', 'duration': '45s each side', 'notes': 'Include internal rotation'},
-                    {'name': 'Foam Roll Upper Back', 'duration': '90s', 'notes': 'Focus on tight spots'}
-                ],
-                'notes': 'Emphasize chest and shoulder recovery'
-            }],
-            'pull': [{
-                'type': 'cooldown',
-                'content': [
-                    {'name': 'Lat Stretch', 'duration': '60s each side', 'notes': 'Include overhead reach'},
-                    {'name': 'Biceps Stretch', 'duration': '45s each arm', 'notes': 'Include shoulder extension'},
-                    {'name': 'Foam Roll Upper Back', 'duration': '90s', 'notes': 'Focus on rhomboids'}
-                ],
-                'notes': 'Emphasize back and biceps recovery'
-            }],
-            'legs': [{
-                'type': 'cooldown',
-                'content': [
-                    {'name': 'Quad Stretch', 'duration': '60s each leg', 'notes': 'Include hip flexor'},
-                    {'name': 'Hamstring Stretch', 'duration': '45s each leg', 'notes': 'Include sciatic nerve glides'},
-                    {'name': 'Foam Roll Calves', 'duration': '90s each leg', 'notes': 'Focus on medial head'}
-                ],
-                'notes': 'Emphasize leg recovery and mobility'
-            }]
-        }
-        return cooldowns.get(split_type, [])
-        
     def _validate_split_schedule(self, program: Dict):
         # اطمینان از توالی مناسب بین جلسات
         trained_muscles = defaultdict(list)
@@ -309,12 +300,12 @@ class PushPullLegsSplitStrategy(SplitStrategy):
                 if (days[i] - days[i-1]).days < min_recovery:
                     self._adjust_exercise_scheduling(program, muscle)
 
-    def _add_warmup_cooldown(self, program: Dict):
-        """افزودن گرم کردن و سرد کردن متناسب برای هر جلسه"""
+    def _add_warmup_cooldown(self, program: Dict, warmup_map: Dict, cooldown_map: Dict, day_sequence: List[str]):
+        """افزودن گرم کردن و سرد کردن متناسب برای هر جلسه با استفاده از نگاشت‌های DRY"""
         for day, exercises in program['weekly_plan'].items():
-            split_type = self.DAY_SEQUENCE[list(program['weekly_plan'].keys()).index(day) % len(self.DAY_SEQUENCE)]
-            warmup = self._get_warmup(split_type)
-            cooldown = self._get_cooldown(split_type)
+            split_type = day_sequence[list(program['weekly_plan'].keys()).index(day) % len(day_sequence)]
+            warmup = warmup_map.get(split_type, [])
+            cooldown = cooldown_map.get(split_type, [])
             program['weekly_plan'][day] = warmup + exercises + cooldown
 
     def _validate_volume(self, program: Dict):
@@ -353,3 +344,29 @@ class PushPullLegsSplitStrategy(SplitStrategy):
         بعداً باید منطق کامل اضافه شود.
         """
         pass
+    
+    def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> dict:
+        if isinstance(exercise, dict):
+            print('[ERROR] Only Exercise model instances are allowed, not dict')
+            raise TypeError('Only Exercise model instances are allowed, not dict')
+        muscles = exercise.primary_muscles if is_primary else exercise.secondary_muscles
+        muscle_group = muscles[0] if muscles else 'full_body'
+        print(f'[DEBUG] Creating exercise entry for {exercise.name} (primary={is_primary})')
+        return {
+            'exercise_id': exercise.id,
+            'exercise_name': exercise.name,
+            'type': 'compound' if is_primary else 'isolation',
+            'muscle_group': muscle_group,
+            'secondary_muscles': exercise.secondary_muscles if not is_primary else [],
+            'mechanic': exercise.mechanic,
+            'equipment': exercise.equipment,
+            'difficulty': getattr(exercise, 'difficulty', ''),
+            'sets': getattr(exercise, 'sets', 4) if is_primary else getattr(exercise, 'sets', 3),
+            'reps': getattr(exercise, 'reps', '8-12'),
+            'rest_seconds': calculate_rest_time(exercise.mechanic, 0.7),
+            'technique': getattr(exercise, 'technique', None),
+            'technique_notes': getattr(exercise, 'technique_notes', None),
+            'notes': get_exercise_notes(self.settings.experience_level, is_primary),
+            'progression': get_progression_notes(self.settings.experience_level),
+            'alternatives': self.get_exercise_alternatives(exercise)
+        }

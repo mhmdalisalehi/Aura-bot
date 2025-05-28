@@ -5,10 +5,11 @@ from accounts.services.split_startegy.base import SplitStrategy
 from accounts.models import Exercise, UserProfile, TrainingSettings
 from accounts.services.recovery_manager import RecoveryManager
 from accounts.services.volume_manager import WorkoutVolumeManager
-from accounts.services.exercise_selector import ExerciseSelector
+from accounts.services.exercise_selector import ExerciseSelector, map_muscle_names
 from accounts.services.mobility_manager import MobilityManager
 from datetime import datetime
 from accounts.services.date_converter import convert_day_to_date
+from accounts.services.workout_utils import get_progression_notes, get_exercise_notes, calculate_rest_time
 
 current_date = datetime.now()
 
@@ -82,6 +83,26 @@ class BroSplitStrategy(SplitStrategy):
                   'pyramids', 'negatives', 'forced_reps']
     }
     
+    # Warmup and cooldown mappings for DRY base usage
+    WARMUP_MAP = {
+        'chest': [],
+        'back': [],
+        'legs': [],
+        'shoulders': [],
+        'arms': [],
+        'core': []
+        # Fill with actual warmup dicts if needed
+    }
+    COOLDOWN_MAP = {
+        'chest': [],
+        'back': [],
+        'legs': [],
+        'shoulders': [],
+        'arms': [],
+        'core': []
+        # Fill with actual cooldown dicts if needed
+    }
+
     def _generate_base_program(self, week: int) -> Dict:
         """
         تولید برنامه پایه با ویژگی‌های حرفه‌ای
@@ -123,6 +144,15 @@ class BroSplitStrategy(SplitStrategy):
             dated_program[training_date.strftime('%Y-%m-%d')] = exercises
         return dated_program
         
+    def generate(self, week: int) -> Dict:
+        self.current_week = week
+        program = {'weekly_plan': {}}
+        base_program = self._generate_base_program(week)
+        program['weekly_plan'] = base_program
+        self._add_warmup_cooldown(program, self.WARMUP_MAP, self.COOLDOWN_MAP, self.DAY_PRIORITY)
+        self._validate_volume(program)
+        return program
+
     def _prioritize_days_by_recovery(self, available_days: List[str]) -> List[str]:
         """اولویت‌بندی روزها بر اساس ریکاوری"""
         prioritized = []
@@ -227,7 +257,7 @@ class BroSplitStrategy(SplitStrategy):
         return base_counts
         
     def _build_muscle_exercises(self, muscle: str, count: int, week: int, is_primary: bool) -> List[Exercise]:
-        available = self.exercise_selector.get_exercises([muscle], week)['main']
+        available = self.exercise_selector.get_exercises(map_muscle_names([muscle]), week)['main']
         if is_primary:
             filtered = [ex for ex in available if ex.mechanic == 'compound']
         else:
@@ -341,7 +371,7 @@ class BroSplitStrategy(SplitStrategy):
     def _build_weak_point_exercises(self, muscles: List[str], week: int) -> List[Exercise]:
         exercises = []
         for muscle in muscles:
-            available = self.exercise_selector.get_exercises([muscle], week)['main']
+            available = self.exercise_selector.get_exercises(map_muscle_names([muscle]), week)['main']
             compound = [ex for ex in available if ex.mechanic == 'compound']
             isolation = [ex for ex in available if ex.mechanic == 'isolation']
             exercises.extend(compound[:1])
@@ -352,7 +382,7 @@ class BroSplitStrategy(SplitStrategy):
         core_muscles = ['abs', 'obliques', 'lower_back']
         exercises = []
         for muscle in core_muscles:
-            available = self.exercise_selector.get_exercises([muscle], week)['main']
+            available = self.exercise_selector.get_exercises(map_muscle_names([muscle]), week)['main']
             if available:
                 exercises.extend(available[:2])
         return exercises
@@ -382,9 +412,11 @@ class BroSplitStrategy(SplitStrategy):
             
     def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> dict:
         if isinstance(exercise, dict):
+            print('[ERROR] Only Exercise model instances are allowed, not dict')
             raise TypeError('Only Exercise model instances are allowed, not dict')
         muscles = exercise.primary_muscles if is_primary else exercise.secondary_muscles
         muscle_group = muscles[0] if muscles else 'full_body'
+        print(f'[DEBUG] Creating exercise entry for {exercise.name} (primary={is_primary})')
         return {
             'exercise_id': exercise.id,
             'exercise_name': exercise.name,
@@ -394,21 +426,12 @@ class BroSplitStrategy(SplitStrategy):
             'mechanic': exercise.mechanic,
             'equipment': exercise.equipment,
             'difficulty': getattr(exercise, 'difficulty', ''),
-            'sets': getattr(exercise, 'sets', 4) if is_primary else 3,
+            'sets': getattr(exercise, 'sets', 4) if is_primary else getattr(exercise, 'sets', 3),
             'reps': getattr(exercise, 'reps', '8-12'),
-            'rest_seconds': self._calculate_rest_time(exercise, is_primary),
+            'rest_seconds': calculate_rest_time(exercise.mechanic, 0.7),
             'technique': getattr(exercise, 'technique', None),
             'technique_notes': getattr(exercise, 'technique_notes', None),
-            'notes': self._generate_exercise_notes(exercise, is_primary),
-            'progression': self._get_progression_notes(),
+            'notes': get_exercise_notes(self.settings.experience_level, is_primary),
+            'progression': get_progression_notes(self.settings.experience_level),
             'alternatives': self.get_exercise_alternatives(exercise)
         }
-        
-    def _get_progression_notes(self) -> str:
-        """دریافت نکات پیشرفت"""
-        if self.settings.experience_level == 'beginner':
-            return "Focus on form and technique. Increase weight when 12 reps become easy."
-        elif self.settings.experience_level == 'intermediate':
-            return "Progressive overload: Increase weight or reps each week."
-        else:
-            return "Advanced progression: Use various techniques and periodization."

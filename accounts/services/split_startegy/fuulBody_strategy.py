@@ -7,9 +7,10 @@ from accounts.services.split_startegy.base import SplitStrategy
 from accounts.models import Exercise, UserProfile, TrainingSettings
 from accounts.services.recovery_manager import RecoveryManager
 from accounts.services.volume_manager import WorkoutVolumeManager
-from accounts.services.exercise_selector import ExerciseSelector
+from accounts.services.exercise_selector import ExerciseSelector, map_muscle_names
 from accounts.services.mobility_manager import MobilityManager
 from accounts.services.date_converter import convert_day_to_date
+from accounts.services.workout_utils import get_progression_notes, get_exercise_notes, calculate_rest_time
 
 current_date = datetime.now()
 
@@ -63,17 +64,43 @@ class FullBodySplitStrategy(SplitStrategy):
                   'pyramids', 'rest_pause', 'cluster_sets', 'complexes']
     }
     
+    # Warmup and cooldown mappings for DRY base usage
+    WARMUP_MAP = {
+        'full_body': [{
+            'type': 'mobility',
+            'content': [
+                {'name': 'Dynamic Full Body Warmup', 'sets': 1, 'duration': '5-10min'},
+                {'name': 'Joint Mobility', 'sets': 1, 'duration': '3-5min'},
+                {'name': 'Light Cardio', 'sets': 1, 'duration': '5min'},
+                {'name': 'Bodyweight Squats', 'sets': 2, 'reps': '10-12'},
+                {'name': 'Push-ups', 'sets': 2, 'reps': '8-10'},
+                {'name': 'Pull-ups/Assisted Pull-ups', 'sets': 2, 'reps': '5-8'}
+            ],
+            'notes': 'Focus on full body activation and mobility'
+        }]
+    }
+    COOLDOWN_MAP = {
+        'full_body': [{
+            'type': 'cooldown',
+            'content': [
+                {'name': 'Full Body Stretch', 'duration': '5-10min', 'notes': 'Include all major muscle groups'},
+                {'name': 'Foam Rolling', 'duration': '5-10min', 'notes': 'Focus on tight areas'},
+                {'name': 'Deep Breathing', 'duration': '2-3min', 'notes': 'Calm down and relax'},
+                {'name': 'Light Walking', 'duration': '5min', 'notes': 'Active recovery'}
+            ],
+            'notes': 'Emphasize full body recovery and flexibility'
+        }]
+    }
+    DAY_SEQUENCE = ['full_body']
+
     def generate(self, week: int) -> Dict:
-        """تولید برنامه تمرینی با ویژگی‌های حرفه‌ای"""
         program = {'weekly_plan': {}}
-        
         for day in self.settings.training_days.keys():
             program['weekly_plan'][day] = self._build_fullbody_day(week)
             self._validate_day_plan(program['weekly_plan'][day])
-            
         self._balance_volume_across_days(program)
-        self._add_warmup_cooldown(program)
-        
+        self._add_warmup_cooldown(program, self.WARMUP_MAP, self.COOLDOWN_MAP, self.DAY_SEQUENCE)
+        self._validate_volume(program)
         # تبدیل کلیدها به تاریخ
         dated_program = {}
         base_date = datetime.now()
@@ -117,9 +144,6 @@ class FullBodySplitStrategy(SplitStrategy):
         # تنظیم حجم و شدت
         exercises = self._adjust_exercise_volume(exercises)
         
-        # اضافه کردن گرم کردن و سرد کردن
-        exercises = self._get_warmup() + exercises + self._get_cooldown()
-        
         return exercises
         
     def _get_exercise_counts(self) -> Dict[str, int]:
@@ -140,7 +164,7 @@ class FullBodySplitStrategy(SplitStrategy):
         
     def _build_priority_exercises(self, muscle: str, priority_exercises: List[str], count: int, week: int, is_primary: bool) -> List[Exercise]:
         exercises = []
-        available = self.exercise_selector.get_exercises([muscle], week)['main']
+        available = self.exercise_selector.get_exercises(map_muscle_names([muscle]), week)['main']
         for exercise_name in priority_exercises:
             if len(exercises) >= count:
                 break
@@ -158,7 +182,7 @@ class FullBodySplitStrategy(SplitStrategy):
         return exercises
         
     def _build_muscle_exercises(self, muscle: str, count: int, week: int, is_primary: bool) -> List[Exercise]:
-        available = self.exercise_selector.get_exercises([muscle], week)['main']
+        available = self.exercise_selector.get_exercises(map_muscle_names([muscle]), week)['main']
         if is_primary:
             filtered = [ex for ex in available if ex.mechanic == 'compound']
         else:
@@ -223,34 +247,6 @@ class FullBodySplitStrategy(SplitStrategy):
             exercise.reps = base_volume['reps']
             exercise.volume_multiplier = multiplier
         return exercises
-        
-    def _get_warmup(self) -> List[Exercise]:
-        """انتخاب گرم کردن اختصاصی برای تمرین تمام بدن"""
-        return [{
-            'type': 'mobility',
-            'content': [
-                {'name': 'Dynamic Full Body Warmup', 'sets': 1, 'duration': '5-10min'},
-                {'name': 'Joint Mobility', 'sets': 1, 'duration': '3-5min'},
-                {'name': 'Light Cardio', 'sets': 1, 'duration': '5min'},
-                {'name': 'Bodyweight Squats', 'sets': 2, 'reps': '10-12'},
-                {'name': 'Push-ups', 'sets': 2, 'reps': '8-10'},
-                {'name': 'Pull-ups/Assisted Pull-ups', 'sets': 2, 'reps': '5-8'}
-            ],
-            'notes': 'Focus on full body activation and mobility'
-        }]
-        
-    def _get_cooldown(self) -> List[Exercise]:
-        """انتخاب سرد کردن اختصاصی برای تمرین تمام بدن"""
-        return [{
-            'type': 'cooldown',
-            'content': [
-                {'name': 'Full Body Stretch', 'duration': '5-10min', 'notes': 'Include all major muscle groups'},
-                {'name': 'Foam Rolling', 'duration': '5-10min', 'notes': 'Focus on tight areas'},
-                {'name': 'Deep Breathing', 'duration': '2-3min', 'notes': 'Calm down and relax'},
-                {'name': 'Light Walking', 'duration': '5min', 'notes': 'Active recovery'}
-            ],
-            'notes': 'Emphasize full body recovery and flexibility'
-        }]
         
     def _validate_day_plan(self, exercises: List[Exercise]):
         """اعتبارسنجی برنامه روزانه"""
@@ -319,3 +315,29 @@ class FullBodySplitStrategy(SplitStrategy):
                 program['weekly_plan'][day].remove(random.choice(isolation_exercises))
             else:
                 program['weekly_plan'][day].pop()
+                
+    def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> dict:
+        if isinstance(exercise, dict):
+            print('[ERROR] Only Exercise model instances are allowed, not dict')
+            raise TypeError('Only Exercise model instances are allowed, not dict')
+        muscles = exercise.primary_muscles if is_primary else exercise.secondary_muscles
+        muscle_group = muscles[0] if muscles else 'full_body'
+        print(f'[DEBUG] Creating exercise entry for {exercise.name} (primary={is_primary})')
+        return {
+            'exercise_id': exercise.id,
+            'exercise_name': exercise.name,
+            'type': 'compound' if is_primary else 'isolation',
+            'muscle_group': muscle_group,
+            'secondary_muscles': exercise.secondary_muscles if not is_primary else [],
+            'mechanic': exercise.mechanic,
+            'equipment': exercise.equipment,
+            'difficulty': getattr(exercise, 'difficulty', ''),
+            'sets': getattr(exercise, 'sets', 4) if is_primary else getattr(exercise, 'sets', 3),
+            'reps': getattr(exercise, 'reps', '8-12'),
+            'rest_seconds': calculate_rest_time(exercise.mechanic, 0.7),
+            'technique': getattr(exercise, 'technique', None),
+            'technique_notes': getattr(exercise, 'technique_notes', None),
+            'notes': get_exercise_notes(self.settings.experience_level, is_primary),
+            'progression': get_progression_notes(self.settings.experience_level),
+            'alternatives': self.get_exercise_alternatives(exercise)
+        }

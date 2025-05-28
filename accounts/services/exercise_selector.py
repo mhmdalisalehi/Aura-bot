@@ -5,6 +5,23 @@ from accounts.models import UserProfile, TrainingSettings, InjuryExerciseClassif
 from django.db.models import Q
 import logging
 
+MUSCLE_NAME_MAP = {
+    "back": ["middle back", "lats", "lower back", "traps"],
+    "upper_chest": ["chest"],
+    "lateral_delts": ["shoulders"],
+    "rear_delts": ["shoulders"],
+    "outer_quads": ["quadriceps"],
+    "hamstring_insertion": ["hamstrings"],
+    "glute_medius": ["glutes"],
+    # Add more mappings as needed
+}
+
+def map_muscle_names(muscles: list) -> list:
+    mapped = []
+    for m in muscles:
+        mapped.extend(MUSCLE_NAME_MAP.get(m, [m]))
+    return mapped
+
 class ExerciseScorer:
     """سیستم امتیازدهی هوشمند به تمرینات با وزن‌های حرفه‌ای"""
     
@@ -385,12 +402,7 @@ class ExerciseSelector:
         return compound_exercises + isolation_exercises
     
     def _get_main_exercises(self, target_muscles: List[str], week: int):
-        """
-        انتخاب تمرینات اصلی با فیلترهای حرفه‌ای
-        - تمرینات ترکیبی برای مبتدیان
-        - ترکیب مناسب تمرینات بر اساس هدف
-        """
-        # کوئری ساده فقط روی عضلات هدف
+        print(f"[DEBUG] _get_main_exercises: target_muscles={target_muscles}, week={week}")
         qs = Exercise.objects.all()
         exercises = [
             ex for ex in qs
@@ -399,14 +411,17 @@ class ExerciseSelector:
                 (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
             )
         ]
+        print(f"[DEBUG] After muscle filter: {len(exercises)} exercises")
         # فیلتر تجهیزات
         if self.settings.available_equipment:
             exercises = [ex for ex in exercises if ex.equipment in self.settings.available_equipment]
+        print(f"[DEBUG] After equipment filter: {len(exercises)} exercises")
         # فیلتر سطح تجربه
         if self.settings.experience_level == 'beginner':
             exercises = [ex for ex in exercises if ex.level == 'beginner' or (ex.level == 'intermediate' and ex.mechanic == 'compound')]
         elif self.settings.experience_level == 'intermediate':
             exercises = [ex for ex in exercises if ex.level in ['beginner', 'intermediate', 'expert']]
+        print(f"[DEBUG] After experience filter: {len(exercises)} exercises")
         # فیلتر بر اساس هدف
         if self.user.goal:
             if self.user.goal == 'muscle_gain':
@@ -430,6 +445,7 @@ class ExerciseSelector:
                     ex.category in ['cardio', 'plyometrics', 'strength', 'crossfit', 'weighted_bodyweight'] or
                     ex.mechanic == 'compound'
                 )]
+        print(f"[DEBUG] After goal filter: {len(exercises)} exercises")
         return list(exercises)
     
     def _get_complementary_exercises(

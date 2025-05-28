@@ -7,9 +7,10 @@ from accounts.services.split_startegy.base import SplitStrategy
 from accounts.models import Exercise, UserProfile, TrainingSettings
 from accounts.services.recovery_manager import RecoveryManager
 from accounts.services.volume_manager import WorkoutVolumeManager
-from accounts.services.exercise_selector import ExerciseSelector
+from accounts.services.exercise_selector import ExerciseSelector, map_muscle_names
 from accounts.services.mobility_manager import MobilityManager
 from accounts.services.date_converter import convert_day_to_date
+from accounts.services.workout_utils import get_progression_notes, get_exercise_notes, calculate_rest_time
 
 current_date = datetime.now()
 
@@ -67,23 +68,68 @@ class UpperLowerSplitStrategy(SplitStrategy):
                   'pyramids', 'negatives', 'forced_reps', 'cluster_sets']
     }
     
+    # Warmup and cooldown mappings for DRY base usage
+    WARMUP_MAP = {
+        'upper': [{
+            'type': 'mobility',
+            'content': [
+                {'name': 'Band Shoulder Dislocates', 'sets': 2, 'reps': '10-12'},
+                {'name': 'Scapular Wall Slides', 'sets': 2, 'reps': '12-15'},
+                {'name': 'Dynamic Chest Stretch', 'sets': 2, 'duration': '30s'},
+                {'name': 'Band Pull-Aparts', 'sets': 2, 'reps': '15-20'},
+                {'name': 'Cat-Cow Stretch', 'sets': 2, 'reps': '10-12'}
+            ],
+            'notes': 'Focus on shoulder mobility and upper body activation'
+        }],
+        'lower': [{
+            'type': 'mobility',
+            'content': [
+                {'name': 'Hip Circle Walks', 'sets': 2, 'reps': '10 each direction'},
+                {'name': 'Bodyweight Squats with Pause', 'sets': 2, 'reps': '12-15'},
+                {'name': 'Dynamic Hamstring Stretch', 'sets': 2, 'duration': '30s'},
+                {'name': 'Ankle Mobility', 'sets': 2, 'reps': '10 each side'},
+                {'name': 'Hip Flexor Stretch', 'sets': 2, 'duration': '30s each side'}
+            ],
+            'notes': 'Focus on hip and ankle mobility for lower body'
+        }]
+    }
+    COOLDOWN_MAP = {
+        'upper': [{
+            'type': 'cooldown',
+            'content': [
+                {'name': 'Chest Stretch', 'duration': '60s', 'notes': 'Focus on pec minor'},
+                {'name': 'Shoulder Stretch', 'duration': '45s each side', 'notes': 'Include internal rotation'},
+                {'name': 'Lat Stretch', 'duration': '60s each side', 'notes': 'Include overhead reach'},
+                {'name': 'Foam Roll Upper Back', 'duration': '90s', 'notes': 'Focus on tight spots'},
+                {'name': 'Biceps/Triceps Stretch', 'duration': '45s each arm', 'notes': 'Include shoulder extension'}
+            ],
+            'notes': 'Emphasize upper body recovery and mobility'
+        }],
+        'lower': [{
+            'type': 'cooldown',
+            'content': [
+                {'name': 'Quad Stretch', 'duration': '60s each leg', 'notes': 'Include hip flexor'},
+                {'name': 'Hamstring Stretch', 'duration': '45s each leg', 'notes': 'Include sciatic nerve glides'},
+                {'name': 'Calf Stretch', 'duration': '60s each leg', 'notes': 'Include both gastrocnemius and soleus'},
+                {'name': 'Hip Flexor Stretch', 'duration': '45s each side', 'notes': 'Include psoas'},
+                {'name': 'Foam Roll Legs', 'duration': '90s each leg', 'notes': 'Focus on IT band and quads'}
+            ],
+            'notes': 'Emphasize lower body recovery and flexibility'
+        }]
+    }
+
     def generate(self, week: int) -> Dict:
-        """تولید برنامه تمرینی با ویژگی‌های حرفه‌ای"""
-        self.current_week = week  # مقداردهی هفته جاری
+        self.current_week = week
         program = {'weekly_plan': {}}
         day_counter = 0
-        
         for day in self.settings.training_days.keys():
             split_type = 'upper' if day_counter % 2 == 0 else 'lower'
-            
             program['weekly_plan'][day] = self._build_day_plan(split_type, week)
             self.split_map[day] = split_type
             day_counter += 1
-        
         self._validate_split_schedule(program)
-        self._add_warmup_cooldown(program)
+        self._add_warmup_cooldown(program, self.WARMUP_MAP, self.COOLDOWN_MAP, self.DAY_SEQUENCE)
         self._validate_volume(program)
-        
         return program
     
     def _build_day_plan(self, split_type: str, week: int) -> List[Exercise]:
@@ -127,14 +173,11 @@ class UpperLowerSplitStrategy(SplitStrategy):
         # تنظیم حجم و شدت
         exercises = self._adjust_exercise_volume(exercises, muscle_config['volume_multiplier'])
         
-        # اضافه کردن گرم کردن و سرد کردن
-        exercises = self._get_warmup(split_type) + exercises + self._get_cooldown(split_type)
-                
         return exercises
     
     def _build_priority_exercises(self, muscle: str, priority_exercises: List[str], count: int, week: int, is_primary: bool) -> List[Exercise]:
         exercises = []
-        available = self.exercise_selector.get_exercises([muscle], week)['main']
+        available = self.exercise_selector.get_exercises(map_muscle_names([muscle]), week)['main']
         for exercise_name in priority_exercises:
             if len(exercises) >= count:
                 break
@@ -168,7 +211,7 @@ class UpperLowerSplitStrategy(SplitStrategy):
         return base_counts
         
     def _build_muscle_exercises(self, muscle: str, count: int, week: int, is_primary: bool) -> List[Exercise]:
-        available = self.exercise_selector.get_exercises([muscle], week)['main']
+        available = self.exercise_selector.get_exercises(map_muscle_names([muscle]), week)['main']
         if is_primary:
             filtered = [ex for ex in available if ex.mechanic == 'compound']
         else:
@@ -179,7 +222,7 @@ class UpperLowerSplitStrategy(SplitStrategy):
         exercises = []
         for area in focus_areas:
             if random.random() < 0.6:
-                available = self.exercise_selector.get_exercises([area], week)['main']
+                available = self.exercise_selector.get_exercises(map_muscle_names([area]), week)['main']
                 filtered = [ex for ex in available if ex.mechanic == 'isolation']
                 if filtered:
                     exercises.extend(filtered[:1])
@@ -244,62 +287,6 @@ class UpperLowerSplitStrategy(SplitStrategy):
             exercise.volume_multiplier = multiplier
         return exercises
             
-    def _get_warmup(self, split_type: str) -> List[Exercise]:
-        """انتخاب گرم کردن اختصاصی برای هر نوع جلسه"""
-        warmups = {
-            'upper': [{
-                'type': 'mobility',
-                'content': [
-                    {'name': 'Band Shoulder Dislocates', 'sets': 2, 'reps': '10-12'},
-                    {'name': 'Scapular Wall Slides', 'sets': 2, 'reps': '12-15'},
-                    {'name': 'Dynamic Chest Stretch', 'sets': 2, 'duration': '30s'},
-                    {'name': 'Band Pull-Aparts', 'sets': 2, 'reps': '15-20'},
-                    {'name': 'Cat-Cow Stretch', 'sets': 2, 'reps': '10-12'}
-                ],
-                'notes': 'Focus on shoulder mobility and upper body activation'
-            }],
-            'lower': [{
-                'type': 'mobility',
-                'content': [
-                    {'name': 'Hip Circle Walks', 'sets': 2, 'reps': '10 each direction'},
-                    {'name': 'Bodyweight Squats with Pause', 'sets': 2, 'reps': '12-15'},
-                    {'name': 'Dynamic Hamstring Stretch', 'sets': 2, 'duration': '30s'},
-                    {'name': 'Ankle Mobility', 'sets': 2, 'reps': '10 each side'},
-                    {'name': 'Hip Flexor Stretch', 'sets': 2, 'duration': '30s each side'}
-                ],
-                'notes': 'Focus on hip and ankle mobility for lower body'
-            }]
-        }
-        return warmups.get(split_type, [])
-        
-    def _get_cooldown(self, split_type: str) -> List[Exercise]:
-        """انتخاب سرد کردن اختصاصی برای هر نوع جلسه"""
-        cooldowns = {
-            'upper': [{
-                'type': 'cooldown',
-                'content': [
-                    {'name': 'Chest Stretch', 'duration': '60s', 'notes': 'Focus on pec minor'},
-                    {'name': 'Shoulder Stretch', 'duration': '45s each side', 'notes': 'Include internal rotation'},
-                    {'name': 'Lat Stretch', 'duration': '60s each side', 'notes': 'Include overhead reach'},
-                    {'name': 'Foam Roll Upper Back', 'duration': '90s', 'notes': 'Focus on tight spots'},
-                    {'name': 'Biceps/Triceps Stretch', 'duration': '45s each arm', 'notes': 'Include shoulder extension'}
-                ],
-                'notes': 'Emphasize upper body recovery and mobility'
-            }],
-            'lower': [{
-                'type': 'cooldown',
-                'content': [
-                    {'name': 'Quad Stretch', 'duration': '60s each leg', 'notes': 'Include hip flexor'},
-                    {'name': 'Hamstring Stretch', 'duration': '45s each leg', 'notes': 'Include sciatic nerve glides'},
-                    {'name': 'Calf Stretch', 'duration': '60s each leg', 'notes': 'Include both gastrocnemius and soleus'},
-                    {'name': 'Hip Flexor Stretch', 'duration': '45s each side', 'notes': 'Include psoas'},
-                    {'name': 'Foam Roll Legs', 'duration': '90s each leg', 'notes': 'Focus on IT band and quads'}
-                ],
-                'notes': 'Emphasize lower body recovery and flexibility'
-            }]
-        }
-        return cooldowns.get(split_type, [])
-        
     def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> dict:
         if isinstance(exercise, dict):
             raise TypeError('Only Exercise model instances are allowed, not dict')
@@ -316,71 +303,14 @@ class UpperLowerSplitStrategy(SplitStrategy):
             'difficulty': getattr(exercise, 'difficulty', ''),
             'sets': getattr(exercise, 'sets', 4) if is_primary else getattr(exercise, 'sets', 3),
             'reps': getattr(exercise, 'reps', '8-12'),
-            'rest_seconds': self._calculate_rest_time(exercise, is_primary),
+            'rest_seconds': calculate_rest_time(exercise.mechanic, 0.7),  # Use a default intensity or pass real one if available
             'technique': getattr(exercise, 'technique', None),
             'technique_notes': getattr(exercise, 'technique_notes', None),
-            'notes': self._generate_exercise_notes(exercise, is_primary),
-            'progression': self._get_progression_notes(),
+            'notes': get_exercise_notes(self.settings.experience_level, is_primary),
+            'progression': get_progression_notes(self.settings.experience_level),
             'alternatives': self.get_exercise_alternatives(exercise)
         }
         
-    def _calculate_rest_time(self, exercise, is_primary: bool) -> int:
-        """محاسبه زمان استراحت بین ست‌ها"""
-        # زمان پایه بر اساس نوع تمرین
-        base_rest = 90 if is_primary else 60
-        
-        # تنظیم بر اساس هدف
-        if self.user.goal == 'strength':
-            base_rest += 30
-        elif self.user.goal == 'endurance':
-            base_rest -= 30
-        elif self.user.goal == 'weight_loss':
-            base_rest -= 15
-            
-        # تنظیم بر اساس سطح تجربه
-        if self.settings.experience_level == 'beginner':
-            base_rest += 30  # استراحت بیشتر برای مبتدیان
-        elif self.settings.experience_level == 'expert':
-            base_rest -= 15  # استراحت کمتر برای حرفه‌ای‌ها
-            
-        # تنظیم بر اساس مکانیک تمرین
-        if getattr(exercise, 'mechanic', '') == 'compound':
-            base_rest += 15
-        elif getattr(exercise, 'mechanic', '') == 'isolation':
-            base_rest -= 15
-            
-        # محدود کردن زمان استراحت در محدوده منطقی
-        return max(45, min(180, base_rest))
-
-    def _add_warmup_cooldown(self, program: Dict):
-        """افزودن گرم کردن و سرد کردن متناسب برای هر جلسه"""
-        for day, exercises in program['weekly_plan'].items():
-            split_type = self.DAY_SEQUENCE[list(program['weekly_plan'].keys()).index(day) % len(self.DAY_SEQUENCE)]
-            warmup = self._get_warmup(split_type)
-            cooldown = self._get_cooldown(split_type)
-            program['weekly_plan'][day] = warmup + exercises + cooldown
-            
-    def _get_progression_notes(self) -> str:
-        """دریافت نکات پیشرفت"""
-        if self.settings.experience_level == 'beginner':
-            return "Focus on form and technique. Increase weight when 12 reps become easy."
-        elif self.settings.experience_level == 'intermediate':
-            return "Progressive overload: Increase weight or reps each week."
-        else:
-            return "Advanced progression: Use various techniques and periodization."
-
-    def _generate_exercise_notes(self, exercise: Exercise, is_primary: bool) -> str:
-        """تولید توضیحات تمرین بر اساس نوع و سطح تجربه"""
-        if is_primary:
-            if self.settings.experience_level == 'beginner':
-                return "روی فرم صحیح حرکت تمرکز کنید و با وزنه سبک شروع کنید."
-            elif self.settings.experience_level == 'intermediate':
-                return "وزنه را به تدریج افزایش دهید و روی کنترل حرکت تمرکز کنید."
-            else:
-                return "از تکنیک‌های پیشرفته مانند drop set یا rest-pause استفاده کنید."
-        else:
-            return "حرکت را با کنترل کامل و دامنه حرکتی مناسب انجام دهید."
-
     def _adjust_program(self, program: Dict, increase: bool):
         # تنظیم برنامه بر اساس حجم کلی
         adjustment_factor = 1.1 if increase else 0.9

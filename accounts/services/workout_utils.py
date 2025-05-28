@@ -162,75 +162,25 @@ def get_muscle_groups_for_split(split_type: str) -> Dict[str, List[str]]:
     return muscle_groups.get(split_type, muscle_groups['full_body'])
 
 
+def get_progression_notes(experience_level: str) -> str:
+    """Get progression notes based on experience level."""
+    if experience_level == 'beginner':
+        return "Focus on form and technique. Increase weight when 12 reps become easy."
+    elif experience_level == 'intermediate':
+        return "Progressive overload: Increase weight or reps each week."
+    else:
+        return "Advanced progression: Use various techniques and periodization."
+
+
 # تابع تولید نکات و راهنمایی‌های تمرینی برای هر حرکت
-def get_exercise_notes(exercise: Exercise, experience_level: str) -> List[str]:
-    """
-    تولید نکات و راهنمایی‌های تمرینی برای هر حرکت بر اساس نوع حرکت و سطح تجربه کاربر.
-    به عنوان یک مربی حرفه‌ای، نکات را طوری تنظیم می‌کنیم که به کاربر در اجرای صحیح حرکت کمک کند.
-    """
-    notes = []
-    
-    # نکات عمومی برای همه سطوح
-    general_notes = [
-        "قبل از شروع ست اصلی، حتماً یک ست گرم کردنی با وزنه سبک انجام دهید",
-        "در طول حرکت نفس‌کشی منظم داشته باشید",
-        "حرکت را با کنترل کامل انجام دهید و از حرکت‌های ناگهانی خودداری کنید"
-    ]
-    notes.extend(general_notes)
-    
-    # نکات مخصوص مبتدیان
-    if experience_level == "beginner":
-        beginner_notes = [
-            "روی فرم صحیح حرکت تمرکز کنید، نه روی وزنه",
-            "از یک نفر بخواهید فرم شما را چک کند",
-            "اگر احساس درد یا ناراحتی کردید، حرکت را متوقف کنید",
-            "بین ست‌ها استراحت کافی داشته باشید"
-        ]
-        notes.extend(beginner_notes)
-    
-    # نکات مخصوص سطح متوسط
-    elif experience_level == "intermediate":
-        intermediate_notes = [
-            "روی افزایش تدریجی وزنه تمرکز کنید",
-            "تکنیک‌های پیشرفته مثل drop set یا rest-pause را امتحان کنید",
-            "به احساس عضله در طول حرکت توجه کنید",
-            "سعی کنید در هر جلسه پیشرفت داشته باشید"
-        ]
-        notes.extend(intermediate_notes)
-    
-    # نکات مخصوص حرفه‌ای‌ها
-    elif experience_level == "expert":
-        expert_notes = [
-            "از تکنیک‌های پیشرفته مثل superset و giant set استفاده کنید",
-            "روی نقاط ضعف خود تمرکز کنید",
-            "از تکنیک‌های افزایش شدت مثل forced reps استفاده کنید",
-            "برنامه‌ریزی دوره‌ای را رعایت کنید"
-        ]
-        notes.extend(expert_notes)
-    
-    # نکات مخصوص نوع حرکت
-    if exercise.mechanic == "compound":
-        compound_notes = [
-            "روی هماهنگی بین عضلات مختلف تمرکز کنید",
-            "از تکنیک bracing (سفت کردن عضلات مرکزی) استفاده کنید",
-            "حرکت را از مفصل اصلی شروع کنید"
-        ]
-        notes.extend(compound_notes)
-    elif exercise.mechanic == "isolation":
-        isolation_notes = [
-            "روی انقباض کامل عضله هدف تمرکز کنید",
-            "از momentum (تکانه) استفاده نکنید",
-            "دامنه حرکت را کامل اجرا کنید"
-        ]
-        notes.extend(isolation_notes)
-    
-    # نکات مخصوص تجهیزات مورد نیاز
-    if exercise.equipment:
-        equipment_notes = [
-            f"از تجهیزات {exercise.equipment} به درستی استفاده کنید",
-            "قبل از استفاده از تجهیزات، نحوه تنظیم آن‌ها را یاد بگیرید",
-            "از سالم بودن تجهیزات اطمینان حاصل کنید"
-        ]
-        notes.extend(equipment_notes)
-    
-    return notes 
+def get_exercise_notes(experience_level: str, is_primary: bool) -> str:
+    """Generate notes for an exercise based on type and experience."""
+    if is_primary:
+        if experience_level == 'beginner':
+            return "روی فرم صحیح حرکت تمرکز کنید و با وزنه سبک شروع کنید."
+        elif experience_level == 'intermediate':
+            return "وزنه را به تدریج افزایش دهید و روی کنترل حرکت تمرکز کنید."
+        else:
+            return "از تکنیک‌های پیشرفته مانند drop set یا rest-pause استفاده کنید."
+    else:
+        return "حرکت را با کنترل کامل و دامنه حرکتی مناسب انجام دهید."

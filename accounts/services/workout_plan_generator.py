@@ -15,88 +15,50 @@ from .workout_utils import (
     calculate_rest_time,
     calculate_intensity,
     get_next_training_day,
-    get_muscle_groups_for_split
+    get_muscle_groups_for_split,
+    get_exercise_notes
 )
 from accounts.services.split_rotation_manager import update_split_if_needed
 from accounts.services.date_converter import convert_day_to_date, convert_persian_to_english_weekday
 import logging
+from .base_manager import BaseWorkoutManager
 
 def get_field(obj, field):
     if isinstance(obj, dict):
         return obj.get(field)
     return getattr(obj, field, None)
 
-class WorkoutPlanGenerator:
+class WorkoutPlanGenerator(BaseWorkoutManager):
     def __init__(self, user: UserProfile, settings: TrainingSettings):
-        self.user = user
-        self.settings = settings
-        self._initialize_managers()
-        self._validate_managers()
+        super().__init__(user, settings)
         
-    def _initialize_managers(self):
-        """مقداردهی اولیه مدیران با مدیریت خطا"""
-        try:
-            self.exercise_selector = ExerciseSelector(self.user, self.settings)
-            self.volume_manager = WorkoutVolumeManager(self.user, self.settings)
-            self.recovery_manager = RecoveryManager(self.user, self.settings)
-            self.mobility_manager = MobilityManager(self.user, self.settings)
-            self.validator = WorkoutValidator(self.user, self.settings)
-            
-            # تنظیم مدیران در validator
-            self.validator.set_managers(
-                self.volume_manager,
-                self.recovery_manager,
-                self.mobility_manager,
-                self.exercise_selector
-            )
-        except Exception as e:
-            raise ValueError("Some managers are not initialized")
-            
-    def _validate_managers(self):
-        """اعتبارسنجی مدیران"""
-        if not all([
-            self.exercise_selector,
-            self.volume_manager,
-            self.recovery_manager,
-            self.mobility_manager,
-            self.validator
-        ]):
-            raise ValueError("Some managers are not initialized")
-            
     def generate_plan(self, weeks: int = 4) -> Dict:
-        """تولید برنامه تمرینی با مدیریت خطا و همگام‌سازی"""
+        print(f"[DEBUG] Generating workout plan for {weeks} weeks")
         try:
             # انتخاب استراتژی مناسب
             strategy = self._get_split_strategy()
-            
+            print(f"[DEBUG] Using split strategy: {type(strategy).__name__}")
             # تولید برنامه هفتگی
             weekly_plan = {}
             current_date = datetime.now()
-            
             for week in range(weeks):
-                # بررسی نیاز به کاهش بار
+                print(f"[DEBUG] Generating week {week+1}")
                 if self.volume_manager._should_deload(week + 1):
+                    print(f"[DEBUG] Deload week: {week+1}")
                     weekly_plan.update(self._generate_deload_week(current_date, week + 1))
                     continue
-                    
-                # تولید برنامه برای هر هفته
                 week_plan = strategy.generate(week + 1)
-                
-                # تبدیل نام روزهای هفته به تاریخ و اضافه کردن تاریخ‌ها و همگام‌سازی
+                print(f"[DEBUG] Week plan: {week_plan}")
                 weekly_plan.update(self._add_dates_to_plan(week_plan, current_date))
-                
-                # فقط کلیدهایی که واقعا تاریخ هستند را در نظر بگیر
                 date_keys = [day for day in weekly_plan.keys() if len(day) == 10 and day[4] == '-' and day[7] == '-']
                 if date_keys:
                     current_date = max(
                         datetime.strptime(day, '%Y-%m-%d')
                         for day in date_keys
                     ) + timedelta(days=1)
-            
             # تبدیل ساختار برنامه به فرمت مورد نیاز validator
             plain_weekly_plan = {}
             for day, day_plan in weekly_plan.items():
-                # ترکیب همه تمرینات در یک لیست
                 all_exercises = []
                 if isinstance(day_plan, dict):
                     if 'warmup' in day_plan:
@@ -106,19 +68,20 @@ class WorkoutPlanGenerator:
                     if 'cooldown' in day_plan:
                         all_exercises.extend(day_plan['cooldown'])
                 else:
-                    # اگر day_plan یک لیست است (مثلاً در حالت deload)
                     all_exercises.extend(day_plan)
                 plain_weekly_plan[day] = all_exercises
-            
             # اعتبارسنجی برنامه با ساختار مسطح
             is_valid, errors = self.validator.validate_program({'weekly_plan': plain_weekly_plan})
+            print(f"[DEBUG] Plan validation result: {is_valid}, errors: {errors}")
             if not is_valid:
+                print(f"[ERROR] Program is not valid: {errors}")
                 raise ValueError(f"Program is not valid: {', '.join(errors)}")
-                
-            # برگرداندن برنامه اصلی با ساختار کامل
-            return {'weekly_plan': weekly_plan}
+            print(f"[DEBUG] Generated plan: {plain_weekly_plan}")
+            # برگرداندن برنامه اصلی با ساختار مسطح (سازگار با validator)
+            return {'weekly_plan': plain_weekly_plan}
             
         except Exception as e:
+            print(f"[ERROR] Exception in generate_plan: {str(e)}")
             raise ValueError(f"Error in generating workout plan: {str(e)}")
             
     def _generate_deload_week(self, current_date: datetime, week: int) -> Dict:
@@ -151,34 +114,59 @@ class WorkoutPlanGenerator:
         dated_plan = {}
         for day, exercises in week_plan.items():
             if not exercises:
-                logging.warning(f"No exercises generated for day {day}!")
+                print(f"[WARNING] No exercises generated for day {day}!")
             training_date = convert_day_to_date(day, current_date)
             target_muscles = []
-            formatted_exercises = []
+            main_exercises = []
             warmups = []
             cooldowns = []
-            for exercise in exercises:
-                # فقط در این نقطه مدل را به dict تبدیل کن
-                if hasattr(exercise, 'id'):
+            # Robustly handle both list and dict day plans
+            if isinstance(exercises, dict):
+                # Already split by keys
+                main_items = exercises.get('main', [])
+                warmups = exercises.get('warmup', [])
+                cooldowns = exercises.get('cooldown', [])
+                items = main_items + warmups + cooldowns
+            else:
+                items = exercises
+            for exercise in items:
+                # Convert Exercise model to dict
+                if hasattr(exercise, 'id') and hasattr(exercise, 'name'):
                     formatted_exercise = {
                         'exercise_id': exercise.id,
                         'exercise_name': exercise.name,
                         'type': getattr(exercise, 'type', 'compound'),
-                        'muscle_group': exercise.primary_muscles[0] if exercise.primary_muscles else 'full_body',
+                        'muscle_group': exercise.primary_muscles[0] if hasattr(exercise, 'primary_muscles') and exercise.primary_muscles else 'full_body',
                         'sets': getattr(exercise, 'sets', 3),
                         'reps': getattr(exercise, 'reps', '8-12'),
                         'rest_seconds': getattr(exercise, 'rest_seconds', 60),
                         'intensity': getattr(exercise, 'intensity', 0.7),
                         'notes': getattr(exercise, 'notes', '')
                     }
-                    formatted_exercises.append(formatted_exercise)
-                    if not target_muscles and exercise.primary_muscles:
+                    # Place warmup/cooldown/main by type
+                    t = formatted_exercise.get('type', '').lower()
+                    if t == 'warmup':
+                        warmups.append(formatted_exercise)
+                    elif t == 'cooldown':
+                        cooldowns.append(formatted_exercise)
+                    elif t not in ('warmup', 'cooldown', 'mobility'):
+                        main_exercises.append(formatted_exercise)
+                    if not target_muscles and hasattr(exercise, 'primary_muscles') and exercise.primary_muscles:
                         target_muscles.extend(exercise.primary_muscles)
+                elif isinstance(exercise, dict):
+                    t = exercise.get('type', '').lower()
+                    if t == 'warmup':
+                        warmups.append(exercise)
+                    elif t == 'cooldown':
+                        cooldowns.append(exercise)
+                    elif t not in ('warmup', 'cooldown', 'mobility'):
+                        # treat as main exercise dict
+                        main_exercises.append(exercise)
             if not target_muscles:
                 target_muscles = ['full_body']
             if not self.recovery_manager.can_train(target_muscles, training_date):
+                print(f"[WARNING] Recovery manager blocked training for {target_muscles} on {training_date}")
                 training_date = self._find_next_available_date(training_date, target_muscles)
-            # اطمینان از وجود حداقل یک تمرین گرم کردن و سرد کردن
             if not warmups:
                 warmups = [{
                     'exercise_id': 0,
@@ -204,11 +192,11 @@ class WorkoutPlanGenerator:
                     'notes': 'General cooldown for the workout'
                 }]
             dated_plan[training_date.strftime('%Y-%m-%d')] = {
-                'main': formatted_exercises,
+                'main': main_exercises,
                 'warmup': warmups[:3],
                 'cooldown': cooldowns[:3]
             }
-            current_date = training_date + timedelta(days=1)
+            print(f"[DEBUG] Dated plan for {training_date.strftime('%Y-%m-%d')}: {dated_plan[training_date.strftime('%Y-%m-%d')]}")
         return dated_plan
         
     def _find_next_available_date(self, start_date: datetime, target_muscles: List[str]) -> datetime:
@@ -324,4 +312,4 @@ class WorkoutPlanGenerator:
             else:
                 return 60  # مقدار پیش‌فرض
         except (ValueError, AttributeError):
-            return 60  # مقدار پیش‌فرض در صورت خطا 
+            return 60  # مقدار پیش‌فرض در صورت خطا
