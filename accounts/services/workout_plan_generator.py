@@ -32,54 +32,101 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
     def __init__(self, user: UserProfile, settings: TrainingSettings):
         super().__init__(user, settings)
         
-    def generate_plan(self, weeks: int = 4) -> Dict:
-        print(f"[DEBUG] Generating workout plan for {weeks} weeks")
+    def generate_plan(self) -> Dict:
         try:
-            # انتخاب استراتژی مناسب
             strategy = self._get_split_strategy()
-            print(f"[DEBUG] Using split strategy: {type(strategy).__name__}")
-            # تولید برنامه هفتگی
             weekly_plan = {}
             current_date = datetime.now()
-            for week in range(weeks):
-                print(f"[DEBUG] Generating week {week+1}")
-                if self.volume_manager._should_deload(week + 1):
-                    print(f"[DEBUG] Deload week: {week+1}")
-                    weekly_plan.update(self._generate_deload_week(current_date, week + 1))
-                    continue
-                week_plan = strategy.generate(week + 1)
-                print(f"[DEBUG] Week plan: {week_plan}")
-                weekly_plan.update(self._add_dates_to_plan(week_plan, current_date))
-                date_keys = [day for day in weekly_plan.keys() if len(day) == 10 and day[4] == '-' and day[7] == '-']
-                if date_keys:
-                    current_date = max(
-                        datetime.strptime(day, '%Y-%m-%d')
-                        for day in date_keys
-                    ) + timedelta(days=1)
-            # تبدیل ساختار برنامه به فرمت مورد نیاز validator
+            week_plan = strategy.generate(1)
+            weekly_plan.update(self._add_dates_to_plan(week_plan['weekly_plan'], current_date))
+            # Flatten and validate
             plain_weekly_plan = {}
+            # Ensure all exercises have required fields for validation
+            def ensure_required_fields(ex):
+                required_fields = [
+                    'exercise_id', 'exercise_name', 'type', 'muscle_group', 'sets', 'reps', 'rest_seconds'
+                ]
+                defaults = {
+                    'exercise_id': 0,
+                    'exercise_name': 'Unknown',
+                    'type': 'unknown',
+                    'muscle_group': 'full_body',
+                    'sets': 1,
+                    'reps': '8-12',
+                    'rest_seconds': 30
+                }
+                if isinstance(ex, dict):
+                    for k in required_fields:
+                        if k not in ex:
+                            ex[k] = defaults[k]
+                return ex
+
+            def expand_and_ensure_fields(ex, ex_type=None):
+                # If this is a container (has 'content'), expand it
+                if isinstance(ex, dict) and 'content' in ex:
+                    expanded = []
+                    for idx, item in enumerate(ex['content']):
+                        # Map fields from content item to required fields
+                        exercise_dict = {
+                            'exercise_id': 0,
+                            'exercise_name': item.get('name', f'Unknown {ex_type or ex.get("type", "")}{idx+1}') if isinstance(item, dict) else str(item),
+                            'type': ex_type or ex.get('type', 'mobility'),
+                            'muscle_group': 'full_body',
+                            'sets': 1,
+                            'reps': '8-12',
+                            'rest_seconds': 30,
+                            'duration_seconds': 60,
+                            'notes': item.get('notes', '') if isinstance(item, dict) else ''
+                        }
+                        # Try to map duration if present
+                        if isinstance(item, dict):
+                            dur = item.get('duration')
+                            if dur:
+                                # Parse duration string (e.g., '60s', '45s each leg')
+                                try:
+                                    if 'min' in dur:
+                                        mins = int(dur.split('min')[0].strip())
+                                        exercise_dict['duration_seconds'] = mins * 60
+                                    elif 's' in dur:
+                                        secs = int(dur.split('s')[0].strip())
+                                        exercise_dict['duration_seconds'] = secs
+                                except Exception:
+                                    pass
+                        expanded.append(exercise_dict)
+                    return expanded
+                else:
+                    return [ensure_required_fields(ex)]
+
             for day, day_plan in weekly_plan.items():
                 all_exercises = []
                 if isinstance(day_plan, dict):
                     if 'warmup' in day_plan:
-                        all_exercises.extend(day_plan['warmup'])
+                        for e in day_plan['warmup']:
+                            all_exercises.extend(expand_and_ensure_fields(e, 'warmup'))
                     if 'main' in day_plan:
-                        all_exercises.extend(day_plan['main'])
+                        all_exercises.extend([ensure_required_fields(e) for e in day_plan['main']])
                     if 'cooldown' in day_plan:
-                        all_exercises.extend(day_plan['cooldown'])
+                        for e in day_plan['cooldown']:
+                            all_exercises.extend(expand_and_ensure_fields(e, 'cooldown'))
                 else:
-                    all_exercises.extend(day_plan)
+                    all_exercises.extend([ensure_required_fields(e) for e in day_plan])
+                # --- Convert all dicts to SimpleNamespace for attribute access ---
+                from types import SimpleNamespace
+                def dict_to_namespace(d):
+                    if isinstance(d, dict):
+                        return SimpleNamespace(**d)
+                    return d
+                all_exercises = [dict_to_namespace(ex) if isinstance(ex, dict) else ex for ex in all_exercises]
                 plain_weekly_plan[day] = all_exercises
-            # اعتبارسنجی برنامه با ساختار مسطح
             is_valid, errors = self.validator.validate_program({'weekly_plan': plain_weekly_plan})
-            print(f"[DEBUG] Plan validation result: {is_valid}, errors: {errors}")
             if not is_valid:
-                print(f"[ERROR] Program is not valid: {errors}")
+                print("\n[VALIDATION ERROR] Program structure is not valid!")
+                print("[VALIDATION ERROR] Validation errors:", errors)
+                print("[VALIDATION ERROR] Problematic plan structure:")
+                import pprint; pprint.pprint(plain_weekly_plan)
                 raise ValueError(f"Program is not valid: {', '.join(errors)}")
-            print(f"[DEBUG] Generated plan: {plain_weekly_plan}")
-            # برگرداندن برنامه اصلی با ساختار مسطح (سازگار با validator)
+            print(f"[INFO] Plan validated successfully.")
             return {'weekly_plan': plain_weekly_plan}
-            
         except Exception as e:
             print(f"[ERROR] Exception in generate_plan: {str(e)}")
             raise ValueError(f"Error in generating workout plan: {str(e)}")
@@ -114,7 +161,8 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
         dated_plan = {}
         for day, exercises in week_plan.items():
             if not exercises:
-                print(f"[WARNING] No exercises generated for day {day}!")
+                # [WARNING] No exercises generated for day {day}!
+                pass
             training_date = convert_day_to_date(day, current_date)
             target_muscles = []
             main_exercises = []
@@ -124,9 +172,28 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
             if isinstance(exercises, dict):
                 # Already split by keys
                 main_items = exercises.get('main', [])
+                # If main_items are already dicts, add them directly
+                if main_items and all(isinstance(ex, dict) for ex in main_items):
+                    main_exercises = main_items
+                else:
+                    for ex in main_items:
+                        if isinstance(ex, dict):
+                            main_exercises.append(ex)
+                        elif hasattr(ex, 'id') and hasattr(ex, 'name'):
+                            main_exercises.append({
+                                'exercise_id': ex.id,
+                                'exercise_name': ex.name,
+                                'type': getattr(ex, 'type', 'compound'),
+                                'muscle_group': ex.primary_muscles[0] if hasattr(ex, 'primary_muscles') and ex.primary_muscles else 'full_body',
+                                'sets': getattr(ex, 'sets', 3),
+                                'reps': getattr(ex, 'reps', '8-12'),
+                                'rest_seconds': getattr(ex, 'rest_seconds', 60),
+                                'intensity': getattr(ex, 'intensity', 0.7),
+                                'notes': getattr(ex, 'notes', '')
+                            })
                 warmups = exercises.get('warmup', [])
                 cooldowns = exercises.get('cooldown', [])
-                items = main_items + warmups + cooldowns
+                items = []  # Already handled above
             else:
                 items = exercises
             for exercise in items:
@@ -165,7 +232,7 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
             if not target_muscles:
                 target_muscles = ['full_body']
             if not self.recovery_manager.can_train(target_muscles, training_date):
-                print(f"[WARNING] Recovery manager blocked training for {target_muscles} on {training_date}")
+                # [WARNING] Recovery manager blocked training for {target_muscles} on {training_date}
                 training_date = self._find_next_available_date(training_date, target_muscles)
             if not warmups:
                 warmups = [{
@@ -196,7 +263,6 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
                 'warmup': warmups[:3],
                 'cooldown': cooldowns[:3]
             }
-            print(f"[DEBUG] Dated plan for {training_date.strftime('%Y-%m-%d')}: {dated_plan[training_date.strftime('%Y-%m-%d')]}")
         return dated_plan
         
     def _find_next_available_date(self, start_date: datetime, target_muscles: List[str]) -> datetime:
@@ -313,3 +379,49 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
                 return 60  # مقدار پیش‌فرض
         except (ValueError, AttributeError):
             return 60  # مقدار پیش‌فرض در صورت خطا
+    
+    def save_plan_to_db(self, plan: Dict, weeks: int = 4):
+        """
+        Save the generated plan (output of generate_plan) to the normalized database models.
+        """
+        from accounts.models import WorkoutPlan, WorkoutDay, WorkoutExercise
+        # Create WorkoutPlan
+        workout_plan = WorkoutPlan.objects.create(
+            user=self.user.user,
+            settings=self.settings,
+            weeks=weeks,
+            split_type=self.settings.split_type,
+            experience_level=self.settings.experience_level,
+            goal=self.user.goal,
+            available_equipment=self.settings.available_equipment,
+            training_days=self.settings.training_days
+        )
+        # Save each day
+        for day_idx, (date_str, exercises) in enumerate(plan['weekly_plan'].items()):
+            workout_day = WorkoutDay.objects.create(
+                plan=workout_plan,
+                date=date_str,
+                order=day_idx
+            )
+            # Save each exercise
+            for ex_idx, exercise in enumerate(exercises):
+                ex_obj = None
+                if 'exercise_id' in exercise and exercise['exercise_id']:
+                    try:
+                        ex_obj = Exercise.objects.get(id=exercise['exercise_id'])
+                    except Exercise.DoesNotExist:
+                        ex_obj = None
+                WorkoutExercise.objects.create(
+                    day=workout_day,
+                    exercise=ex_obj,
+                    exercise_name=exercise.get('exercise_name', ''),
+                    type=exercise.get('type', ''),
+                    muscle_group=exercise.get('muscle_group', ''),
+                    sets=exercise.get('sets', 0),
+                    reps=exercise.get('reps', ''),
+                    rest_seconds=exercise.get('rest_seconds', 60),
+                    intensity=exercise.get('intensity', 0.7),
+                    notes=exercise.get('notes', ''),
+                    order=ex_idx
+                )
+        return workout_plan

@@ -341,6 +341,9 @@ class SplitStrategy:
             split_type = day_sequence[idx % len(day_sequence)]
             warmup = self._get_warmup(split_type, warmup_map)
             cooldown = self._get_cooldown(split_type, cooldown_map)
+            # If exercises is a dict (with 'main'), merge all as a list
+            if isinstance(exercises, dict) and 'main' in exercises:
+                exercises = exercises['main']
             program['weekly_plan'][day] = warmup + exercises + cooldown
 
     def _validate_volume(self, program: Dict):

@@ -132,7 +132,7 @@ class UpperLowerSplitStrategy(SplitStrategy):
         self._validate_volume(program)
         return program
     
-    def _build_day_plan(self, split_type: str, week: int) -> List[Exercise]:
+    def _build_day_plan(self, split_type: str, week: int) -> dict:
         """ساخت برنامه حرفه‌ای برای یک روز تمرین"""
         exercises = []
         muscle_config = self.MUSCLE_GROUPS[split_type]
@@ -173,7 +173,13 @@ class UpperLowerSplitStrategy(SplitStrategy):
         # تنظیم حجم و شدت
         exercises = self._adjust_exercise_volume(exercises, muscle_config['volume_multiplier'])
         
-        return exercises
+        # Convert to dicts for 'main' section
+        main_exercises = [self._create_exercise_entry(ex, is_primary=(ex.mechanic == 'compound')) for ex in exercises]
+        # DEBUG: Print all selected exercises before returning main
+        print(f"[DEBUG] main_exercises for {split_type} day: {[ex['exercise_name'] for ex in main_exercises]}")
+        if not main_exercises:
+            print(f"[WARNING] No main exercises generated for {split_type} day! Check exercise selection logic.")
+        return {'main': main_exercises}
     
     def _build_priority_exercises(self, muscle: str, priority_exercises: List[str], count: int, week: int, is_primary: bool) -> List[Exercise]:
         exercises = []

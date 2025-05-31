@@ -144,12 +144,14 @@ class WorkoutValidator:
                     
         return True
     
-    def _validate_exercise_structure(self, exercise: Exercise) -> bool:
+    def _validate_exercise_structure(self, exercise) -> bool:
         """اعتبارسنجی ساختار یک تمرین"""
         required_fields = [
             'exercise_id', 'exercise_name', 'type', 
             'muscle_group', 'sets', 'reps', 'rest_seconds'
         ]
+        if isinstance(exercise, dict):
+            return all(field in exercise for field in required_fields)
         return all(hasattr(exercise, field) for field in required_fields)
     
     def _validate_exercise_balance(self, program: Dict) -> List[str]:
@@ -157,16 +159,13 @@ class WorkoutValidator:
         errors = []
         exercise_counts = {}
         muscle_counts = {}
-        
         for day, exercises in program['weekly_plan'].items():
             # شمارش تمرینات هر نوع
             for exercise in exercises:
-                ex_type = exercise.type
-                muscle = exercise.muscle_group
-                
+                ex_type = exercise['type'] if isinstance(exercise, dict) else exercise.type
+                muscle = exercise['muscle_group'] if isinstance(exercise, dict) else exercise.muscle_group
                 exercise_counts[ex_type] = exercise_counts.get(ex_type, 0) + 1
                 muscle_counts[muscle] = muscle_counts.get(muscle, 0) + 1
-        
         # بررسی تعادل نوع تمرینات
         for ex_type, count in exercise_counts.items():
             limits = self.INTENSITY_LIMITS.get(ex_type, {'min': 2, 'max': 5})
@@ -174,7 +173,6 @@ class WorkoutValidator:
                 errors.append(f"Number of {ex_type} exercises is less than allowed")
             elif count > limits['max']:
                 errors.append(f"Number of {ex_type} exercises is more than allowed")
-        
         # بررسی تعادل عضلات
         for muscle, count in muscle_counts.items():
             limits = self.VOLUME_LIMITS.get(muscle, {'min': 4, 'max': 12})
@@ -182,7 +180,6 @@ class WorkoutValidator:
                 errors.append(f"Number of {muscle} exercises is less than allowed")
             elif count > limits['max']:
                 errors.append(f"Number of {muscle} exercises is more than allowed")
-        
         return errors
     
     def _validate_volume(self, program: Dict) -> List[str]:

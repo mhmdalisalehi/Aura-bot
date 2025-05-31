@@ -95,4 +95,42 @@ class InjuryExerciseClassification(models.Model):
     def __str__(self):
         return f"{self.exercise.name} - {self.injury} - {self.classification}"
 
+class WorkoutPlan(models.Model):
+    user = models.ForeignKey(BotUser, on_delete=models.CASCADE, related_name='workout_plans')
+    settings = models.ForeignKey(TrainingSettings, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    weeks = models.PositiveIntegerField(default=4)
+    split_type = models.CharField(max_length=20)
+    experience_level = models.CharField(max_length=15)
+    goal = models.CharField(max_length=30)
+    available_equipment = models.JSONField()
+    training_days = models.JSONField()
+
+    def __str__(self):
+        return f"WorkoutPlan for {self.user} ({self.created_at.date()})"
+
+class WorkoutDay(models.Model):
+    plan = models.ForeignKey(WorkoutPlan, on_delete=models.CASCADE, related_name='days')
+    date = models.DateField()
+    order = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.plan} - {self.date}"
+
+class WorkoutExercise(models.Model):
+    day = models.ForeignKey(WorkoutDay, on_delete=models.CASCADE, related_name='exercises')
+    exercise = models.ForeignKey(Exercise, on_delete=models.SET_NULL, null=True, blank=True)
+    exercise_name = models.CharField(max_length=255)
+    type = models.CharField(max_length=30)
+    muscle_group = models.CharField(max_length=50)
+    sets = models.PositiveIntegerField()
+    reps = models.CharField(max_length=20)
+    rest_seconds = models.PositiveIntegerField(default=60)
+    intensity = models.FloatField(default=0.7)
+    notes = models.TextField(blank=True, null=True)
+    order = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.exercise_name} on {self.day}"
+
 

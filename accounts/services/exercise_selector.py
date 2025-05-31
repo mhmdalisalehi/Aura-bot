@@ -303,6 +303,10 @@ class ExerciseSelector:
             workout_structure['warmup'] = [ex for ex, _ in self._get_warmup_exercises(target_muscles, week)]
         main_exercises = self._get_main_exercises(target_muscles, week)
         scored_main = self._score_and_select_exercises(main_exercises, week, count)
+        # DEBUG: print selected exercises for main[]
+        # print("[DEBUG] Selected exercises for main[]:")
+        # for ex, score in scored_main:
+        #     print(f"  {ex.name} (id={ex.id}) - score={score}")
         workout_structure['main'] = [ex for ex, _ in scored_main]
         if include_complementary:
             workout_structure['complementary'] = [ex for ex, _ in self._get_complementary_exercises([ex for ex, _ in scored_main], week)]
@@ -375,6 +379,10 @@ class ExerciseSelector:
             )
             scored_exercises.append((exercise, score))
         scored_exercises.sort(key=lambda x: x[1], reverse=True)
+        # DEBUG: print top scored exercises
+        # print(f"[DEBUG] Top scored exercises (week={week}):")
+        # for i, (ex, score) in enumerate(scored_exercises[:count]):
+        #     print(f"  {i+1}. {ex.name} (id={ex.id}) - score={score}")
         return scored_exercises[:count]
 
     def _distribute_exercises(
@@ -402,7 +410,7 @@ class ExerciseSelector:
         return compound_exercises + isolation_exercises
     
     def _get_main_exercises(self, target_muscles: List[str], week: int):
-        print(f"[DEBUG] _get_main_exercises: target_muscles={target_muscles}, week={week}")
+        # print(f"[DEBUG] _get_main_exercises: target_muscles={target_muscles}, week={week}")
         qs = Exercise.objects.all()
         exercises = [
             ex for ex in qs
@@ -411,17 +419,17 @@ class ExerciseSelector:
                 (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
             )
         ]
-        print(f"[DEBUG] After muscle filter: {len(exercises)} exercises")
+        # print(f"[DEBUG] After muscle filter: {len(exercises)} exercises")
         # فیلتر تجهیزات
         if self.settings.available_equipment:
             exercises = [ex for ex in exercises if ex.equipment in self.settings.available_equipment]
-        print(f"[DEBUG] After equipment filter: {len(exercises)} exercises")
+        # print(f"[DEBUG] After equipment filter: {len(exercises)} exercises")
         # فیلتر سطح تجربه
         if self.settings.experience_level == 'beginner':
             exercises = [ex for ex in exercises if ex.level == 'beginner' or (ex.level == 'intermediate' and ex.mechanic == 'compound')]
         elif self.settings.experience_level == 'intermediate':
             exercises = [ex for ex in exercises if ex.level in ['beginner', 'intermediate', 'expert']]
-        print(f"[DEBUG] After experience filter: {len(exercises)} exercises")
+        # print(f"[DEBUG] After experience filter: {len(exercises)} exercises")
         # فیلتر بر اساس هدف
         if self.user.goal:
             if self.user.goal == 'muscle_gain':
@@ -445,7 +453,7 @@ class ExerciseSelector:
                     ex.category in ['cardio', 'plyometrics', 'strength', 'crossfit', 'weighted_bodyweight'] or
                     ex.mechanic == 'compound'
                 )]
-        print(f"[DEBUG] After goal filter: {len(exercises)} exercises")
+        # print(f"[DEBUG] After goal filter: {len(exercises)} exercises")
         return list(exercises)
     
     def _get_complementary_exercises(

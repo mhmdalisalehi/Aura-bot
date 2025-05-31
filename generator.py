@@ -30,7 +30,11 @@ def generate_workout_plan(telegram_id: str, duration_weeks: int = 4) -> None:
         
         # تولید برنامه تمرینی
         generator = WorkoutPlanGenerator(user_profile, training_settings)
-        plan = generator.generate_plan(weeks=duration_weeks)
+        plan = generator.generate_plan()
+
+        # ذخیره در پایگاه داده (DB)
+        generator.save_plan_to_db(plan)
+        print("Workout plan saved to database.")
         
         # خروجی گرفتن برنامه
         exporter = WorkoutExporter(user_profile, training_settings)
@@ -65,4 +69,4 @@ if __name__ == "__main__":
         generate_workout_plan('mhmdalislhi', duration_weeks=4)
     except Exception as e:
         print("Error:", e)
-        traceback.print_exc() 
+        traceback.print_exc()
