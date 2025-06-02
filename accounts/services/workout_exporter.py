@@ -86,20 +86,34 @@ class WorkoutExporter:
             'preferred_exercises': getattr(self.user, 'preferred_exercises', None),
             'avoided_exercises': getattr(self.user, 'avoided_exercises', None)
         }
-    
+
     def _get_program_info(self) -> Dict:
         """دریافت اطلاعات کامل برنامه"""
-        return {
+        program_info = {
             'created_at': datetime.now().isoformat(),
             'split_type': self.settings.split_type,
             'training_days': list(self.settings.training_days.keys()),
             'available_equipment': self.settings.available_equipment,
-            'training_goal': self.settings.training_goal,
-            'cardio_preference': self.settings.cardio_preference,
-            'rest_preference': self.settings.rest_preference,
-            'program_duration_weeks': self.settings.program_duration_weeks,
-            'intensity_preference': self.settings.intensity_preference
+            'training_days_per_week': self.settings.training_days_per_week,
+            'training_duration_minutes': self.settings.training_duration_minutes,
+            'experience_level': self.settings.experience_level,
+            'preferred_location': self.settings.preferred_location,
+            'goal': self.user.goal  # Add user's goal from UserProfile
         }
+        
+        # Add optional fields if they exist
+        optional_fields = [
+            'cardio_preference',
+            'rest_preference',
+            'program_duration_weeks',
+            'intensity_preference'
+        ]
+        
+        for field in optional_fields:
+            if hasattr(self.settings, field):
+                program_info[field] = getattr(self.settings, field)
+                
+        return program_info
     
     def _format_weekly_plan(self, weekly_plan: Dict) -> Dict:
         """فرمت‌بندی برنامه هفتگی برای JSON با جزئیات بیشتر"""
@@ -108,24 +122,62 @@ class WorkoutExporter:
         for day, exercises in weekly_plan.items():
             formatted_plan[day] = []
             for exercise in exercises:
-                exercise_obj = Exercise.objects.get(name=exercise['exercise_name'])
-                notes = get_exercise_notes(exercise_obj, self.settings.experience_level)
-                
-                formatted_exercise = {
-                    'name': exercise['exercise_name'],
-                    'type': exercise['type'],
-                    'muscle_group': exercise['muscle_group'],
-                    'sets': exercise['sets'],
-                    'reps': exercise['reps'],
-                    'rest_seconds': exercise.get('rest_seconds', 60),
-                    'intensity': exercise.get('intensity', 0.7),
-                    'technique': exercise.get('technique', ''),
-                    'notes': notes,
-                    'equipment': exercise_obj.equipment,
-                    'difficulty': exercise_obj.difficulty,
-                    'video_url': exercise_obj.video_url if hasattr(exercise_obj, 'video_url') else None,
-                    'alternative_exercises': exercise.get('alternative_exercises', [])
-                }
+                if isinstance(exercise, str):
+                    # Handle string exercises like "rest" or "stretching"
+                    formatted_exercise = {
+                        'name': exercise,
+                        'type': 'recovery',
+                        'muscle_group': None,
+                        'sets': None,
+                        'reps': None,
+                        'rest_seconds': None,
+                        'intensity': None,
+                        'technique': None,
+                        'notes': None,
+                        'equipment': None,
+                        'difficulty': None,
+                        'video_url': None,
+                        'alternative_exercises': []
+                    }
+                else:
+                    # Handle regular exercise objects
+                    try:
+                        exercise_obj = Exercise.objects.get(name=exercise['exercise_name'])
+                        notes = get_exercise_notes(exercise_obj, self.settings.experience_level)
+                        
+                        formatted_exercise = {
+                            'name': exercise['exercise_name'],
+                            'type': exercise.get('type', 'exercise'),
+                            'muscle_group': exercise.get('muscle_group'),
+                            'sets': exercise.get('sets'),
+                            'reps': exercise.get('reps'),
+                            'rest_seconds': exercise.get('rest_seconds', 60),
+                            'intensity': exercise.get('intensity', 0.7),
+                            'technique': exercise.get('technique', ''),
+                            'notes': notes,
+                            'equipment': exercise_obj.equipment,
+                            'difficulty': exercise_obj.difficulty,
+                            'video_url': exercise_obj.video_url if hasattr(exercise_obj, 'video_url') else None,
+                            'alternative_exercises': exercise.get('alternative_exercises', [])
+                        }
+                    except Exercise.DoesNotExist:
+                        # Handle case where exercise doesn't exist in database
+                        formatted_exercise = {
+                            'name': exercise['exercise_name'],
+                            'type': exercise.get('type', 'exercise'),
+                            'muscle_group': exercise.get('muscle_group'),
+                            'sets': exercise.get('sets'),
+                            'reps': exercise.get('reps'),
+                            'rest_seconds': exercise.get('rest_seconds', 60),
+                            'intensity': exercise.get('intensity', 0.7),
+                            'technique': exercise.get('technique', ''),
+                            'notes': None,
+                            'equipment': None,
+                            'difficulty': None,
+                            'video_url': None,
+                            'alternative_exercises': []
+                        }
+            
                 formatted_plan[day].append(formatted_exercise)
                 
         return formatted_plan
@@ -204,15 +256,18 @@ class WorkoutExporter:
         ]
     
     def _format_program_info(self) -> List[str]:
-        """فرمت‌بندی اطلاعات برنامه برای متن"""
+        """فرمت‌بندی اطلاعات برنامه برای خروجی متنی"""
         return [
-            f"تاریخ ایجاد: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
-            f"نوع برنامه: {self.settings.split_type}",
+            f"زمان ساخت برنامه: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            f"نوع تقسیم‌بندی: {self.settings.split_type}",
+            f"تعداد روزهای تمرین در هفته: {self.settings.training_days_per_week}",
+            f"زمان هر جلسه تمرین: {self.settings.training_duration_minutes} دقیقه",
+            f"سطح تجربه: {self.settings.experience_level}",
+            f"محل تمرین: {self.settings.preferred_location}",
+            f"هدف تمرین: {self.user.goal}",
             f"روزهای تمرین: {', '.join(self.settings.training_days.keys())}",
-            f"تجهیزات در دسترس: {', '.join(self.settings.available_equipment)}",
-            f"هدف تمرین: {self.settings.training_goal}",
-            f"مدت برنامه: {self.settings.program_duration_weeks} هفته",
-            f"ترجیح شدت: {self.settings.intensity_preference}"
+            f"تجهیزات در دسترس:",
+            *[f"- {equipment}" for equipment in self.settings.available_equipment.values()]
         ]
     
     def _format_weekly_plan_text(self, weekly_plan: Dict) -> List[str]:
@@ -394,4 +449,30 @@ class WorkoutExporter:
         text.append(f"روش پیگیری: {info['strength_tracking']['tracking_method']}")
         text.append(f"پیشرفت: {info['strength_tracking']['progression']}")
         
-        return text 
+        return text
+    
+    def _format_nutrition_tips(self) -> List[str]:
+        """فرمت‌بندی نکات تغذیه برای خروجی متنی"""
+        tips = self._get_nutrition_tips()
+        formatted = []
+
+        if 'general' in tips:
+            formatted.append("نکات عمومی:")
+            formatted.extend(f"- {tip}" for tip in tips['general'])
+            formatted.append("")
+
+        if 'specific' in tips:
+            formatted.append("نکات اختصاصی برای هدف شما:")
+            formatted.extend(f"- {tip}" for tip in tips['specific'])
+            formatted.append("")
+
+        if 'pre_workout' in tips:
+            formatted.append("قبل از تمرین:")
+            formatted.extend(f"- {tip}" for tip in tips['pre_workout'])
+            formatted.append("")
+
+        if 'post_workout' in tips:
+            formatted.append("بعد از تمرین:")
+            formatted.extend(f"- {tip}" for tip in tips['post_workout'])
+
+        return formatted
