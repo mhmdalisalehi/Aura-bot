@@ -8,6 +8,9 @@ from exercises.models import Exercise
 from .workout_utils import get_exercise_notes
 from datetime import timedelta
 
+from logger_util import get_logger
+logger = get_logger('workout_exporter', 'logs/workout_exporter.log')
+
 class WorkoutExportError(Exception):
     """خطای مخصوص خروجی گرفتن برنامه"""
     pass
@@ -15,17 +18,21 @@ class WorkoutExportError(Exception):
 class WorkoutExporter:
     def __init__(self, user: UserProfile, settings: TrainingSettings):
         if not user or not settings:
+            logger.error("اطلاعات کاربر یا تنظیمات ناقص است")
             raise WorkoutExportError("اطلاعات کاربر یا تنظیمات ناقص است")
         self.user = user
         self.settings = settings
         try:
             self.bot_user = BotUser.objects.get(id=user.user.id)
+            logger.info(f"WorkoutExporter initialized for user {user.id}")
         except BotUser.DoesNotExist:
+            logger.error("کاربر بات یافت نشد")
             raise WorkoutExportError("کاربر بات یافت نشد")
         
     def export_to_json(self, program: Dict) -> str:
         """خروجی گرفتن برنامه به فرمت JSON با جزئیات کامل"""
         try:
+            logger.info("Exporting program to JSON")
             export_data = {
                 'user_info': self._get_user_info(),
                 'program_info': self._get_program_info(),
@@ -34,18 +41,18 @@ class WorkoutExporter:
                 'nutrition_tips': self._get_nutrition_tips(),
                 'progress_tracking': self._get_progress_tracking_info()
             }
+            logger.info("Program exported to JSON successfully")
             return json.dumps(export_data, indent=2, ensure_ascii=False)
         except Exception as e:
+            logger.error(f"خطا در خروجی JSON: {str(e)}")
             raise WorkoutExportError(f"خطا در خروجی JSON: {str(e)}")
 
     def export_to_excel(self, program: Dict, output_path: str) -> None:
         """خروجی گرفتن برنامه به فرمت Excel"""
         try:
-            # ایجاد DataFrame برای هر بخش
+            logger.info(f"Exporting program to Excel at {output_path}")
             user_df = pd.DataFrame([self._get_user_info()])
             program_df = pd.DataFrame([self._get_program_info()])
-            
-            # تبدیل برنامه هفتگی به DataFrame
             weekly_data = []
             for day, exercises in program['weekly_plan'].items():
                 for exercise in exercises:
@@ -55,14 +62,13 @@ class WorkoutExporter:
                     }
                     weekly_data.append(exercise_data)
             weekly_df = pd.DataFrame(weekly_data)
-            
-            # ذخیره در فایل Excel با چند شیت
             with pd.ExcelWriter(output_path) as writer:
                 user_df.to_excel(writer, sheet_name='اطلاعات کاربر', index=False)
                 program_df.to_excel(writer, sheet_name='اطلاعات برنامه', index=False)
                 weekly_df.to_excel(writer, sheet_name='برنامه هفتگی', index=False)
-                
+            logger.info("Program exported to Excel successfully")
         except Exception as e:
+            logger.error(f"خطا در خروجی Excel: {str(e)}")
             raise WorkoutExportError(f"خطا در خروجی Excel: {str(e)}")
 
     @lru_cache(maxsize=32)
@@ -70,6 +76,7 @@ class WorkoutExporter:
         """دریافت اطلاعات کامل کاربر با کش"""
         bot_user = self.user.user
         name = f"{bot_user.first_name or ''} {bot_user.last_name or ''}".strip()
+        logger.debug(f"Getting user info for {bot_user.username}")
         return {
             'telegram_id': bot_user.telegram_id,
             'username': bot_user.username,
@@ -89,28 +96,24 @@ class WorkoutExporter:
     
     def _get_program_info(self) -> Dict:
         """دریافت اطلاعات کامل برنامه"""
+        logger.debug("Getting program info")
         return {
             'created_at': datetime.now().isoformat(),
             'split_type': self.settings.split_type,
             'training_days': list(self.settings.training_days.keys()),
             'available_equipment': self.settings.available_equipment,
-            'training_goal': self.settings.training_goal,
-            'cardio_preference': self.settings.cardio_preference,
-            'rest_preference': self.settings.rest_preference,
-            'program_duration_weeks': self.settings.program_duration_weeks,
-            'intensity_preference': self.settings.intensity_preference
+            'training_goal': self.user.goal,
         }
     
     def _format_weekly_plan(self, weekly_plan: Dict) -> Dict:
         """فرمت‌بندی برنامه هفتگی برای JSON با جزئیات بیشتر"""
         formatted_plan = {}
-        
+        logger.debug("Formatting weekly plan for export")
         for day, exercises in weekly_plan.items():
             formatted_plan[day] = []
             for exercise in exercises:
                 exercise_obj = Exercise.objects.get(name=exercise['exercise_name'])
                 notes = get_exercise_notes(exercise_obj, self.settings.experience_level)
-                
                 formatted_exercise = {
                     'name': exercise['exercise_name'],
                     'type': exercise['type'],
@@ -122,16 +125,16 @@ class WorkoutExporter:
                     'technique': exercise.get('technique', ''),
                     'notes': notes,
                     'equipment': exercise_obj.equipment,
-                    'difficulty': exercise_obj.difficulty,
+                    'difficulty': exercise_obj.level,
                     'video_url': exercise_obj.video_url if hasattr(exercise_obj, 'video_url') else None,
-                    'alternative_exercises': exercise.get('alternative_exercises', [])
                 }
                 formatted_plan[day].append(formatted_exercise)
-                
+        logger.debug("Weekly plan formatted")
         return formatted_plan
     
     def _get_recovery_info(self, program: Dict) -> Dict:
         """دریافت اطلاعات ریکاوری"""
+        logger.debug("Getting recovery info")
         return {
             'recommended_sleep_hours': self._get_sleep_recommendation(),
             'active_recovery_days': self._get_active_recovery_days(program),
@@ -141,6 +144,7 @@ class WorkoutExporter:
     
     def _get_nutrition_tips(self) -> Dict:
         """دریافت نکات تغذیه بر اساس هدف و تیپ بدنی"""
+        logger.debug("Getting nutrition tips")
         nutrition_tips = {
             'general': [
                 "روزانه 8-10 لیوان آب بنوشید",
@@ -158,8 +162,6 @@ class WorkoutExporter:
                 "الکترولیت‌های از دست رفته را جایگزین کنید"
             ]
         }
-        
-        # اضافه کردن نکات مخصوص بر اساس هدف
         if self.user.goal == 'muscle_gain':
             nutrition_tips['specific'] = [
                 "مصرف پروتئین را به 1.6-2.2 گرم به ازای هر کیلوگرم وزن بدن افزایش دهید",
@@ -172,11 +174,11 @@ class WorkoutExporter:
                 "مصرف پروتئین را بالا نگه دارید (1.6-2 گرم به ازای هر کیلوگرم)",
                 "کربوهیدرات‌ها را در زمان‌های مناسب مصرف کنید"
             ]
-            
         return nutrition_tips
     
     def _get_progress_tracking_info(self) -> Dict:
         """دریافت اطلاعات پیگیری پیشرفت"""
+        logger.debug("Getting progress tracking info")
         return {
             'metrics_to_track': self._get_tracking_metrics(),
             'measurement_frequency': self._get_measurement_frequency(),
@@ -188,6 +190,7 @@ class WorkoutExporter:
         """فرمت‌بندی اطلاعات کاربر برای متن"""
         bot_user = self.user.user
         name = f"{bot_user.first_name or ''} {bot_user.last_name or ''}".strip()
+        logger.debug(f"Formatting user info for {bot_user.username}")
         return [
             f"شناسه تلگرام: {bot_user.telegram_id}",
             f"نام کاربری: {bot_user.username}",
@@ -205,20 +208,20 @@ class WorkoutExporter:
     
     def _format_program_info(self) -> List[str]:
         """فرمت‌بندی اطلاعات برنامه برای متن"""
+        logger.debug("Formatting program info")
         return [
             f"تاریخ ایجاد: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
             f"نوع برنامه: {self.settings.split_type}",
             f"روزهای تمرین: {', '.join(self.settings.training_days.keys())}",
             f"تجهیزات در دسترس: {', '.join(self.settings.available_equipment)}",
-            f"هدف تمرین: {self.settings.training_goal}",
-            f"مدت برنامه: {self.settings.program_duration_weeks} هفته",
-            f"ترجیح شدت: {self.settings.intensity_preference}"
+            f"هدف تمرین: {self.user.goal}",
+            f"مدت برنامه: 4 هفته",
         ]
     
     def _format_weekly_plan_text(self, weekly_plan: Dict) -> List[str]:
         """فرمت‌بندی برنامه هفتگی برای متن با جزئیات بیشتر"""
+        logger.debug("Formatting weekly plan for text export")
         text = []
-        
         for day, exercises in weekly_plan.items():
             text.append(f"\n{day}:")
             for i, exercise in enumerate(exercises, 1):
@@ -239,15 +242,11 @@ class WorkoutExporter:
                     text.append("   حرکات جایگزین:")
                     for alt in exercise['alternative_exercises']:
                         text.append(f"      - {alt}")
-                    
         return text
     
     def _get_sleep_recommendation(self) -> Dict:
-        """دریافت توصیه‌های خواب
-        
-        Returns:
-            اطلاعات توصیه‌های خواب
-        """
+        """دریافت توصیه‌های خواب"""
+        logger.debug("Getting sleep recommendation")
         return {
             'hours': 7-9,
             'quality_tips': [
@@ -258,24 +257,15 @@ class WorkoutExporter:
         }
     
     def _get_active_recovery_days(self, program: Dict) -> List[str]:
-        """دریافت روزهای ریکاوری فعال
-        
-        Args:
-            program: برنامه تمرینی
-            
-        Returns:
-            لیست روزهای ریکاوری فعال
-        """
+        """دریافت روزهای ریکاوری فعال"""
+        logger.debug("Getting active recovery days")
         training_days = set(program['weekly_plan'].keys())
         all_days = set(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
         return list(all_days - training_days)
     
     def _get_stretching_routine(self) -> List[Dict]:
-        """دریافت برنامه کشش
-        
-        Returns:
-            لیست تمرینات کشش
-        """
+        """دریافت برنامه کشش"""
+        logger.debug("Getting stretching routine")
         return [
             {
                 'name': 'کشش همسترینگ',
@@ -299,6 +289,7 @@ class WorkoutExporter:
     
     def _get_recovery_techniques(self) -> List[str]:
         """دریافت تکنیک‌های ریکاوری"""
+        logger.debug("Getting recovery techniques")
         return [
             "ماساژ",
             "غوطه‌وری در آب سرد",
@@ -309,6 +300,7 @@ class WorkoutExporter:
     
     def _get_tracking_metrics(self) -> List[str]:
         """دریافت معیارهای پیگیری پیشرفت"""
+        logger.debug("Getting tracking metrics")
         metrics = ["وزن بدن", "دور کمر", "دور بازو", "دور سینه", "دور ران"]
         if self.user.goal == 'muscle_gain':
             metrics.extend(["وزن‌های استفاده شده در حرکات اصلی", "تعداد تکرارها"])
@@ -318,6 +310,7 @@ class WorkoutExporter:
     
     def _get_measurement_frequency(self) -> Dict:
         """دریافت دفعات اندازه‌گیری"""
+        logger.debug("Getting measurement frequency")
         return {
             'weight': 'هفته‌ای یکبار',
             'measurements': 'دوهفته یکبار',
@@ -327,6 +320,7 @@ class WorkoutExporter:
     
     def _get_photo_guidelines(self) -> List[str]:
         """دریافت راهنمای عکس‌های پیشرفت"""
+        logger.debug("Getting photo guidelines")
         return [
             "عکس‌ها را در نور مناسب بگیرید",
             "از زوایای مختلف عکس بگیرید",
@@ -336,6 +330,7 @@ class WorkoutExporter:
     
     def _get_strength_tracking_guide(self) -> Dict:
         """دریافت راهنمای پیگیری قدرت"""
+        logger.debug("Getting strength tracking guide")
         return {
             'main_lifts': [
                 "اسکات",
@@ -352,16 +347,15 @@ class WorkoutExporter:
         if include_sections is None:
             include_sections = ['user_info', 'program_info', 'nutrition_tips', 
                               'recovery_info', 'weekly_plan', 'progress_tracking']
-        
+        logger.info(f"Exporting program to text. Sections: {include_sections}")
         section_formatters = {
             'user_info': (self._format_user_info, "=== اطلاعات کاربر ==="),
             'program_info': (self._format_program_info, "=== اطلاعات برنامه ==="),
-            'nutrition_tips': (self._format_nutrition_tips, "=== نکات تغذیه ==="),
-            'recovery_info': (lambda: self._format_recovery_info(program), "=== اطلاعات ریکاوری ==="),
+            'nutrition_tips': (self._get_nutrition_tips, "=== نکات تغذیه ==="),
+            'recovery_info': (lambda: self._get_recovery_info(program), "=== اطلاعات ریکاوری ==="),
             'weekly_plan': (lambda: self._format_weekly_plan_text(program['weekly_plan']), "=== برنامه هفتگی ==="),
             'progress_tracking': (self._format_progress_tracking_info, "=== راهنمای پیگیری پیشرفت ===")
         }
-        
         text = []
         for section in include_sections:
             if section in section_formatters:
@@ -369,29 +363,24 @@ class WorkoutExporter:
                 text.append(header)
                 text.extend(formatter())
                 text.append("")
-        
+        logger.info("Program exported to text successfully")
         return "\n".join(text)
 
     def _format_progress_tracking_info(self) -> List[str]:
         """فرمت‌بندی اطلاعات پیگیری پیشرفت برای متن"""
         info = self._get_progress_tracking_info()
         text = []
-        
         text.append("معیارهای پیگیری:")
         for metric in info['metrics_to_track']:
             text.append(f"- {metric}")
-            
         text.append("\nدفعات اندازه‌گیری:")
         for metric, frequency in info['measurement_frequency'].items():
             text.append(f"- {metric}: {frequency}")
-            
         text.append("\nراهنمای عکس‌های پیشرفت:")
         for guideline in info['progress_photos']:
             text.append(f"- {guideline}")
-            
         text.append("\nپیگیری قدرت:")
         text.append(f"حرکات اصلی: {', '.join(info['strength_tracking']['main_lifts'])}")
         text.append(f"روش پیگیری: {info['strength_tracking']['tracking_method']}")
         text.append(f"پیشرفت: {info['strength_tracking']['progression']}")
-        
-        return text 
+        return text

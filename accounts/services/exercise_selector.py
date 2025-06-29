@@ -3,7 +3,9 @@ import random
 from exercises.models import Exercise
 from accounts.models import UserProfile, TrainingSettings, InjuryExerciseClassification
 from django.db.models import Q
-import logging
+
+from logger_util import get_logger
+logger = get_logger('exercise_selector', 'logs/exercise_selector.log')
 
 MUSCLE_NAME_MAP = {
     "back": ["middle back", "lats", "lower back", "traps"],
@@ -20,22 +22,22 @@ def map_muscle_names(muscles: list) -> list:
     mapped = []
     for m in muscles:
         mapped.extend(MUSCLE_NAME_MAP.get(m, [m]))
+    logger.debug(f"Mapped muscle names: {muscles} -> {mapped}")
     return mapped
 
 class ExerciseScorer:
     """سیستم امتیازدهی هوشمند به تمرینات با وزن‌های حرفه‌ای"""
-    
-    # وزن‌های امتیازدهی (مجموع = 10)
+
     WEIGHTS = {
-        'safety': 3.0,        # ایمنی (آسیب‌ها و محدودیت‌ها)
-        'effectiveness': 2.5, # اثربخشی (هدف و تیپ بدنی)
-        'experience': 1.5,    # تجربه و سطح
-        'demographics': 1.0,  # سن و جنسیت
-        'time': 1.0,         # زمان و کارایی
-        'location': 0.5,     # محل تمرین
-        'history': 0.5       # تاریخچه تمرینات
+        'safety': 3.0,
+        'effectiveness': 2.5,
+        'experience': 1.5,
+        'demographics': 1.0,
+        'time': 1.0,
+        'location': 0.5,
+        'history': 0.5
     }
-    
+
     @staticmethod
     def calculate_exercise_score(
         exercise: Exercise,
@@ -44,7 +46,7 @@ class ExerciseScorer:
         week: int,
         last_trained: int = None
     ) -> float:
-        """محاسبه امتیاز نهایی با وزن‌های حرفه‌ای"""
+        logger.debug(f"Scoring exercise {exercise.name} (id={exercise.id}) for user {user.id}, week {week}")
         scores = {
             'safety': ExerciseScorer._safety_score(exercise, settings.injuries),
             'effectiveness': ExerciseScorer._effectiveness_score(exercise, user),
@@ -54,23 +56,16 @@ class ExerciseScorer:
             'location': ExerciseScorer._location_score(exercise, settings.preferred_location),
             'history': ExerciseScorer._history_score(week, last_trained) if last_trained is not None else 1.0
         }
-        
-        # محاسبه امتیاز نهایی با وزن‌ها
+        logger.debug(f"Score breakdown for {exercise.name}: {scores}")
         final_score = sum(
             score * ExerciseScorer.WEIGHTS[category]
             for category, score in scores.items()
         )
-        
-        # نرمال‌سازی امتیاز نهایی (تقسیم بر مجموع وزن‌ها)
+        logger.debug(f"Final score for {exercise.name}: {final_score}")
         return final_score / sum(ExerciseScorer.WEIGHTS.values())
-    
+
     @staticmethod
     def _safety_score(exercise: Exercise, injuries: List[str]) -> float:
-        """
-        محاسبه امتیاز ایمنی (وزن: 3.0)
-        - بررسی آسیب‌ها
-        - اگر تمرین ناایمن باشد، امتیاز کل صفر می‌شود
-        """
         if not injuries:
             return 1.0
         injury_classifications = InjuryExerciseClassification.objects.filter(
@@ -78,17 +73,15 @@ class ExerciseScorer:
             injury__in=injuries
         )
         if injury_classifications.filter(classification='avoid').exists():
-            return 0.0  # تمرین ممنوع است
+            logger.info(f"Exercise {exercise.name} is marked as 'avoid' for injuries {injuries}")
+            return 0.0
         if injury_classifications.filter(classification='safe').exists():
-            return 0.8  # جایگزین امن
+            logger.info(f"Exercise {exercise.name} is marked as 'safe' for injuries {injuries}")
+            return 0.8
         return 1.0
-    
+
     @staticmethod
     def _effectiveness_score(exercise: Exercise, user: UserProfile) -> float:
-        """
-        محاسبه امتیاز اثربخشی (وزن: 2.5)
-        - ترکیب هدف و تیپ بدنی
-        """
         goal_scores = {
             'muscle_gain': {
                 'compound': 1.3,
@@ -115,7 +108,6 @@ class ExerciseScorer:
                 'isolation': 0.6
             }
         }
-        
         body_type_scores = {
             'ectomorph': {
                 'compound': 1.4,
@@ -136,22 +128,14 @@ class ExerciseScorer:
                 'isolation': 1.3
             }
         }
-        
-        # محاسبه امتیاز هدف
         goal_score = goal_scores.get(user.goal, {}).get(exercise.category, 1.0)
-        
-        # محاسبه امتیاز تیپ بدنی
         body_type_score = body_type_scores.get(user.body_type, {}).get(exercise.category, 1.0)
-        
-        # ترکیب امتیازها با وزن بیشتر برای هدف
-        return (goal_score * 0.6) + (body_type_score * 0.4)
-    
+        score = (goal_score * 0.6) + (body_type_score * 0.4)
+        logger.debug(f"Effectiveness score for {exercise.name}: {score}")
+        return score
+
     @staticmethod
     def _experience_score(exercise: Exercise, experience_level: str) -> float:
-        """
-        محاسبه امتیاز تجربه (وزن: 1.5)
-        - تطابق سطح تمرین با تجربه کاربر
-        """
         if experience_level == 'beginner':
             if exercise.level == 'beginner':
                 return 1.5
@@ -170,16 +154,10 @@ class ExerciseScorer:
             elif exercise.level == 'intermediate':
                 return 0.9
             return 1.2
-    
+
     @staticmethod
     def _demographic_score(exercise: Exercise, age: int, gender: str) -> float:
-        """
-        محاسبه امتیاز دموگرافیک (وزن: 1.0)
-        - تطابق با سن و جنسیت
-        """
         score = 1.0
-        
-        # تنظیم بر اساس سن
         if age > 50:
             if exercise.category in ['plyometrics', 'strongman', 'crossfit']:
                 score *= 0.4
@@ -192,8 +170,6 @@ class ExerciseScorer:
                 score *= 0.7
             elif exercise.mechanic == 'compound':
                 score *= 0.9
-                
-        # تنظیم بر اساس جنسیت
         if gender == 'female':
             if exercise.category == 'powerlifting':
                 score *= 0.8
@@ -201,42 +177,34 @@ class ExerciseScorer:
                 score *= 1.2
             elif exercise.category == 'cardio':
                 score *= 1.1
-                
+        logger.debug(f"Demographic score for {exercise.name}: {score}")
         return score
-    
+
     @staticmethod
     def _time_efficiency_score(exercise: Exercise, available_minutes: int) -> float:
-        """
-        محاسبه امتیاز کارایی زمانی (وزن: 1.0)
-        - تطابق با زمان در دسترس
-        """
-        if available_minutes < 30:  # زمان خیلی کم
+        if available_minutes < 30:
             if exercise.mechanic == 'compound':
                 return 1.4
             return 0.6
-        elif available_minutes < 45:  # زمان کم
+        elif available_minutes < 45:
             if exercise.mechanic == 'compound':
                 return 1.2
             elif exercise.mechanic == 'isolation':
                 return 0.8
             return 1.0
-        elif available_minutes < 60:  # زمان متوسط
+        elif available_minutes < 60:
             if exercise.mechanic == 'compound':
                 return 1.1
             elif exercise.mechanic == 'isolation':
                 return 1.0
             return 1.2
-        else:  # زمان کافی
+        else:
             if exercise.mechanic == 'isolation':
                 return 1.2
             return 1.0
-    
+
     @staticmethod
     def _location_score(exercise: Exercise, preferred_location: str) -> float:
-        """
-        محاسبه امتیاز محل تمرین (وزن: 0.5)
-        - تطابق با تجهیزات و فضای موجود
-        """
         location_equipment_map = {
             'home': {
                 'primary': ['body', 'dumbbell', 'bands', 'kettlebells'],
@@ -251,31 +219,25 @@ class ExerciseScorer:
                 'secondary': ['resistance_bands', 'medicine_ball']
             }
         }
-        
         location_data = location_equipment_map.get(preferred_location, {})
         primary_equipment = location_data.get('primary', [])
         secondary_equipment = location_data.get('secondary', [])
-        
         if exercise.equipment in primary_equipment:
             return 1.2
         elif exercise.equipment in secondary_equipment:
             return 1.0
         return 0.7
-    
+
     @staticmethod
     def _history_score(current_week: int, last_trained: int) -> float:
-        """
-        محاسبه امتیاز تاریخچه (وزن: 0.5)
-        - تنوع در تمرینات
-        """
         weeks_since_last = current_week - last_trained
         if weeks_since_last <= 1:
-            return 0.4  # تمرینات اخیر امتیاز کمتری دارند
+            return 0.4
         elif weeks_since_last <= 2:
-            return 0.8  # تمرینات با فاصله مناسب
+            return 0.8
         elif weeks_since_last <= 3:
-            return 1.2  # تمرینات با فاصله زیاد
-        return 1.0  # فاصله خیلی زیاد
+            return 1.2
+        return 1.0
 
 class ExerciseSelector:
     def __init__(self, user: UserProfile, settings: TrainingSettings):
@@ -284,6 +246,7 @@ class ExerciseSelector:
         self.exercise_history = {}
         self.scorer = ExerciseScorer()
         self.current_week = 1
+        logger.info(f"ExerciseSelector initialized for user {user.id}")
 
     def get_exercises(
         self,
@@ -294,28 +257,28 @@ class ExerciseSelector:
         include_warmup: bool = True,
         include_cooldown: bool = True
     ) -> Dict[str, List[Exercise]]:
-        """
-        دریافت تمرینات مناسب برای عضلات هدف با ساختار حرفه‌ای
-        فقط مدل‌ها در زنجیره
-        """
+        logger.info(f"Selecting exercises for target_muscles={target_muscles}, week={week}, count={count}")
         workout_structure = {}
         if include_warmup:
+            logger.debug("Selecting warmup exercises")
             workout_structure['warmup'] = [ex for ex, _ in self._get_warmup_exercises(target_muscles, week)]
         main_exercises = self._get_main_exercises(target_muscles, week)
+        logger.debug(f"Found {len(main_exercises)} main exercises before scoring")
         scored_main = self._score_and_select_exercises(main_exercises, week, count)
-        # DEBUG: print selected exercises for main[]
-        # print("[DEBUG] Selected exercises for main[]:")
-        # for ex, score in scored_main:
-        #     print(f"  {ex.name} (id={ex.id}) - score={score}")
+        logger.info(f"Selected main exercises: {[ex.name for ex, _ in scored_main]}")
         workout_structure['main'] = [ex for ex, _ in scored_main]
         if include_complementary:
+            logger.debug("Selecting complementary and stabilization exercises")
             workout_structure['complementary'] = [ex for ex, _ in self._get_complementary_exercises([ex for ex, _ in scored_main], week)]
             workout_structure['stabilization'] = [ex for ex, _ in self._get_stabilization_exercises(target_muscles, week)]
         if include_cooldown:
+            logger.debug("Selecting cooldown exercises")
             workout_structure['cooldown'] = [ex for ex, _ in self._get_cooldown_exercises(target_muscles, week)]
+        logger.info(f"Workout structure keys: {list(workout_structure.keys())}")
         return workout_structure
 
     def _get_warmup_exercises(self, target_muscles: List[str], week: int) -> List[Tuple[Exercise, float]]:
+        logger.debug(f"Getting warmup exercises for {target_muscles}, week {week}")
         qs = Exercise.objects.filter(level='beginner')
         warmup_exercises = [
             ex for ex in qs
@@ -329,9 +292,11 @@ class ExerciseSelector:
                 (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
             )
         ]
+        logger.debug(f"Found {len(warmup_exercises)} warmup exercises")
         return self._score_and_select_exercises(warmup_exercises, week, count=3)
 
     def _get_cooldown_exercises(self, target_muscles: List[str], week: int) -> List[Tuple[Exercise, float]]:
+        logger.debug(f"Getting cooldown exercises for {target_muscles}, week {week}")
         qs = Exercise.objects.filter(level='beginner')
         cooldown_exercises = [
             ex for ex in qs
@@ -345,9 +310,11 @@ class ExerciseSelector:
                 (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
             )
         ]
+        logger.debug(f"Found {len(cooldown_exercises)} cooldown exercises")
         return self._score_and_select_exercises(cooldown_exercises, week, count=3)
 
     def _get_stabilization_exercises(self, target_muscles: List[str], week: int) -> List[Tuple[Exercise, float]]:
+        logger.debug(f"Getting stabilization exercises for {target_muscles}, week {week}")
         qs = Exercise.objects.filter(level__in=['beginner', 'intermediate'])
         stabilization_exercises = [
             ex for ex in qs
@@ -359,6 +326,7 @@ class ExerciseSelector:
                 not self.settings.available_equipment or ex.equipment in self.settings.available_equipment
             )
         ]
+        logger.debug(f"Found {len(stabilization_exercises)} stabilization exercises")
         return self._score_and_select_exercises(stabilization_exercises, week, count=2)
 
     def _score_and_select_exercises(
@@ -367,6 +335,7 @@ class ExerciseSelector:
         week: int,
         count: int
     ) -> List[Tuple[Exercise, float]]:
+        logger.debug(f"Scoring {len(exercises)} exercises for week {week}, selecting top {count}")
         scored_exercises = []
         for exercise in exercises:
             last_trained = self.exercise_history.get(exercise.id)
@@ -379,38 +348,26 @@ class ExerciseSelector:
             )
             scored_exercises.append((exercise, score))
         scored_exercises.sort(key=lambda x: x[1], reverse=True)
-        # DEBUG: print top scored exercises
-        # print(f"[DEBUG] Top scored exercises (week={week}):")
-        # for i, (ex, score) in enumerate(scored_exercises[:count]):
-        #     print(f"  {i+1}. {ex.name} (id={ex.id}) - score={score}")
+        logger.debug(f"Top scored exercises: {[ex.name for ex, _ in scored_exercises[:count]]}")
         return scored_exercises[:count]
 
     def _distribute_exercises(
         self,
         exercises: List[Tuple[Exercise, float]]
     ) -> List[Tuple[Exercise, float]]:
-        """توزیع تمرینات ترکیبی و ایزوله
-        
-        Args:
-            exercises: لیست تمرینات با امتیاز
-            
-        Returns:
-            لیست توزیع شده تمرینات
-        """
+        logger.debug("Distributing compound and isolation exercises")
         compound_exercises = []
         isolation_exercises = []
-        
         for exercise, score in exercises:
             if exercise.mechanic == 'compound':
                 compound_exercises.append((exercise, score))
             else:
                 isolation_exercises.append((exercise, score))
-            
-        # اولویت با تمرینات ترکیبی
+        logger.debug(f"Compound: {len(compound_exercises)}, Isolation: {len(isolation_exercises)}")
         return compound_exercises + isolation_exercises
-    
+
     def _get_main_exercises(self, target_muscles: List[str], week: int):
-        # print(f"[DEBUG] _get_main_exercises: target_muscles={target_muscles}, week={week}")
+        logger.debug(f"Getting main exercises for {target_muscles}, week {week}")
         qs = Exercise.objects.all()
         exercises = [
             ex for ex in qs
@@ -419,19 +376,17 @@ class ExerciseSelector:
                 (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
             )
         ]
-        # print(f"[DEBUG] After muscle filter: {len(exercises)} exercises")
-        # فیلتر تجهیزات
+        logger.debug(f"Main exercises after muscle filter: {len(exercises)}")
         if self.settings.available_equipment:
             exercises = [ex for ex in exercises if ex.equipment in self.settings.available_equipment]
-        # print(f"[DEBUG] After equipment filter: {len(exercises)} exercises")
-        # فیلتر سطح تجربه
+            logger.debug(f"Main exercises after equipment filter: {len(exercises)}")
         if self.settings.experience_level == 'beginner':
             exercises = [ex for ex in exercises if ex.level == 'beginner' or (ex.level == 'intermediate' and ex.mechanic == 'compound')]
         elif self.settings.experience_level == 'intermediate':
             exercises = [ex for ex in exercises if ex.level in ['beginner', 'intermediate', 'expert']]
-        # print(f"[DEBUG] After experience filter: {len(exercises)} exercises")
-        # فیلتر بر اساس هدف
+        logger.debug(f"Main exercises after experience filter: {len(exercises)}")
         if self.user.goal:
+            before_goal = len(exercises)
             if self.user.goal == 'muscle_gain':
                 exercises = [ex for ex in exercises if (
                     ex.category in ['strength', 'powerlifting', 'weighted_bodyweight'] or
@@ -453,15 +408,16 @@ class ExerciseSelector:
                     ex.category in ['cardio', 'plyometrics', 'strength', 'crossfit', 'weighted_bodyweight'] or
                     ex.mechanic == 'compound'
                 )]
-        # print(f"[DEBUG] After goal filter: {len(exercises)} exercises")
+            logger.debug(f"Main exercises after goal filter ({self.user.goal}): {before_goal} -> {len(exercises)}")
         return list(exercises)
-    
+
     def _get_complementary_exercises(
         self,
         main_exercises: List,
         week: int,
         count: int = 2
     ) -> List[Tuple[Exercise, float]]:
+        logger.debug(f"Getting complementary exercises for main_exercises (count={len(main_exercises)}), week {week}")
         complementary_muscles = set()
         for exercise in main_exercises:
             ex = exercise
@@ -476,6 +432,7 @@ class ExerciseSelector:
             elif ex.force == 'static':
                 complementary_muscles.update(['core', 'lower_back'])
         if not complementary_muscles:
+            logger.info("No complementary muscles found, skipping complementary exercises.")
             return []
         qs = Exercise.objects.all()
         complementary = [
@@ -488,25 +445,17 @@ class ExerciseSelector:
                 not self.settings.available_equipment or ex.equipment in self.settings.available_equipment
             )
         ]
+        logger.debug(f"Found {len(complementary)} complementary exercises")
         scored = self._score_and_select_exercises(complementary, week, count)
+        logger.info(f"Selected complementary exercises: {[ex.name for ex, _ in scored]}")
         return scored
-    
+
     def update_history(self, exercise_id: int, week: int):
-        """به‌روزرسانی تاریخچه تمرینات
-        
-        Args:
-            exercise_id: شناسه تمرین
-            week: شماره هفته
-        """
         self.exercise_history[exercise_id] = week
+        logger.info(f"Updated exercise history: exercise_id={exercise_id}, week={week}")
 
     def get_alternative_exercises(self, exercise_id: int, physical_limitations=None) -> List[Exercise]:
-        """
-        دریافت لیست تمرینات جایگزین مناسب
-        - تمرینات با همان گروه عضلانی
-        - تمرینات با سطح دشواری مشابه
-        - تمرینات سازگار با محدودیت‌های فیزیکی
-        """
+        logger.info(f"Getting alternative exercises for exercise_id={exercise_id}")
         try:
             main_exercise = Exercise.objects.get(id=exercise_id)
             qs = Exercise.objects.filter(level=main_exercise.level)
@@ -520,22 +469,26 @@ class ExerciseSelector:
                     not physical_limitations or not any(injury in (ex.injuries or []) for injury in physical_limitations)
                 )
             ]
-            # مقداردهی current_week اگر به صورت داینامیک ست شده باشد
             week = getattr(self, 'current_week', 1)
             scored_alternatives = self._score_and_select_exercises(
                 alternatives,
                 week,
                 count=5
             )
+            logger.info(f"Found {len(scored_alternatives)} alternative exercises for exercise_id={exercise_id}")
             return [ex[0] for ex in scored_alternatives]
         except Exercise.DoesNotExist:
+            logger.warning(f"Exercise with id={exercise_id} does not exist.")
             return []
         except Exception as e:
-            print(f"خطا در دریافت تمرینات جایگزین: {str(e)}")
+            logger.error(f"Error getting alternative exercises for exercise_id={exercise_id}: {str(e)}")
             return []
 
     def get_mobility_exercises(self, target_areas: list = None, exercise_type: str = 'warmup', split_type: str = None) -> list:
+        logger.info(f"Getting mobility exercises for target_areas={target_areas}, exercise_type={exercise_type}, split_type={split_type}")
         exercises = super().get_mobility_exercises(target_areas, exercise_type, split_type)
         if not exercises:
-            logging.warning(f"هیچ تمرین موبیلیتی برای {target_areas} و نوع {exercise_type} پیدا نشد!")
+            logger.warning(f"No mobility exercises found for {target_areas} and type {exercise_type}")
+        else:
+            logger.info(f"Found {len(exercises)} mobility exercises for {target_areas} and type {exercise_type}")
         return exercises

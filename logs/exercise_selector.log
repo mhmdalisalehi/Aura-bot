@@ -1,0 +1,173 @@
+2025-06-29 17:05:58,907 INFO ExerciseSelector initialized for user 1
+2025-06-29 17:05:58,908 INFO Selecting exercises for target_muscles=['chest'], week=1, count=5
+2025-06-29 17:05:58,973 INFO Selected main exercises: ['Incline Cable Flye', 'Flat Bench Cable Flyes', 'Around The Worlds', 'Barbell Guillotine Bench Press', 'Wide-Grip Barbell Bench Press']
+2025-06-29 17:05:59,011 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:05:59,070 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:05:59,071 INFO Selecting exercises for target_muscles=['chest'], week=1, count=5
+2025-06-29 17:05:59,125 INFO Selected main exercises: ['Incline Cable Flye', 'Flat Bench Cable Flyes', 'Around The Worlds', 'Barbell Guillotine Bench Press', 'Wide-Grip Barbell Bench Press']
+2025-06-29 17:05:59,160 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:05:59,213 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:05:59,213 INFO Selecting exercises for target_muscles=['middle back', 'lats', 'lower back', 'traps'], week=1, count=5
+2025-06-29 17:05:59,269 INFO Selected main exercises: ['Middle Back Shrug', 'Alternating Kettlebell Row', 'Bent-Arm Barbell Pullover', 'Elevated Cable Rows', 'Lying T-Bar Row']
+2025-06-29 17:05:59,304 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:05:59,355 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:05:59,355 INFO Selecting exercises for target_muscles=['middle back', 'lats', 'lower back', 'traps'], week=1, count=5
+2025-06-29 17:05:59,409 INFO Selected main exercises: ['Middle Back Shrug', 'Alternating Kettlebell Row', 'Bent-Arm Barbell Pullover', 'Elevated Cable Rows', 'Lying T-Bar Row']
+2025-06-29 17:05:59,446 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:05:59,526 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:05:59,526 INFO Selecting exercises for target_muscles=['shoulders'], week=1, count=5
+2025-06-29 17:05:59,660 INFO Selected main exercises: ['Lying One-Arm Lateral Raise', 'Lying Rear Delt Raise', 'Standing Front Barbell Raise Over Head', 'Dumbbell Lying One-Arm Rear Lateral Raise', 'Dumbbell Lying Rear Lateral Raise']
+2025-06-29 17:05:59,724 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:05:59,821 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:05:59,821 INFO Selecting exercises for target_muscles=['shoulders'], week=1, count=5
+2025-06-29 17:05:59,886 INFO Selected main exercises: ['Lying One-Arm Lateral Raise', 'Lying Rear Delt Raise', 'Standing Front Barbell Raise Over Head', 'Dumbbell Lying One-Arm Rear Lateral Raise', 'Dumbbell Lying Rear Lateral Raise']
+2025-06-29 17:05:59,929 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:00,026 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:00,027 INFO Selecting exercises for target_muscles=['biceps'], week=1, count=5
+2025-06-29 17:06:00,087 INFO Selected main exercises: ['Zottman Preacher Curl', 'Dumbbell Prone Incline Curl', 'Lying Cable Curl', 'Lying High Bench Barbell Curl', 'Overhead Cable Curl']
+2025-06-29 17:06:00,126 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:00,186 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:00,186 INFO Selecting exercises for target_muscles=['triceps'], week=1, count=5
+2025-06-29 17:06:00,243 INFO Selected main exercises: ['Dumbbell One-Arm Triceps Extension', 'Incline Barbell Triceps Extension', 'Kneeling Cable Triceps Extension', 'Seated Bent-Over Two-Arm Dumbbell Triceps Extension', 'Lying Close-Grip Barbell Triceps Extension Behind The Head']
+2025-06-29 17:06:00,280 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:00,337 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:00,337 INFO Selecting exercises for target_muscles=['forearms'], week=1, count=5
+2025-06-29 17:06:00,389 INFO Selected main exercises: ['Dumbbell Lying Supination', 'Seated One-Arm Dumbbell Palms-Down Wrist Curl', 'Dumbbell Lying Pronation', 'Bottoms-Up Clean From The Hang Position', 'Palms-Down Dumbbell Wrist Curl Over A Bench']
+2025-06-29 17:06:00,424 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:00,478 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:00,478 INFO Selecting exercises for target_muscles=['lats'], week=1, count=5
+2025-06-29 17:06:00,529 INFO Selected main exercises: ['Bent-Arm Barbell Pullover', 'Elevated Cable Rows', 'Full Range-Of-Motion Lat Pulldown', 'V-Bar Pulldown', 'Wide-Grip Pulldown Behind The Neck']
+2025-06-29 17:06:00,565 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:00,620 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:00,621 INFO Selecting exercises for target_muscles=['shoulders'], week=1, count=5
+2025-06-29 17:06:00,673 INFO Selected main exercises: ['Lying One-Arm Lateral Raise', 'Lying Rear Delt Raise', 'Standing Front Barbell Raise Over Head', 'Dumbbell Lying One-Arm Rear Lateral Raise', 'Dumbbell Lying Rear Lateral Raise']
+2025-06-29 17:06:00,709 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:00,763 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:00,768 INFO Selecting exercises for target_muscles=['quadriceps'], week=1, count=5
+2025-06-29 17:06:00,826 INFO Selected main exercises: ['Barbell Full Squat', 'Front Squat (Clean Grip)', 'Narrow Stance Hack Squats', 'Narrow Stance Leg Press', 'Wide Stance Barbell Squat']
+2025-06-29 17:06:00,863 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:00,917 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:00,917 INFO Selecting exercises for target_muscles=['quadriceps'], week=1, count=5
+2025-06-29 17:06:00,974 INFO Selected main exercises: ['Barbell Full Squat', 'Front Squat (Clean Grip)', 'Narrow Stance Hack Squats', 'Narrow Stance Leg Press', 'Wide Stance Barbell Squat']
+2025-06-29 17:06:01,008 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:01,085 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:01,085 INFO Selecting exercises for target_muscles=['hamstrings'], week=1, count=5
+2025-06-29 17:06:01,188 INFO Selected main exercises: ['Power Clean', 'Reverse Hyperextension', 'Smith Machine Hang Power Clean', 'Dumbbell Clean', 'Romanian Deadlift']
+2025-06-29 17:06:01,231 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:01,287 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:01,287 INFO Selecting exercises for target_muscles=['hamstrings'], week=1, count=5
+2025-06-29 17:06:01,349 INFO Selected main exercises: ['Power Clean', 'Reverse Hyperextension', 'Smith Machine Hang Power Clean', 'Dumbbell Clean', 'Romanian Deadlift']
+2025-06-29 17:06:01,387 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:01,442 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:01,442 INFO Selecting exercises for target_muscles=['glutes'], week=1, count=5
+2025-06-29 17:06:01,496 INFO Selected main exercises: ['One-Legged Cable Kickback', 'Barbell Hip Thrust', 'Kneeling Squat', 'Barbell Glute Bridge', 'Pull Through']
+2025-06-29 17:06:01,532 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:01,587 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:01,587 INFO Selecting exercises for target_muscles=['glutes'], week=1, count=5
+2025-06-29 17:06:01,643 INFO Selected main exercises: ['One-Legged Cable Kickback', 'Barbell Hip Thrust', 'Kneeling Squat', 'Barbell Glute Bridge', 'Pull Through']
+2025-06-29 17:06:01,682 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:01,737 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:01,738 INFO Selecting exercises for target_muscles=['calves'], week=1, count=5
+2025-06-29 17:06:01,791 INFO Selected main exercises: ['Calf Raise On A Dumbbell', 'Standing Dumbbell Calf Raise', 'Calf Press On The Leg Press Machine', 'Standing Calf Raises', 'Barbell Seated Calf Raise']
+2025-06-29 17:06:01,828 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:01,883 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:01,883 INFO Selecting exercises for target_muscles=['adductors'], week=1, count=5
+2025-06-29 17:06:01,936 INFO Selected main exercises: ['Thigh Adductor', 'Band Hip Adductions']
+2025-06-29 17:06:01,973 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:02,028 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:02,028 INFO Selecting exercises for target_muscles=['abductors'], week=1, count=5
+2025-06-29 17:06:02,082 INFO Selected main exercises: ['Thigh Abductor', 'Monster Walk']
+2025-06-29 17:06:02,119 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:02,172 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:02,173 INFO Selecting exercises for target_muscles=['quadriceps'], week=1, count=5
+2025-06-29 17:06:02,224 INFO Selected main exercises: ['Barbell Full Squat', 'Front Squat (Clean Grip)', 'Narrow Stance Hack Squats', 'Narrow Stance Leg Press', 'Wide Stance Barbell Squat']
+2025-06-29 17:06:02,258 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:02,310 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:02,311 INFO Selecting exercises for target_muscles=['hamstrings'], week=1, count=5
+2025-06-29 17:06:02,362 INFO Selected main exercises: ['Power Clean', 'Reverse Hyperextension', 'Smith Machine Hang Power Clean', 'Dumbbell Clean', 'Romanian Deadlift']
+2025-06-29 17:06:02,398 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:02,451 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:02,457 INFO Selecting exercises for target_muscles=['chest'], week=1, count=5
+2025-06-29 17:06:02,511 INFO Selected main exercises: ['Incline Cable Flye', 'Flat Bench Cable Flyes', 'Around The Worlds', 'Barbell Guillotine Bench Press', 'Wide-Grip Barbell Bench Press']
+2025-06-29 17:06:02,567 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:02,617 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:02,617 INFO Selecting exercises for target_muscles=['chest'], week=1, count=5
+2025-06-29 17:06:02,668 INFO Selected main exercises: ['Incline Cable Flye', 'Flat Bench Cable Flyes', 'Around The Worlds', 'Barbell Guillotine Bench Press', 'Wide-Grip Barbell Bench Press']
+2025-06-29 17:06:02,704 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:02,756 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:02,757 INFO Selecting exercises for target_muscles=['middle back', 'lats', 'lower back', 'traps'], week=1, count=5
+2025-06-29 17:06:02,810 INFO Selected main exercises: ['Middle Back Shrug', 'Alternating Kettlebell Row', 'Bent-Arm Barbell Pullover', 'Elevated Cable Rows', 'Lying T-Bar Row']
+2025-06-29 17:06:02,846 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:02,900 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:02,900 INFO Selecting exercises for target_muscles=['middle back', 'lats', 'lower back', 'traps'], week=1, count=5
+2025-06-29 17:06:02,953 INFO Selected main exercises: ['Middle Back Shrug', 'Alternating Kettlebell Row', 'Bent-Arm Barbell Pullover', 'Elevated Cable Rows', 'Lying T-Bar Row']
+2025-06-29 17:06:02,991 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:03,049 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:03,049 INFO Selecting exercises for target_muscles=['shoulders'], week=1, count=5
+2025-06-29 17:06:03,103 INFO Selected main exercises: ['Lying One-Arm Lateral Raise', 'Lying Rear Delt Raise', 'Standing Front Barbell Raise Over Head', 'Dumbbell Lying One-Arm Rear Lateral Raise', 'Dumbbell Lying Rear Lateral Raise']
+2025-06-29 17:06:03,141 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:03,195 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:03,196 INFO Selecting exercises for target_muscles=['shoulders'], week=1, count=5
+2025-06-29 17:06:03,250 INFO Selected main exercises: ['Lying One-Arm Lateral Raise', 'Lying Rear Delt Raise', 'Standing Front Barbell Raise Over Head', 'Dumbbell Lying One-Arm Rear Lateral Raise', 'Dumbbell Lying Rear Lateral Raise']
+2025-06-29 17:06:03,286 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:03,341 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:03,341 INFO Selecting exercises for target_muscles=['biceps'], week=1, count=5
+2025-06-29 17:06:03,396 INFO Selected main exercises: ['Zottman Preacher Curl', 'Dumbbell Prone Incline Curl', 'Lying Cable Curl', 'Lying High Bench Barbell Curl', 'Overhead Cable Curl']
+2025-06-29 17:06:03,437 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:03,492 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:03,493 INFO Selecting exercises for target_muscles=['triceps'], week=1, count=5
+2025-06-29 17:06:03,546 INFO Selected main exercises: ['Dumbbell One-Arm Triceps Extension', 'Incline Barbell Triceps Extension', 'Kneeling Cable Triceps Extension', 'Seated Bent-Over Two-Arm Dumbbell Triceps Extension', 'Lying Close-Grip Barbell Triceps Extension Behind The Head']
+2025-06-29 17:06:03,581 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:03,636 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:03,636 INFO Selecting exercises for target_muscles=['chest'], week=1, count=5
+2025-06-29 17:06:03,689 INFO Selected main exercises: ['Incline Cable Flye', 'Flat Bench Cable Flyes', 'Around The Worlds', 'Barbell Guillotine Bench Press', 'Wide-Grip Barbell Bench Press']
+2025-06-29 17:06:03,725 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:03,780 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:03,781 INFO Selecting exercises for target_muscles=['lats'], week=1, count=5
+2025-06-29 17:06:03,835 INFO Selected main exercises: ['Bent-Arm Barbell Pullover', 'Elevated Cable Rows', 'Full Range-Of-Motion Lat Pulldown', 'V-Bar Pulldown', 'Wide-Grip Pulldown Behind The Neck']
+2025-06-29 17:06:03,873 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:03,927 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:03,931 INFO Selecting exercises for target_muscles=['quadriceps'], week=1, count=5
+2025-06-29 17:06:03,985 INFO Selected main exercises: ['Barbell Full Squat', 'Front Squat (Clean Grip)', 'Narrow Stance Hack Squats', 'Narrow Stance Leg Press', 'Wide Stance Barbell Squat']
+2025-06-29 17:06:04,021 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:04,074 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:04,075 INFO Selecting exercises for target_muscles=['quadriceps'], week=1, count=5
+2025-06-29 17:06:04,130 INFO Selected main exercises: ['Barbell Full Squat', 'Front Squat (Clean Grip)', 'Narrow Stance Hack Squats', 'Narrow Stance Leg Press', 'Wide Stance Barbell Squat']
+2025-06-29 17:06:04,166 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:04,219 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:04,220 INFO Selecting exercises for target_muscles=['hamstrings'], week=1, count=5
+2025-06-29 17:06:04,273 INFO Selected main exercises: ['Power Clean', 'Reverse Hyperextension', 'Smith Machine Hang Power Clean', 'Dumbbell Clean', 'Romanian Deadlift']
+2025-06-29 17:06:04,310 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:04,363 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:04,364 INFO Selecting exercises for target_muscles=['hamstrings'], week=1, count=5
+2025-06-29 17:06:04,417 INFO Selected main exercises: ['Power Clean', 'Reverse Hyperextension', 'Smith Machine Hang Power Clean', 'Dumbbell Clean', 'Romanian Deadlift']
+2025-06-29 17:06:04,454 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:04,507 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:04,508 INFO Selecting exercises for target_muscles=['glutes'], week=1, count=5
+2025-06-29 17:06:04,561 INFO Selected main exercises: ['One-Legged Cable Kickback', 'Barbell Hip Thrust', 'Kneeling Squat', 'Barbell Glute Bridge', 'Pull Through']
+2025-06-29 17:06:04,597 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:04,652 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:04,652 INFO Selecting exercises for target_muscles=['glutes'], week=1, count=5
+2025-06-29 17:06:04,705 INFO Selected main exercises: ['One-Legged Cable Kickback', 'Barbell Hip Thrust', 'Kneeling Squat', 'Barbell Glute Bridge', 'Pull Through']
+2025-06-29 17:06:04,741 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:04,797 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:04,797 INFO Selecting exercises for target_muscles=['calves'], week=1, count=5
+2025-06-29 17:06:04,852 INFO Selected main exercises: ['Calf Raise On A Dumbbell', 'Standing Dumbbell Calf Raise', 'Calf Press On The Leg Press Machine', 'Standing Calf Raises', 'Barbell Seated Calf Raise']
+2025-06-29 17:06:04,888 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:04,941 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:04,941 INFO Selecting exercises for target_muscles=['adductors'], week=1, count=5
+2025-06-29 17:06:05,015 INFO Selected main exercises: ['Thigh Adductor', 'Band Hip Adductions']
+2025-06-29 17:06:05,052 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:05,105 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:05,105 INFO Selecting exercises for target_muscles=['abductors'], week=1, count=5
+2025-06-29 17:06:05,159 INFO Selected main exercises: ['Thigh Abductor', 'Monster Walk']
+2025-06-29 17:06:05,203 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:05,259 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:05,260 INFO Selecting exercises for target_muscles=['quadriceps'], week=1, count=5
+2025-06-29 17:06:05,316 INFO Selected main exercises: ['Barbell Full Squat', 'Front Squat (Clean Grip)', 'Narrow Stance Hack Squats', 'Narrow Stance Leg Press', 'Wide Stance Barbell Squat']
+2025-06-29 17:06:05,352 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:05,406 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']
+2025-06-29 17:06:05,406 INFO Selecting exercises for target_muscles=['hamstrings'], week=1, count=5
+2025-06-29 17:06:05,461 INFO Selected main exercises: ['Power Clean', 'Reverse Hyperextension', 'Smith Machine Hang Power Clean', 'Dumbbell Clean', 'Romanian Deadlift']
+2025-06-29 17:06:05,498 INFO Selected complementary exercises: ['Calf Raise On A Dumbbell', 'Dumbbell Lying Supination']
+2025-06-29 17:06:05,551 INFO Workout structure keys: ['warmup', 'main', 'complementary', 'stabilization', 'cooldown']

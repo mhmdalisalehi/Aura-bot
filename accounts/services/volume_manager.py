@@ -2,6 +2,9 @@ from typing import Dict, List, Tuple
 from exercises.models import Exercise
 from accounts.models import UserProfile, TrainingSettings
 
+from logger_util import get_logger
+logger = get_logger('volume_manager', 'logs/volume_manager.log')
+
 class WorkoutVolumeManager:
     """
     مدیریت حرفه‌ای حجم تمرینات
@@ -10,92 +13,84 @@ class WorkoutVolumeManager:
     - تنظیم حجم بر اساس نوع تمرین
     - مدیریت ریکاوری و خستگی
     """
-    
-    # اهداف حجمی برای هر هدف و سطح تجربه (مجموع ست‌ها در هفته)
+
     VOLUME_TARGETS = {
         'muscle_gain': {
-            'beginner': (10, 12),    # 10-12 ست در هفته
-            'intermediate': (12, 16), # 12-16 ست در هفته
-            'expert': (14, 20)       # 14-20 ست در هفته
+            'beginner': (10, 12),
+            'intermediate': (12, 16),
+            'expert': (14, 20)
         },
         'strength': {
-            'beginner': (8, 10),     # 8-10 ست در هفته
-            'intermediate': (10, 14), # 10-14 ست در هفته
-            'expert': (12, 16)       # 12-16 ست در هفته
+            'beginner': (8, 10),
+            'intermediate': (10, 14),
+            'expert': (12, 16)
         },
         'weight_loss': {
-            'beginner': (12, 15),    # 12-15 ست در هفته
-            'intermediate': (15, 18), # 15-18 ست در هفته
-            'expert': (18, 22)       # 18-22 ست در هفته
+            'beginner': (12, 15),
+            'intermediate': (15, 18),
+            'expert': (18, 22)
         },
         'endurance': {
-            'beginner': (15, 18),    # 15-18 ست در هفته
-            'intermediate': (18, 22), # 18-22 ست در هفته
-            'expert': (20, 25)       # 20-25 ست در هفته
+            'beginner': (15, 18),
+            'intermediate': (18, 22),
+            'expert': (20, 25)
         }
     }
-    
-    # محدوده تکرار برای هر هدف و نوع تمرین
+
     REP_RANGES = {
         'muscle_gain': {
-            'compound': '6-8',    # تمرینات ترکیبی
-            'isolation': '8-12',  # تمرینات ایزوله
-            'accessory': '12-15'  # تمرینات تکمیلی
+            'compound': '6-8',
+            'isolation': '8-12',
+            'accessory': '12-15'
         },
         'strength': {
-            'compound': '3-5',    # تمرینات ترکیبی
-            'isolation': '6-8',   # تمرینات ایزوله
-            'accessory': '8-10'   # تمرینات تکمیلی
+            'compound': '3-5',
+            'isolation': '6-8',
+            'accessory': '8-10'
         },
         'weight_loss': {
-            'compound': '8-12',   # تمرینات ترکیبی
-            'isolation': '12-15', # تمرینات ایزوله
-            'accessory': '15-20'  # تمرینات تکمیلی
+            'compound': '8-12',
+            'isolation': '12-15',
+            'accessory': '15-20'
         },
         'endurance': {
-            'compound': '12-15',  # تمرینات ترکیبی
-            'isolation': '15-20', # تمرینات ایزوله
-            'accessory': '20-25'  # تمرینات تکمیلی
+            'compound': '12-15',
+            'isolation': '15-20',
+            'accessory': '20-25'
         }
     }
-    
+
     def __init__(self, user: UserProfile, settings: TrainingSettings):
         self.user = user
         self.settings = settings
-        self.muscle_volume = {}  # حجم فعلی هر عضله
-        self.weekly_volume = {}  # حجم هفتگی هر عضله
-        self.progression_week = 1  # هفته پیشرفت
-        self.deload_week = False  # هفته کاهش بار
-        
+        self.muscle_volume = {}
+        self.weekly_volume = {}
+        self.progression_week = 1
+        self.deload_week = False
+        logger.info(f"WorkoutVolumeManager initialized for user {user.id}")
+
     def adjust_volume(self, muscle: str, week: int, exercise_type: str = 'compound') -> Dict:
-        """
-        تنظیم حجم تمرین برای یک عضله در هفته مشخص
-        - تنظیم بر اساس هدف و تجربه
-        - تنظیم بر اساس نوع تمرین
-        - تنظیم بر اساس پیشرفت
-        - تنظیم بر اساس ریکاوری
-        """
-        # بررسی نیاز به کاهش بار
+        logger.info(f"Adjusting volume for muscle={muscle}, week={week}, exercise_type={exercise_type}")
         if self._should_deload(week):
+            logger.info(f"Deload week detected for week={week}, muscle={muscle}")
             return self._get_deload_volume(muscle, exercise_type)
-        
-        # دریافت حجم پایه
         base_volume = self._get_base_volume(muscle, exercise_type)
-        
-        # تنظیم‌های متوالی
+        logger.debug(f"Base volume for {muscle}: {base_volume}")
         adjusted_volume = self._adjust_for_experience(base_volume)
+        logger.debug(f"After experience adjustment: {adjusted_volume}")
         adjusted_volume = self._adjust_for_recovery(adjusted_volume, muscle)
+        logger.debug(f"After recovery adjustment: {adjusted_volume}")
         adjusted_volume = self._adjust_for_progression(adjusted_volume, week)
+        logger.debug(f"After progression adjustment: {adjusted_volume}")
         adjusted_volume = self._adjust_for_exercise_type(adjusted_volume, exercise_type)
+        logger.debug(f"After exercise type adjustment: {adjusted_volume}")
         adjusted_volume = self._adjust_for_goal(adjusted_volume, exercise_type)
-        
-        # به‌روزرسانی تاریخچه
+        logger.debug(f"After goal adjustment: {adjusted_volume}")
         self._update_volume_history(muscle, adjusted_volume)
-        
+        logger.info(f"Final adjusted volume for {muscle}: {adjusted_volume}")
         return adjusted_volume
-    
+
     def _get_base_volume(self, muscle: str, exercise_type: str) -> Dict:
-        """دریافت حجم پایه برای یک عضله و نوع تمرین"""
         base_volumes = {
             'chest': {'compound': 4, 'isolation': 3, 'accessory': 2},
             'back': {'compound': 4, 'isolation': 3, 'accessory': 2},
@@ -107,88 +102,78 @@ class WorkoutVolumeManager:
             'calves': {'compound': 2, 'isolation': 3, 'accessory': 1},
             'abs': {'compound': 2, 'isolation': 3, 'accessory': 2}
         }
-        
-        # تنظیم بر اساس نوع تمرین
         sets = base_volumes.get(muscle, {'compound': 3, 'isolation': 2, 'accessory': 2})[exercise_type]
-        
-        # تنظیم بر اساس هدف
         if self.user.goal == 'strength':
-            sets = int(sets * 0.8)  # کاهش تعداد ست‌ها برای تمرینات قدرتی
+            sets = int(sets * 0.8)
         elif self.user.goal == 'endurance':
-            sets = int(sets * 1.2)  # افزایش تعداد ست‌ها برای تمرینات استقامتی
-        
+            sets = int(sets * 1.2)
+        logger.debug(f"Base sets for {muscle} ({exercise_type}): {sets}")
         return {
             'sets': sets,
             'reps': self.REP_RANGES[self.user.goal][exercise_type]
         }
-    
+
     def _adjust_for_experience(self, volume: Dict) -> Dict:
-        """تنظیم حجم بر اساس تجربه کاربر"""
         experience_multiplier = {
-            'beginner': 0.7,    # کاهش حجم برای مبتدیان
-            'intermediate': 1.0, # حجم استاندارد
-            'expert': 1.2       # افزایش حجم برای حرفه‌ای‌ها
+            'beginner': 0.7,
+            'intermediate': 1.0,
+            'expert': 1.2
         }.get(self.settings.experience_level, 1.0)
-        
+        logger.debug(f"Experience multiplier: {experience_multiplier}")
         return {
             'sets': int(volume['sets'] * experience_multiplier),
             'reps': volume['reps']
         }
-    
+
     def _adjust_for_recovery(self, volume: Dict, muscle: str) -> Dict:
-        """تنظیم حجم بر اساس وضعیت ریکاوری"""
         if muscle in self.muscle_volume:
             current_volume = self.muscle_volume[muscle]
             threshold = self._get_volume_threshold(muscle)
-            
-            if current_volume > threshold * 1.2:  # حجم خیلی بالا
+            logger.debug(f"Current volume for {muscle}: {current_volume}, threshold: {threshold}")
+            if current_volume > threshold * 1.2:
+                logger.info(f"Volume for {muscle} is very high, reducing by 30%")
                 return {
-                    'sets': int(volume['sets'] * 0.7),  # کاهش 30%
+                    'sets': int(volume['sets'] * 0.7),
                     'reps': volume['reps']
                 }
-            elif current_volume > threshold:  # حجم بالا
+            elif current_volume > threshold:
+                logger.info(f"Volume for {muscle} is high, reducing by 20%")
                 return {
-                    'sets': int(volume['sets'] * 0.8),  # کاهش 20%
+                    'sets': int(volume['sets'] * 0.8),
                     'reps': volume['reps']
                 }
-        
         return volume
-    
+
     def _adjust_for_progression(self, volume: Dict, week: int) -> Dict:
-        """تنظیم حجم بر اساس پیشرفت"""
         if week > self.progression_week:
             self.progression_week = week
-            
-            # افزایش حجم هر 4 هفته
             if week % 4 == 0:
+                logger.info(f"Increasing sets for progression at week {week}")
                 return {
                     'sets': volume['sets'] + 1,
                     'reps': volume['reps']
                 }
-            # افزایش شدت هر 2 هفته
             elif week % 2 == 0:
+                logger.info(f"Increasing intensity for progression at week {week}")
                 return {
                     'sets': volume['sets'],
                     'reps': self._increase_intensity(volume['reps'])
                 }
-        
         return volume
-    
+
     def _adjust_for_exercise_type(self, volume: Dict, exercise_type: str) -> Dict:
-        """تنظیم حجم بر اساس نوع تمرین"""
         type_multiplier = {
-            'compound': 1.2,    # افزایش حجم برای تمرینات ترکیبی
-            'isolation': 1.0,   # حجم استاندارد برای تمرینات ایزوله
-            'accessory': 0.8    # کاهش حجم برای تمرینات تکمیلی
+            'compound': 1.2,
+            'isolation': 1.0,
+            'accessory': 0.8
         }.get(exercise_type, 1.0)
-        
+        logger.debug(f"Type multiplier for {exercise_type}: {type_multiplier}")
         return {
             'sets': int(volume['sets'] * type_multiplier),
             'reps': volume['reps']
         }
-    
+
     def _adjust_for_goal(self, volume: Dict, exercise_type: str) -> Dict:
-        """تنظیم حجم بر اساس هدف کاربر"""
         goal_adjustments = {
             'muscle_gain': {
                 'compound': {'sets': 1.1, 'reps': '8-12'},
@@ -211,51 +196,44 @@ class WorkoutVolumeManager:
                 'accessory': {'sets': 0.7, 'reps': '25-30'}
             }
         }
-        
         adjustment = goal_adjustments.get(self.user.goal, {}).get(exercise_type, {})
+        logger.debug(f"Goal adjustment for {self.user.goal} {exercise_type}: {adjustment}")
         return {
             'sets': int(volume['sets'] * adjustment.get('sets', 1.0)),
             'reps': adjustment.get('reps', volume['reps'])
         }
-    
+
     def _should_deload(self, week: int) -> bool:
-        """بررسی نیاز به کاهش بار"""
-        # کاهش بار هر 8 هفته
         if week % 8 == 0:
             self.deload_week = True
+            logger.info(f"Deload week (every 8 weeks): week={week}")
             return True
-        
-        # کاهش بار بر اساس خستگی
         if self._check_fatigue():
             self.deload_week = True
+            logger.info("Deload triggered due to high fatigue/volume.")
             return True
-            
         self.deload_week = False
         return False
-    
+
     def _get_deload_volume(self, muscle: str, exercise_type: str) -> Dict:
-        """دریافت حجم کاهش بار"""
         base_volume = self._get_base_volume(muscle, exercise_type)
+        logger.info(f"Deload volume for {muscle}: sets reduced by 50%")
         return {
-            'sets': int(base_volume['sets'] * 0.5),  # کاهش 50% حجم
+            'sets': int(base_volume['sets'] * 0.5),
             'reps': self._decrease_intensity(base_volume['reps'])
         }
-    
+
     def _check_fatigue(self) -> bool:
-        """بررسی سطح خستگی"""
         if not self.muscle_volume:
             return False
-            
-        # بررسی حجم کلی در هفته
         total_volume = sum(self.muscle_volume.values())
         max_volume = sum(
             self.VOLUME_TARGETS[self.user.goal][self.settings.experience_level]
-        ) * 1.2  # 20% بیشتر از هدف
-        
+        ) * 1.2
+        logger.debug(f"Total volume: {total_volume}, Max allowed: {max_volume}")
         return total_volume > max_volume
-    
+
     def _get_volume_threshold(self, muscle: str) -> int:
-        """دریافت آستانه حجم برای یک عضله"""
         thresholds = {
             'chest': 20,
             'back': 20,
@@ -268,38 +246,37 @@ class WorkoutVolumeManager:
             'abs': 12
         }
         return thresholds.get(muscle, 15)
-    
+
     def _increase_intensity(self, rep_range: str) -> str:
-        """افزایش شدت با تغییر محدوده تکرار"""
         if '-' in rep_range:
             min_rep, max_rep = map(int, rep_range.split('-'))
-            return f"{min_rep-1}-{max_rep-1}"
+            new_range = f"{max(min_rep-1, 1)}-{max(max_rep-1, 1)}"
+            logger.debug(f"Increasing intensity: {rep_range} -> {new_range}")
+            return new_range
         return rep_range
-    
+
     def _decrease_intensity(self, rep_range: str) -> str:
-        """کاهش شدت با تغییر محدوده تکرار"""
         if '-' in rep_range:
             min_rep, max_rep = map(int, rep_range.split('-'))
-            return f"{min_rep+2}-{max_rep+2}"
+            new_range = f"{min_rep+2}-{max_rep+2}"
+            logger.debug(f"Decreasing intensity: {rep_range} -> {new_range}")
+            return new_range
         return rep_range
-    
+
     def _update_volume_history(self, muscle: str, volume: Dict):
-        """به‌روزرسانی تاریخچه حجم"""
         if muscle not in self.muscle_volume:
             self.muscle_volume[muscle] = 0
-            
-        # محاسبه حجم جدید
         if isinstance(volume['reps'], str) and '-' in volume['reps']:
             min_rep, max_rep = map(int, volume['reps'].split('-'))
             avg_reps = (min_rep + max_rep) / 2
         else:
             avg_reps = int(volume['reps'])
-            
         self.muscle_volume[muscle] += volume['sets'] * avg_reps
-    
+        logger.debug(f"Updated muscle_volume[{muscle}] = {self.muscle_volume[muscle]}")
+
     def reset_weekly_volume(self):
-        """بازنشانی حجم هفتگی"""
+        logger.info("Resetting weekly volume and deload if needed.")
         self.weekly_volume = {}
         if self.deload_week:
             self.muscle_volume = {k: v * 0.5 for k, v in self.muscle_volume.items()}
-            self.deload_week = False 
+            self.deload_week = False
