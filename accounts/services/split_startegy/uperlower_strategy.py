@@ -132,25 +132,30 @@ class UpperLowerSplitStrategy(SplitStrategy):
         self._validate_volume(program)
         logger.info("Upper/lower split program generated successfully")
         return program
-    
+
     def _build_day_plan(self, split_type: str, week: int) -> dict:
         logger.debug(f"Building day plan for {split_type}, week {week}")
         exercises = []
         muscle_config = self.MUSCLE_GROUPS[split_type]
-        exercise_counts = self._get_exercise_counts(split_type)
         for muscle, priority_exercises in muscle_config['exercise_priority'].items():
+            # Use base volume to determine how many compound exercises to select
+            base_volume = self.volume_manager._get_base_volume(muscle, 'compound')
+            count = base_volume['sets']
             exercises.extend(self._build_priority_exercises(
                 muscle,
                 priority_exercises,
-                exercise_counts['primary'],
+                count,
                 week,
                 is_primary=True
             ))
         for muscle in muscle_config['secondary']:
+            # Use base volume for isolation
+            base_volume = self.volume_manager._get_base_volume(muscle, 'isolation')
+            count = base_volume['sets']
             if random.random() < 0.8:
                 exercises.extend(self._build_muscle_exercises(
                     muscle,
-                    exercise_counts['secondary'],
+                    count,
                     week,
                     is_primary=False
                 ))
@@ -161,12 +166,18 @@ class UpperLowerSplitStrategy(SplitStrategy):
         exercises.extend(focus_exercises)
         exercises = self._apply_advanced_techniques(exercises, muscle_config['techniques'])
         exercises = self._adjust_exercise_volume(exercises, muscle_config['volume_multiplier'])
-        main_exercises = [self._create_exercise_entry(ex, is_primary=(ex.mechanic == 'compound')) for ex in exercises]
+        # Filter exercises so total sets per muscle/type do not exceed recommended
+        exercises = self._limit_exercises_by_volume(exercises)
+        main_exercises = [
+            self._create_exercise_entry(ex, is_primary=(ex.mechanic == 'compound'))
+            for ex in exercises
+        ]
+        main_exercises = [ex for ex in main_exercises if ex is not None]
         logger.debug(f"main_exercises for {split_type} day: {[ex['exercise_name'] for ex in main_exercises]}")
         if not main_exercises:
             logger.warning(f"No main exercises generated for {split_type} day! Check exercise selection logic.")
         return {'main': main_exercises}
-    
+
     def _build_priority_exercises(self, muscle: str, priority_exercises: List[str], count: int, week: int, is_primary: bool) -> List[Exercise]:
         exercises = []
         available = self.exercise_selector.get_exercises(map_muscle_names([muscle]), week)['main']
@@ -186,20 +197,7 @@ class UpperLowerSplitStrategy(SplitStrategy):
             exercises.extend(remaining)
         logger.debug(f"Built {len(exercises)} priority exercises for muscle {muscle}")
         return exercises
-        
-    def _get_exercise_counts(self, split_type: str) -> Dict[str, int]:
-        base_counts = {
-            'beginner': {'primary': 3, 'secondary': 1},
-            'intermediate': {'primary': 4, 'secondary': 2},
-            'expert': {'primary': 5, 'secondary': 2}
-        }.get(self.settings.experience_level, {'primary': 4, 'secondary': 2})
-        if self.user.body_type == 'ectomorph':
-            base_counts['primary'] = max(3, base_counts['primary'] - 1)
-        elif self.user.body_type == 'mesomorph':
-            base_counts['primary'] = min(6, base_counts['primary'] + 1)
-        logger.debug(f"Exercise counts for {split_type}: {base_counts}")
-        return base_counts
-        
+
     def _build_muscle_exercises(self, muscle: str, count: int, week: int, is_primary: bool) -> List[Exercise]:
         available = self.exercise_selector.get_exercises(map_muscle_names([muscle]), week)['main']
         if is_primary:
@@ -208,7 +206,7 @@ class UpperLowerSplitStrategy(SplitStrategy):
             filtered = [ex for ex in available if ex.mechanic == 'isolation']
         logger.debug(f"Selected {len(filtered[:count])} exercises for muscle {muscle} (primary={is_primary})")
         return filtered[:count]
-        
+
     def _build_focus_area_exercises(self, focus_areas: List[str], week: int) -> List[Exercise]:
         exercises = []
         for area in focus_areas:
@@ -219,9 +217,8 @@ class UpperLowerSplitStrategy(SplitStrategy):
                     exercises.extend(filtered[:1])
         logger.debug(f"Built {len(exercises)} focus area exercises")
         return exercises
-        
-    def _apply_advanced_techniques(self, exercises: List[Exercise], 
-                                 available_techniques: List[str]) -> List[Exercise]:
+
+    def _apply_advanced_techniques(self, exercises: List[Exercise], available_techniques: List[str]) -> List[Exercise]:
         if not exercises:
             return exercises
         allowed_techniques = [
@@ -237,7 +234,7 @@ class UpperLowerSplitStrategy(SplitStrategy):
                 exercises[i].technique_notes = self._get_technique_notes(technique)
                 logger.debug(f"Applied technique {technique} to exercise {getattr(exercises[i], 'name', '')}")
         return exercises
-        
+
     def _get_technique_notes(self, technique: str) -> str:
         notes = {
             'drop_sets': 'کاهش 20-25% وزن در هر ست',
@@ -250,14 +247,16 @@ class UpperLowerSplitStrategy(SplitStrategy):
             'cluster_sets': 'استراحت کوتاه بین تکرارها'
         }
         return notes.get(technique, '')
-        
+
     def _adjust_exercise_volume(self, exercises: List[Exercise], multiplier: float) -> List[Exercise]:
         for exercise in exercises:
             muscle_group = (exercise.primary_muscles[0] if exercise.primary_muscles else
                             (exercise.secondary_muscles[0] if exercise.secondary_muscles else 'full_body'))
+            ex_type = 'compound' if exercise.mechanic == 'compound' else 'isolation'
             base_volume = self.volume_manager.adjust_volume(
                 muscle_group,
-                self.current_week
+                self.current_week,
+                ex_type
             )
             adjusted_sets = math.ceil(base_volume['sets'] * multiplier)
             if self.user.body_type == 'ectomorph':
@@ -269,24 +268,38 @@ class UpperLowerSplitStrategy(SplitStrategy):
             exercise.reps = base_volume['reps']
             exercise.volume_multiplier = multiplier
         return exercises
-            
-    def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> dict:
+
+    def _limit_exercises_by_volume(self, exercises: List[Exercise]) -> List[Exercise]:
+        # Limit total sets per muscle group/type to not exceed base recommendations
+        muscle_type_sets = defaultdict(int)
+        filtered = []
+        for ex in exercises:
+            muscle_group = (ex.primary_muscles[0] if ex.primary_muscles else
+                            (ex.secondary_muscles[0] if ex.secondary_muscles else 'full_body'))
+            ex_type = 'compound' if ex.mechanic == 'compound' else 'isolation'
+            base_volume = self.volume_manager._get_base_volume(muscle_group, ex_type)
+            max_sets = base_volume['sets']
+            if muscle_type_sets[(muscle_group, ex_type)] + ex.sets <= max_sets:
+                filtered.append(ex)
+                muscle_type_sets[(muscle_group, ex_type)] += ex.sets
+            else:
+                logger.debug(f"Skipping {ex.name} for {muscle_group} ({ex_type}) to avoid exceeding set limit")
+        return filtered
+
+    def _create_exercise_entry(self, exercise: Exercise, is_primary: bool) -> Optional[dict]:
         if isinstance(exercise, dict):
             logger.error('Only Exercise model instances are allowed, not dict')
             raise TypeError('Only Exercise model instances are allowed, not dict')
         muscles = exercise.primary_muscles if is_primary else exercise.secondary_muscles
-        muscle_group = muscles[0] if muscles else 'full_body'
+        muscle_group = muscles[0] if muscles else None
+        if not muscle_group or muscle_group in ['full_body', 'Unknown', '', None]:
+            logger.warning(f"Exercise {exercise.name} has invalid muscle_group, skipping.")
+            return None
         logger.debug(f"Creating exercise entry for {exercise.name} (primary={is_primary})")
-        # --- INJECT VOLUME MANAGER LOGIC HERE ---
         ex_type = 'compound' if is_primary else 'isolation'
-        # Only use volume manager for real muscle groups
-        if muscle_group not in ['full_body', 'warmup', 'cooldown', 'mobility', None, '']:
-            volume = self.volume_manager.adjust_volume(muscle_group, self.current_week, ex_type)
-            sets = volume['sets']
-            reps = volume['reps']
-        else:
-            sets = getattr(exercise, 'sets', 4) if is_primary else getattr(exercise, 'sets', 3)
-            reps = getattr(exercise, 'reps', '8-12')
+        volume = self.volume_manager.adjust_volume(muscle_group, self.current_week, ex_type)
+        sets = volume['sets']
+        reps = volume['reps']
         return {
             'exercise_id': exercise.id,
             'exercise_name': exercise.name,
@@ -305,6 +318,7 @@ class UpperLowerSplitStrategy(SplitStrategy):
             'progression': get_progression_notes(self.settings.experience_level),
             'alternatives': self.get_exercise_alternatives(exercise) if self.settings.injuries else None
         }
+
         
     def _adjust_program(self, program: Dict, increase: bool):
         adjustment_factor = 1.1 if increase else 0.9

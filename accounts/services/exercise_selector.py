@@ -260,73 +260,84 @@ class ExerciseSelector:
         logger.info(f"Selecting exercises for target_muscles={target_muscles}, week={week}, count={count}")
         workout_structure = {}
         if include_warmup:
-            logger.debug("Selecting warmup exercises")
+            logger.info("Selecting warmup exercises")
             workout_structure['warmup'] = [ex for ex, _ in self._get_warmup_exercises(target_muscles, week)]
         main_exercises = self._get_main_exercises(target_muscles, week)
-        logger.debug(f"Found {len(main_exercises)} main exercises before scoring")
+        logger.info(f"Found {len(main_exercises)} main exercises before scoring")
         scored_main = self._score_and_select_exercises(main_exercises, week, count)
         logger.info(f"Selected main exercises: {[ex.name for ex, _ in scored_main]}")
         workout_structure['main'] = [ex for ex, _ in scored_main]
         if include_complementary:
-            logger.debug("Selecting complementary and stabilization exercises")
+            logger.info("Selecting complementary and stabilization exercises")
             workout_structure['complementary'] = [ex for ex, _ in self._get_complementary_exercises([ex for ex, _ in scored_main], week)]
             workout_structure['stabilization'] = [ex for ex, _ in self._get_stabilization_exercises(target_muscles, week)]
         if include_cooldown:
-            logger.debug("Selecting cooldown exercises")
+            logger.info("Selecting cooldown exercises")
             workout_structure['cooldown'] = [ex for ex, _ in self._get_cooldown_exercises(target_muscles, week)]
         logger.info(f"Workout structure keys: {list(workout_structure.keys())}")
         return workout_structure
 
     def _get_warmup_exercises(self, target_muscles: List[str], week: int) -> List[Tuple[Exercise, float]]:
-        logger.debug(f"Getting warmup exercises for {target_muscles}, week {week}")
+        logger.info(f"Getting warmup exercises for {target_muscles}, week {week}")
         qs = Exercise.objects.filter(level='beginner')
         warmup_exercises = [
             ex for ex in qs
             if (
                 (ex.category in ['cardio', 'plyometrics']) or
                 (ex.category == 'stretching') or
-                (ex.category == 'weighted_bodyweight' and ex.equipment == 'body')
+                (ex.equipment == 'body only')
             ) and (
                 not target_muscles or
                 (ex.primary_muscles and any(m in ex.primary_muscles for m in target_muscles)) or
                 (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
             )
         ]
-        logger.debug(f"Found {len(warmup_exercises)} warmup exercises")
+        logger.info(f"Found {len(warmup_exercises)} warmup: {warmup_exercises} warmup exercises")
         return self._score_and_select_exercises(warmup_exercises, week, count=3)
 
     def _get_cooldown_exercises(self, target_muscles: List[str], week: int) -> List[Tuple[Exercise, float]]:
-        logger.debug(f"Getting cooldown exercises for {target_muscles}, week {week}")
+        logger.info(f"Getting cooldown exercises for {target_muscles}, week {week}")
         qs = Exercise.objects.filter(level='beginner')
         cooldown_exercises = [
             ex for ex in qs
             if (
-                (ex.category == 'stretching') or
-                (ex.category == 'weighted_bodyweight' and ex.equipment == 'body') or
-                (ex.category == 'strength' and ex.mechanic == 'isolation')
+                (ex.category == 'stretching')
             ) and (
                 not target_muscles or
                 (ex.primary_muscles and any(m in ex.primary_muscles for m in target_muscles)) or
                 (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
             )
         ]
-        logger.debug(f"Found {len(cooldown_exercises)} cooldown exercises")
+        logger.info(f"Found {len(cooldown_exercises)} cooldown exercises : {cooldown_exercises}")
         return self._score_and_select_exercises(cooldown_exercises, week, count=3)
 
     def _get_stabilization_exercises(self, target_muscles: List[str], week: int) -> List[Tuple[Exercise, float]]:
-        logger.debug(f"Getting stabilization exercises for {target_muscles}, week {week}")
+        logger.info(f"Getting stabilization exercises for {target_muscles}, week {week}")
+
+        # Map main muscle group to stabilization group
+        if any(m in ['chest', 'shoulders'] for m in target_muscles):
+            stab_targets = ['abdominals']
+        elif any(m in ['back', 'lats', 'middle back', 'lower back'] for m in target_muscles):
+            stab_targets = ['neck', 'traps']
+        elif any(m in ['quadriceps', 'hamstrings', 'glutes', 'legs'] for m in target_muscles):
+            stab_targets = ['calves']
+        else:
+            stab_targets = ['abdominals']  # default
+
         qs = Exercise.objects.filter(level__in=['beginner', 'intermediate'])
         stabilization_exercises = [
             ex for ex in qs
             if (
-                (ex.primary_muscles and any(m in ['abs', 'core', 'lower_back'] for m in ex.primary_muscles)) or
-                (ex.category == 'weighted_bodyweight' and ex.equipment == 'body') or
-                (ex.category == 'strength' and ex.mechanic == 'isolation')
+                ex.primary_muscles and any(m in stab_targets for m in ex.primary_muscles)
+            ) and (
+                ex.equipment == 'body'
+            ) and (
+                ex.category == 'strength' and ex.mechanic == 'isolation'
             ) and (
                 not self.settings.available_equipment or ex.equipment in self.settings.available_equipment
             )
         ]
-        logger.debug(f"Found {len(stabilization_exercises)} stabilization exercises")
+        logger.info(f"Found {len(stabilization_exercises)} stabilization exercises for {stab_targets}")
         return self._score_and_select_exercises(stabilization_exercises, week, count=2)
 
     def _score_and_select_exercises(
@@ -335,7 +346,7 @@ class ExerciseSelector:
         week: int,
         count: int
     ) -> List[Tuple[Exercise, float]]:
-        logger.debug(f"Scoring {len(exercises)} exercises for week {week}, selecting top {count}")
+        logger.info(f"Scoring {len(exercises)} exercises for week {week}, selecting top {count}")
         scored_exercises = []
         for exercise in exercises:
             last_trained = self.exercise_history.get(exercise.id)
@@ -348,14 +359,14 @@ class ExerciseSelector:
             )
             scored_exercises.append((exercise, score))
         scored_exercises.sort(key=lambda x: x[1], reverse=True)
-        logger.debug(f"Top scored exercises: {[ex.name for ex, _ in scored_exercises[:count]]}")
+        logger.info(f"Top scored exercises: {[ex.name for ex, _ in scored_exercises[:count]]}")
         return scored_exercises[:count]
 
     def _distribute_exercises(
         self,
         exercises: List[Tuple[Exercise, float]]
     ) -> List[Tuple[Exercise, float]]:
-        logger.debug("Distributing compound and isolation exercises")
+        logger.info("Distributing compound and isolation exercises")
         compound_exercises = []
         isolation_exercises = []
         for exercise, score in exercises:
@@ -363,11 +374,11 @@ class ExerciseSelector:
                 compound_exercises.append((exercise, score))
             else:
                 isolation_exercises.append((exercise, score))
-        logger.debug(f"Compound: {len(compound_exercises)}, Isolation: {len(isolation_exercises)}")
+        logger.info(f"Compound: {len(compound_exercises)}, Isolation: {len(isolation_exercises)}")
         return compound_exercises + isolation_exercises
 
     def _get_main_exercises(self, target_muscles: List[str], week: int):
-        logger.debug(f"Getting main exercises for {target_muscles}, week {week}")
+        logger.info(f"Getting main exercises for {target_muscles}, week {week}")
         qs = Exercise.objects.all()
         exercises = [
             ex for ex in qs
@@ -376,61 +387,59 @@ class ExerciseSelector:
                 (ex.secondary_muscles and any(m in ex.secondary_muscles for m in target_muscles))
             )
         ]
-        logger.debug(f"Main exercises after muscle filter: {len(exercises)}")
+        logger.info(f"Main exercises after muscle filter: {len(exercises)}")
         if self.settings.available_equipment:
             exercises = [ex for ex in exercises if ex.equipment in self.settings.available_equipment]
-            logger.debug(f"Main exercises after equipment filter: {len(exercises)}")
+            logger.info(f"Main exercises after equipment filter: {len(exercises)}")
         if self.settings.experience_level == 'beginner':
             exercises = [ex for ex in exercises if ex.level == 'beginner' or (ex.level == 'intermediate' and ex.mechanic == 'compound')]
         elif self.settings.experience_level == 'intermediate':
             exercises = [ex for ex in exercises if ex.level in ['beginner', 'intermediate', 'expert']]
-        logger.debug(f"Main exercises after experience filter: {len(exercises)}")
+        logger.info(f"Main exercises after experience filter: {len(exercises)}")
         if self.user.goal:
             before_goal = len(exercises)
             if self.user.goal == 'muscle_gain':
                 exercises = [ex for ex in exercises if (
-                    ex.category in ['strength', 'powerlifting', 'weighted_bodyweight'] or
-                    ex.mechanic == 'compound' or
-                    (ex.mechanic == 'isolation' and ex.category == 'strength')
+                    ex.category in ['strength', 'powerlifting',] and
+                    ex.mechanic == 'compound'
                 )]
             elif self.user.goal == 'strength':
                 exercises = [ex for ex in exercises if (
-                    ex.category in ['strength', 'powerlifting', 'weighted_bodyweight', 'olympic_weightlifting'] or
+                    ex.category in ['strength', 'powerlifting', 'olympic weightlifting'] and
                     ex.mechanic == 'compound'
                 )]
             elif self.user.goal == 'weight_loss':
                 exercises = [ex for ex in exercises if (
-                    ex.category in ['strength', 'crossfit', 'weighted_bodyweight', 'cardio', 'plyometrics'] or
+                    ex.category in ['strength', 'crossfit', 'weighted bodyweight', 'cardio', 'plyometrics'] and
                     ex.mechanic == 'compound'
                 )]
             elif self.user.goal == 'endurance':
                 exercises = [ex for ex in exercises if (
-                    ex.category in ['cardio', 'plyometrics', 'strength', 'crossfit', 'weighted_bodyweight'] or
+                    ex.category in ['cardio', 'plyometrics', 'strength', 'crossfit', 'weighted bodyweight'] and
                     ex.mechanic == 'compound'
                 )]
-            logger.debug(f"Main exercises after goal filter ({self.user.goal}): {before_goal} -> {len(exercises)}")
+            logger.info(f"Main exercises after goal filter ({self.user.goal}): {before_goal} -> {len(exercises)}")
         return list(exercises)
 
     def _get_complementary_exercises(
         self,
         main_exercises: List,
         week: int,
-        count: int = 2
+        count: int = 4
     ) -> List[Tuple[Exercise, float]]:
-        logger.debug(f"Getting complementary exercises for main_exercises (count={len(main_exercises)}), week {week}")
+        logger.info(f"Getting complementary exercises for main_exercises (count={len(main_exercises)}), week {week}")
         complementary_muscles = set()
         for exercise in main_exercises:
             ex = exercise
             if hasattr(self, 'exercise_to_dict'):
                 ex = self.exercise_to_dict(ex, 'complementary')
-            if ex.secondary_muscles:
-                complementary_muscles.update(ex.secondary_muscles)
-            if ex.force == 'push':
-                complementary_muscles.update(['back', 'biceps', 'rear_deltoids'])
-            elif ex.force == 'pull':
-                complementary_muscles.update(['chest', 'triceps', 'front_deltoids'])
-            elif ex.force == 'static':
-                complementary_muscles.update(['core', 'lower_back'])
+            logger.info(f"Exercise: {ex.name}, secondary_muscles: {ex.secondary_muscles}")
+            if ex.primary_muscles is ['chest'] or ['shoulders']:
+                complementary_muscles.update(['triceps', 'chest', 'shoulders'])
+            if ex.primary_muscles is ['back']:
+                complementary_muscles.update(['biceps', 'lats', 'middle back', 'lower back', 'traps', ])
+            if ex.primary_muscles or ex.secondary_muscles is ['quadriceps'] or ['hamstrings'] or ['glutes'] or ['calves']:
+                complementary_muscles.update(['quadriceps', 'hamstrings', 'glutes', 'calves',"adductors", "abductors"])
         if not complementary_muscles:
             logger.info("No complementary muscles found, skipping complementary exercises.")
             return []
@@ -438,14 +447,13 @@ class ExerciseSelector:
         complementary = [
             ex for ex in qs
             if (
-                (ex.primary_muscles and any(m in ex.primary_muscles for m in complementary_muscles)) or
-                (ex.category in ['strength', 'weighted_bodyweight'] and ex.mechanic == 'isolation') or
-                (ex.category == 'plyometrics' and ex.level in ['beginner', 'intermediate'])
+                (ex.primary_muscles and any(m in ex.primary_muscles for m in complementary_muscles)) and
+                (ex.category in ['strength'] and ex.mechanic == 'isolation')
             ) and (
                 not self.settings.available_equipment or ex.equipment in self.settings.available_equipment
             )
         ]
-        logger.debug(f"Found {len(complementary)} complementary exercises")
+        logger.info(f"Found {len(complementary)} complementary exercises")
         scored = self._score_and_select_exercises(complementary, week, count)
         logger.info(f"Selected complementary exercises: {[ex.name for ex, _ in scored]}")
         return scored
@@ -488,7 +496,7 @@ class ExerciseSelector:
         logger.info(f"Getting mobility exercises for target_areas={target_areas}, exercise_type={exercise_type}, split_type={split_type}")
         exercises = super().get_mobility_exercises(target_areas, exercise_type, split_type)
         if not exercises:
-            logger.warning(f"No mobility exercises found for {target_areas} and type {exercise_type}")
+            logger.info(f"No mobility exercises found for {target_areas} and type {exercise_type}")
         else:
             logger.info(f"Found {len(exercises)} mobility exercises for {target_areas} and type {exercise_type}")
         return exercises

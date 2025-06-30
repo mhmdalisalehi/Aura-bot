@@ -1,7 +1,0 @@
-2025-06-29 17:05:58,907 INFO RecoveryManager initialized for user 1
-2025-06-29 17:06:05,571 INFO Checking if user can train muscles=['Unknown', 'chest', 'chest', 'chest', 'lats', 'lats', 'lats', 'middle back', 'full_body', 'full_body', 'full_body', 'full_body', 'full_body', 'full_body', 'full_body', 'Unknown'] at 2025-07-05 00:00:00
-2025-06-29 17:06:05,571 INFO All muscles are ready for training.
-2025-06-29 17:06:05,571 INFO Checking if user can train muscles=['Unknown', 'chest', 'chest', 'chest', 'lats', 'lats', 'lats', 'middle back', 'full_body', 'full_body', 'full_body', 'full_body', 'full_body', 'Unknown'] at 2025-06-30 00:00:00
-2025-06-29 17:06:05,573 INFO All muscles are ready for training.
-2025-06-29 17:06:05,573 INFO Checking if user can train muscles=['Unknown', 'quadriceps', 'quadriceps', 'quadriceps', 'quadriceps', 'quadriceps', 'hamstrings', 'hamstrings', 'hamstrings', 'hamstrings', 'glutes', 'glutes', 'glutes', 'glutes', 'full_body', 'full_body', 'full_body', 'full_body', 'full_body', 'Unknown'] at 2025-07-02 00:00:00
-2025-06-29 17:06:05,573 INFO All muscles are ready for training.

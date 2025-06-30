@@ -40,16 +40,16 @@ class Exercise(models.Model):
         ('strongman', 'Strongman'),
         ('powerlifting', 'Powerlifting'),
         ('cardio', 'Cardio'),
-        ('olympic_weightlifting', 'Olympic Weightlifting'),
+        ('olympic weightlifting', 'Olympic Weightlifting'),
         ('crossfit', 'CrossFit'),
-        ('weighted_bodyweight', 'Weighted Bodyweight'),
-        ('assisted_bodyweight', 'Assisted Bodyweight'),
+        ('weighted bodyweight', 'Weighted Bodyweight'),
+        ('assisted bodyweight', 'Assisted Bodyweight'),
     ]
 
     name = models.CharField(max_length=255)
     aliases = models.JSONField(blank=True, null=True)
-    primary_muscles = models.JSONField()
-    secondary_muscles = models.JSONField(blank=True, null=True)
+    primary_muscles = models.JSONField(default=list)
+    secondary_muscles = models.JSONField(blank=True, default=list)
     force = models.CharField(max_length=10, choices=FORCE_CHOICES, blank=True, null=True)
     level = models.CharField(max_length=15, choices=LEVEL_CHOICES)
     mechanic = models.CharField(max_length=15, choices=MECHANIC_CHOICES, blank=True, null=True)
