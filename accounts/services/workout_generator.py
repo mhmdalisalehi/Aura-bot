@@ -31,7 +31,7 @@ class WorkoutGenerator(BaseWorkoutManager):
                 target_muscles,
                 week
             )
-            logger.debug(f"Selected exercises: {exercises}")
+            logger.info(f"Selected exercises: {exercises}")
             workout = {
                 'date': datetime.now().strftime('%Y-%m-%d'),
                 'target_muscles': target_muscles,
@@ -40,7 +40,7 @@ class WorkoutGenerator(BaseWorkoutManager):
             # Add General Warmup at the start
             for exercise_tuple in exercises.get('main', []):
                 exercise = exercise_tuple[0] if isinstance(exercise_tuple, tuple) else exercise_tuple
-                logger.debug(f"Preparing exercise data for: {getattr(exercise, 'name', str(exercise))}")
+                logger.info(f"Preparing exercise data for: {getattr(exercise, 'name', str(exercise))}")
                 exercise_data = self._prepare_exercise_data(exercise, week)
                 workout['exercises'].append(exercise_data)
                 if hasattr(exercise, 'id'):
@@ -50,26 +50,26 @@ class WorkoutGenerator(BaseWorkoutManager):
             is_valid, errors = self.validator.validate_workout(workout)
             logger.info(f"Workout validation result: {is_valid}, errors: {errors}")
             if not is_valid:
-                logger.error(f"Workout is not valid: {errors}")
+                logger.info(f"Workout is not valid: {errors}")
                 raise ValueError(f"Workout is not valid: {', '.join(errors)}")
             logger.info(f"Generated workout: {workout}")
             return workout
         except Exception as e:
-            logger.error(f"Exception in generate_workout: {str(e)}")
+            logger.info(f"Exception in generate_workout: {str(e)}")
             raise ValueError(f"Error in generating workout: {str(e)}")
 
     def _prepare_exercise_data(self, exercise: Exercise, week: int) -> Dict:
-        logger.debug(f"_prepare_exercise_data for: {getattr(exercise, 'name', str(exercise))}, week: {week}")
+        logger.info(f"_prepare_exercise_data for: {getattr(exercise, 'name', str(exercise))}, week: {week}")
         try:
             volume = self.volume_manager.adjust_volume(
                 exercise.primary_muscles[0],
                 week
             )
-            logger.debug(f"Volume for {exercise.name}: {volume}")
+            logger.info(f"Volume for {exercise.name}: {volume}")
             rest_time = calculate_rest_time(exercise, self.settings.experience_level)
             intensity = calculate_intensity(exercise, volume['sets'], volume['reps'])
             notes = get_exercise_notes(exercise, self.settings.experience_level)
-            logger.debug(f"rest_time: {rest_time}, intensity: {intensity}, notes: {notes}")
+            logger.info(f"rest_time: {rest_time}, intensity: {intensity}, notes: {notes}")
             return {
                 'exercise_id': exercise.id,
                 'exercise_name': exercise.name,
@@ -82,7 +82,7 @@ class WorkoutGenerator(BaseWorkoutManager):
                 'notes': notes
             }
         except Exception as e:
-            logger.error(f"Exception in _prepare_exercise_data: {str(e)}")
+            logger.info(f"Exception in _prepare_exercise_data: {str(e)}")
             raise ValueError(f"Error in preparing exercise data: {str(e)}")
 
     def _format_mobility_exercises(self, exercises: List, exercise_type: str) -> List[Dict]:
@@ -100,7 +100,7 @@ class WorkoutGenerator(BaseWorkoutManager):
                 })
             return formatted
         except Exception as e:
-            logger.error(f"Error in formatting mobility exercises: {str(e)}")
+            logger.info(f"Error in formatting mobility exercises: {str(e)}")
             raise ValueError(f"Error in formatting mobility exercises: {str(e)}")
 
     def _get_mobility_duration(self, exercise_type: str) -> int:

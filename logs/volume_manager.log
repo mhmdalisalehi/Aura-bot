@@ -1,0 +1,1196 @@
+2025-06-30 18:53:43,267 INFO WorkoutVolumeManager initialized for user 1
+2025-06-30 18:53:43,268 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:43,539 INFO Base sets for back (compound): 4
+2025-06-30 18:53:43,793 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:44,029 INFO Base sets for biceps (isolation): 3
+2025-06-30 18:53:44,130 INFO Base sets for triceps (isolation): 3
+2025-06-30 18:53:44,130 INFO Base sets for forearms (isolation): 2
+2025-06-30 18:53:44,576 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:53:44,576 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:44,578 INFO Base volume for shoulders: {'sets': 3, 'reps': '6-8'}
+2025-06-30 18:53:44,578 INFO Experience multiplier: 1.0
+2025-06-30 18:53:44,578 INFO After experience adjustment: {'sets': 3, 'reps': '6-8'}
+2025-06-30 18:53:44,578 INFO After recovery adjustment: {'sets': 3, 'reps': '6-8'}
+2025-06-30 18:53:44,578 INFO After progression adjustment: {'sets': 3, 'reps': '6-8'}
+2025-06-30 18:53:44,578 INFO Type multiplier for compound: 1.2
+2025-06-30 18:53:44,578 INFO After exercise type adjustment: {'sets': 3, 'reps': '6-8'}
+2025-06-30 18:53:44,578 INFO Goal adjustment for muscle_gain compound: {'sets': 1.1, 'reps': '8-12'}
+2025-06-30 18:53:44,578 INFO After goal adjustment: {'sets': 3, 'reps': '8-12'}
+2025-06-30 18:53:44,578 INFO Updated muscle_volume[shoulders] = 30.0
+2025-06-30 18:53:44,578 INFO Final adjusted volume for shoulders: {'sets': 3, 'reps': '8-12'}
+2025-06-30 18:53:44,578 INFO Adjusting volume for muscle=triceps, week=1, exercise_type=compound
+2025-06-30 18:53:44,578 INFO Total volume: 30.0, Max allowed: 33.6
+2025-06-30 18:53:44,578 INFO Base sets for triceps (compound): 2
+2025-06-30 18:53:44,579 INFO Base volume for triceps: {'sets': 2, 'reps': '6-8'}
+2025-06-30 18:53:44,579 INFO Experience multiplier: 1.0
+2025-06-30 18:53:44,579 INFO After experience adjustment: {'sets': 2, 'reps': '6-8'}
+2025-06-30 18:53:44,579 INFO After recovery adjustment: {'sets': 2, 'reps': '6-8'}
+2025-06-30 18:53:44,579 INFO After progression adjustment: {'sets': 2, 'reps': '6-8'}
+2025-06-30 18:53:44,579 INFO Type multiplier for compound: 1.2
+2025-06-30 18:53:44,579 INFO After exercise type adjustment: {'sets': 2, 'reps': '6-8'}
+2025-06-30 18:53:44,579 INFO Goal adjustment for muscle_gain compound: {'sets': 1.1, 'reps': '8-12'}
+2025-06-30 18:53:44,579 INFO After goal adjustment: {'sets': 2, 'reps': '8-12'}
+2025-06-30 18:53:44,579 INFO Updated muscle_volume[triceps] = 20.0
+2025-06-30 18:53:44,579 INFO Final adjusted volume for triceps: {'sets': 2, 'reps': '8-12'}
+2025-06-30 18:53:44,579 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:53:44,579 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,579 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,579 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:53:44,579 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:44,579 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:53:44,579 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,579 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:53:44,579 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,579 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,579 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:53:44,579 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:44,580 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:53:44,580 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,580 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:53:44,580 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,580 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,580 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:53:44,580 INFO Base sets for lats (compound): 3
+2025-06-30 18:53:44,580 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:53:44,580 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,580 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:53:44,580 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,580 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,580 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:53:44,580 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:44,581 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:53:44,581 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,581 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:44,581 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,581 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,581 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:44,581 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:44,581 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:44,581 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,581 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:53:44,581 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,581 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,581 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:53:44,581 INFO Base sets for middle back (compound): 3
+2025-06-30 18:53:44,581 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:53:44,581 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,582 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:53:44,582 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,582 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,582 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:53:44,582 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:44,582 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:53:44,582 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,582 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:53:44,582 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,582 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,582 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:53:44,582 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:44,582 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:53:44,582 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,582 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:53:44,582 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,582 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,582 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:53:44,582 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:44,582 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:53:44,582 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,582 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:44,582 INFO Base sets for triceps (compound): 2
+2025-06-30 18:53:44,583 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:44,583 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:44,583 INFO Base sets for lats (compound): 3
+2025-06-30 18:53:44,583 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:44,583 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:44,583 INFO Base sets for middle back (compound): 3
+2025-06-30 18:53:44,583 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:44,583 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:44,583 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:44,583 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:53:44,583 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,583 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,583 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:53:44,583 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:44,583 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:53:44,583 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,583 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:53:44,583 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,583 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,583 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:53:44,583 INFO Base sets for lats (compound): 3
+2025-06-30 18:53:44,583 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:53:44,583 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,584 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:53:44,584 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,584 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,584 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:53:44,584 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:44,584 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:53:44,584 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,584 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:44,584 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,584 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,584 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:44,584 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:44,584 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:44,584 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,584 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:53:44,584 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,584 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,584 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:53:44,584 INFO Base sets for middle back (compound): 3
+2025-06-30 18:53:44,584 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:53:44,584 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,584 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:53:44,584 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:44,584 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:44,584 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:53:44,584 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:44,584 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:53:44,584 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:44,585 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:44,835 INFO Base sets for hamstrings (compound): 3
+2025-06-30 18:53:45,142 INFO Base sets for glutes (compound): 3
+2025-06-30 18:53:45,370 INFO Base sets for calves (isolation): 3
+2025-06-30 18:53:45,511 INFO Base sets for adductors (isolation): 2
+2025-06-30 18:53:45,649 INFO Base sets for abductors (isolation): 2
+2025-06-30 18:53:46,346 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:46,346 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,346 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,346 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:46,346 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,346 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:46,346 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,347 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:46,347 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,347 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,347 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:46,347 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:46,347 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:46,347 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,347 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:46,347 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,347 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,347 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:46,347 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,347 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:46,347 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,347 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:46,347 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,347 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,347 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:46,347 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,347 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:46,347 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,348 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:46,348 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,348 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,348 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:46,348 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:46,348 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:46,348 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,348 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:46,348 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,348 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,348 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:46,348 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,348 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:46,348 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,348 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:46,348 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,348 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,349 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:46,349 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,349 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:46,349 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,349 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:46,349 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,349 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,349 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:46,349 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:46,349 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:46,349 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,349 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:46,349 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,349 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,349 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:46,349 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,349 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:46,349 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,350 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:46,350 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,350 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,350 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:46,350 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,350 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:46,350 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,350 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,350 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:46,350 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,350 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,350 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:46,350 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,350 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,350 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:46,350 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,350 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,350 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:46,350 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,350 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,350 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:46,351 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:46,351 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:46,351 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,351 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:46,351 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:46,351 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:46,351 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:46,351 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:46,351 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:46,351 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:46,351 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:46,620 INFO Base sets for back (compound): 4
+2025-06-30 18:53:46,849 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:47,090 INFO Base sets for biceps (isolation): 3
+2025-06-30 18:53:47,205 INFO Base sets for triceps (isolation): 3
+2025-06-30 18:53:47,325 INFO Base sets for forearms (isolation): 2
+2025-06-30 18:53:47,714 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:53:47,714 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,714 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,714 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:53:47,714 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:47,714 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:53:47,714 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,714 INFO Adjusting volume for muscle=triceps, week=1, exercise_type=compound
+2025-06-30 18:53:47,714 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,714 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,714 INFO Deload week detected for week=1, muscle=triceps
+2025-06-30 18:53:47,714 INFO Base sets for triceps (compound): 2
+2025-06-30 18:53:47,714 INFO Deload volume for triceps: sets reduced by 50%
+2025-06-30 18:53:47,714 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,714 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:53:47,715 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,715 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,715 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:53:47,715 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:47,715 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:53:47,715 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,715 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:53:47,715 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,715 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,715 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:53:47,715 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:47,715 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:53:47,715 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,715 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:53:47,715 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,715 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,715 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:53:47,715 INFO Base sets for lats (compound): 3
+2025-06-30 18:53:47,715 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:53:47,715 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,715 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:53:47,715 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,716 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,716 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:53:47,716 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:47,716 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:53:47,716 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,716 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:47,716 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,716 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,716 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:47,716 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:47,716 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:47,716 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,716 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:53:47,716 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,716 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,716 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:53:47,716 INFO Base sets for middle back (compound): 3
+2025-06-30 18:53:47,716 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:53:47,716 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,716 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:53:47,716 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,716 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,716 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:53:47,716 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:47,717 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:53:47,717 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,717 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:53:47,717 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,717 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,717 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:53:47,717 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:47,717 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:53:47,717 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,717 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:53:47,717 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,717 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,717 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:53:47,717 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:47,717 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:53:47,717 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,717 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:47,717 INFO Base sets for triceps (compound): 2
+2025-06-30 18:53:47,717 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:47,717 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:47,717 INFO Base sets for lats (compound): 3
+2025-06-30 18:53:47,717 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:47,718 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:47,718 INFO Base sets for middle back (compound): 3
+2025-06-30 18:53:47,718 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:47,718 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:47,718 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:47,718 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:53:47,718 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,718 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,718 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:53:47,718 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:47,718 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:53:47,718 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,718 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:53:47,718 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,718 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,718 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:53:47,718 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:47,718 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:53:47,718 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,718 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:53:47,718 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,718 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,719 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:53:47,719 INFO Base sets for lats (compound): 3
+2025-06-30 18:53:47,719 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:53:47,719 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,719 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:53:47,719 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,719 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,719 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:53:47,719 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:47,719 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:53:47,719 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,719 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:47,719 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,719 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,719 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:47,719 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:47,719 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:47,719 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,719 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:53:47,719 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:47,719 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:47,719 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:53:47,719 INFO Base sets for middle back (compound): 3
+2025-06-30 18:53:47,719 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:53:47,720 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:47,720 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:47,962 INFO Base sets for hamstrings (compound): 3
+2025-06-30 18:53:48,189 INFO Base sets for glutes (compound): 3
+2025-06-30 18:53:48,409 INFO Base sets for calves (isolation): 3
+2025-06-30 18:53:48,409 INFO Base sets for adductors (isolation): 2
+2025-06-30 18:53:48,527 INFO Base sets for abductors (isolation): 2
+2025-06-30 18:53:48,758 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:48,758 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,758 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,758 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:48,758 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,758 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:48,758 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,758 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:48,758 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,758 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,758 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:48,758 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,758 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:48,758 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,758 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:48,758 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,759 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,759 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:48,759 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,759 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:48,759 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,759 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:48,759 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,759 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,759 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:48,759 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,759 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:48,759 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,759 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:48,759 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,759 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,759 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:48,759 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,759 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:48,759 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,759 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:48,759 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,759 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,759 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:48,759 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,760 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:48,760 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,760 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:48,760 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,760 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,760 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:48,760 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,760 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:48,760 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,760 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:48,760 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,760 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,760 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:48,760 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,760 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:48,760 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,760 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:48,760 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,760 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,760 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:48,760 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,760 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:48,760 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,760 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:48,760 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,761 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,761 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:48,761 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,761 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:48,761 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,761 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,761 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,761 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,761 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,761 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,761 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,761 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,761 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,761 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,761 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,761 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:48,761 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,761 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,761 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:48,761 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,761 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:48,762 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,762 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:48,762 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,762 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,762 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:48,762 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,762 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:48,762 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,763 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:53:48,763 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,763 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,763 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:53:48,763 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:48,763 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:53:48,763 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,763 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:53:48,763 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,763 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,764 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:53:48,764 INFO Base sets for lats (compound): 3
+2025-06-30 18:53:48,764 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:53:48,764 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,764 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:53:48,764 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,764 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,764 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:53:48,764 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:48,764 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:53:48,764 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,764 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:48,764 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,764 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,764 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:48,764 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,764 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:48,764 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,764 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:53:48,764 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,764 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,764 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:53:48,764 INFO Base sets for middle back (compound): 3
+2025-06-30 18:53:48,764 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:53:48,765 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,765 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:53:48,765 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,765 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,765 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:53:48,765 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:48,765 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:53:48,765 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,765 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:48,765 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,765 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,765 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:48,765 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,765 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:48,765 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,765 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:48,765 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,765 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,765 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:48,765 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,765 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:48,766 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,766 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:53:48,766 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,766 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,766 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:53:48,766 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:53:48,766 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:53:48,766 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,766 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:53:48,766 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,766 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,766 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:53:48,766 INFO Base sets for chest (compound): 4
+2025-06-30 18:53:48,766 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:53:48,766 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,766 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:53:48,767 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,767 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,767 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:53:48,767 INFO Base sets for lats (compound): 3
+2025-06-30 18:53:48,767 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:53:48,767 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,767 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:53:48,767 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,767 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,767 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:53:48,767 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:53:48,767 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:53:48,767 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,767 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:48,767 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,767 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,767 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:48,767 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,767 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:48,767 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,767 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:53:48,767 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,767 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,767 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:53:48,768 INFO Base sets for middle back (compound): 3
+2025-06-30 18:53:48,768 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:53:48,768 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,768 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:53:48,768 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,768 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,768 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:53:48,768 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:53:48,768 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:53:48,768 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:53:48,768 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:53:48,768 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:53:48,768 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:53:48,768 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:53:48,768 INFO Base sets for lower back (compound): 3
+2025-06-30 18:53:48,768 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:53:48,768 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:31,789 INFO WorkoutVolumeManager initialized for user 1
+2025-06-30 18:54:31,790 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:31,994 INFO Base sets for back (compound): 4
+2025-06-30 18:54:32,221 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:32,473 INFO Base sets for biceps (isolation): 3
+2025-06-30 18:54:32,585 INFO Base sets for triceps (isolation): 3
+2025-06-30 18:54:32,694 INFO Base sets for forearms (isolation): 2
+2025-06-30 18:54:33,039 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:54:33,039 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:33,039 INFO Base volume for shoulders: {'sets': 3, 'reps': '6-8'}
+2025-06-30 18:54:33,039 INFO Experience multiplier: 1.0
+2025-06-30 18:54:33,039 INFO After experience adjustment: {'sets': 3, 'reps': '6-8'}
+2025-06-30 18:54:33,039 INFO After recovery adjustment: {'sets': 3, 'reps': '6-8'}
+2025-06-30 18:54:33,039 INFO After progression adjustment: {'sets': 3, 'reps': '6-8'}
+2025-06-30 18:54:33,040 INFO Type multiplier for compound: 1.2
+2025-06-30 18:54:33,040 INFO After exercise type adjustment: {'sets': 3, 'reps': '6-8'}
+2025-06-30 18:54:33,040 INFO Goal adjustment for muscle_gain compound: {'sets': 1.1, 'reps': '8-12'}
+2025-06-30 18:54:33,040 INFO After goal adjustment: {'sets': 3, 'reps': '8-12'}
+2025-06-30 18:54:33,040 INFO Updated muscle_volume[shoulders] = 30.0
+2025-06-30 18:54:33,040 INFO Final adjusted volume for shoulders: {'sets': 3, 'reps': '8-12'}
+2025-06-30 18:54:33,040 INFO Adjusting volume for muscle=triceps, week=1, exercise_type=compound
+2025-06-30 18:54:33,040 INFO Total volume: 30.0, Max allowed: 33.6
+2025-06-30 18:54:33,040 INFO Base sets for triceps (compound): 2
+2025-06-30 18:54:33,040 INFO Base volume for triceps: {'sets': 2, 'reps': '6-8'}
+2025-06-30 18:54:33,040 INFO Experience multiplier: 1.0
+2025-06-30 18:54:33,040 INFO After experience adjustment: {'sets': 2, 'reps': '6-8'}
+2025-06-30 18:54:33,040 INFO After recovery adjustment: {'sets': 2, 'reps': '6-8'}
+2025-06-30 18:54:33,040 INFO After progression adjustment: {'sets': 2, 'reps': '6-8'}
+2025-06-30 18:54:33,040 INFO Type multiplier for compound: 1.2
+2025-06-30 18:54:33,040 INFO After exercise type adjustment: {'sets': 2, 'reps': '6-8'}
+2025-06-30 18:54:33,040 INFO Goal adjustment for muscle_gain compound: {'sets': 1.1, 'reps': '8-12'}
+2025-06-30 18:54:33,040 INFO After goal adjustment: {'sets': 2, 'reps': '8-12'}
+2025-06-30 18:54:33,040 INFO Updated muscle_volume[triceps] = 20.0
+2025-06-30 18:54:33,040 INFO Final adjusted volume for triceps: {'sets': 2, 'reps': '8-12'}
+2025-06-30 18:54:33,040 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:54:33,040 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,040 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,040 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:54:33,041 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:33,041 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:54:33,041 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,041 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:54:33,041 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,041 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,041 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:54:33,041 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:33,041 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:54:33,041 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,041 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:54:33,041 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,041 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,041 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:54:33,041 INFO Base sets for lats (compound): 3
+2025-06-30 18:54:33,041 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:54:33,041 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,041 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:54:33,041 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,041 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,041 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:54:33,041 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:33,041 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:54:33,042 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,042 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:33,042 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,042 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,042 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:33,042 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:33,042 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:33,042 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,042 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:54:33,042 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,042 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,042 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:54:33,042 INFO Base sets for middle back (compound): 3
+2025-06-30 18:54:33,042 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:54:33,042 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,042 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:54:33,042 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,042 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,042 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:54:33,042 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:33,042 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:54:33,042 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,042 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:54:33,042 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,042 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,042 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:54:33,043 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:33,043 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:54:33,043 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,043 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:54:33,043 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,043 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,043 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:54:33,043 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:33,043 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:54:33,043 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,043 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:33,043 INFO Base sets for triceps (compound): 2
+2025-06-30 18:54:33,043 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:33,043 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:33,043 INFO Base sets for lats (compound): 3
+2025-06-30 18:54:33,043 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:33,043 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:33,043 INFO Base sets for middle back (compound): 3
+2025-06-30 18:54:33,043 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:33,043 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:33,043 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:33,043 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:54:33,043 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,044 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,044 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:54:33,044 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:33,044 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:54:33,044 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,044 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:54:33,044 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,044 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,044 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:54:33,044 INFO Base sets for lats (compound): 3
+2025-06-30 18:54:33,044 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:54:33,044 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,044 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:54:33,044 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,044 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,044 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:54:33,044 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:33,044 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:54:33,044 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,044 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:33,044 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,044 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,044 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:33,044 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:33,045 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:33,045 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,045 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:54:33,045 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,045 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,045 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:54:33,045 INFO Base sets for middle back (compound): 3
+2025-06-30 18:54:33,045 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:54:33,045 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,045 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:54:33,045 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:33,045 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:33,045 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:54:33,045 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:33,045 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:54:33,045 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:33,045 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:33,260 INFO Base sets for hamstrings (compound): 3
+2025-06-30 18:54:33,520 INFO Base sets for glutes (compound): 3
+2025-06-30 18:54:33,735 INFO Base sets for calves (isolation): 3
+2025-06-30 18:54:33,858 INFO Base sets for adductors (isolation): 2
+2025-06-30 18:54:34,009 INFO Base sets for abductors (isolation): 2
+2025-06-30 18:54:34,734 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:34,734 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,734 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,734 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:34,734 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,734 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:34,734 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,734 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:34,734 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,734 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,735 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:34,735 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:34,735 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:34,735 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,735 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:34,735 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,735 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,735 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:34,735 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,735 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:34,735 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,735 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:34,735 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,735 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,735 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:34,735 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,735 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:34,735 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,735 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:34,735 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,735 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,735 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:34,736 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:34,736 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:34,736 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,736 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:34,736 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,736 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,736 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:34,736 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,736 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:34,736 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,736 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:34,736 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,736 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,736 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:34,736 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,736 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:34,736 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,736 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:34,736 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,736 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,736 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:34,737 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:34,737 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:34,737 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,737 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:34,737 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,737 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,737 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:34,737 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,737 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:34,737 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,737 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:34,737 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,737 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,737 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:34,737 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,737 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:34,737 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,737 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,737 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:34,737 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,737 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,737 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:34,738 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,738 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,738 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:34,738 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,738 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,738 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:34,738 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,738 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,738 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:34,738 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:34,738 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:34,738 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,738 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:34,738 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:34,738 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:34,738 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:34,738 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:34,738 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:34,738 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:34,738 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:34,992 INFO Base sets for back (compound): 4
+2025-06-30 18:54:35,322 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:35,587 INFO Base sets for biceps (isolation): 3
+2025-06-30 18:54:35,695 INFO Base sets for triceps (isolation): 3
+2025-06-30 18:54:35,805 INFO Base sets for forearms (isolation): 2
+2025-06-30 18:54:36,278 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:54:36,278 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,278 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,278 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:54:36,278 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:36,278 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:54:36,278 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,278 INFO Adjusting volume for muscle=triceps, week=1, exercise_type=compound
+2025-06-30 18:54:36,278 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,278 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,278 INFO Deload week detected for week=1, muscle=triceps
+2025-06-30 18:54:36,278 INFO Base sets for triceps (compound): 2
+2025-06-30 18:54:36,278 INFO Deload volume for triceps: sets reduced by 50%
+2025-06-30 18:54:36,278 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,278 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:54:36,279 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,279 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,279 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:54:36,279 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:36,279 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:54:36,279 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,279 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:54:36,279 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,279 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,279 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:54:36,279 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:36,279 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:54:36,279 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,279 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:54:36,279 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,279 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,279 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:54:36,279 INFO Base sets for lats (compound): 3
+2025-06-30 18:54:36,279 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:54:36,279 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,279 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:54:36,279 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,280 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,280 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:54:36,280 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:36,280 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:54:36,280 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,280 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:36,280 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,280 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,280 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:36,280 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:36,280 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:36,280 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,280 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:54:36,280 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,280 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,280 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:54:36,280 INFO Base sets for middle back (compound): 3
+2025-06-30 18:54:36,280 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:54:36,280 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,280 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:54:36,280 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,280 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,281 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:54:36,281 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:36,281 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:54:36,281 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,281 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:54:36,281 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,281 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,281 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:54:36,281 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:36,281 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:54:36,281 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,281 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:54:36,281 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,281 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,281 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:54:36,281 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:36,281 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:54:36,281 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,281 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:36,282 INFO Base sets for triceps (compound): 2
+2025-06-30 18:54:36,282 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:36,282 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:36,282 INFO Base sets for lats (compound): 3
+2025-06-30 18:54:36,282 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:36,282 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:36,282 INFO Base sets for middle back (compound): 3
+2025-06-30 18:54:36,282 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:36,282 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:36,282 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:36,282 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:54:36,282 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,282 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,282 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:54:36,282 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:36,282 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:54:36,282 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,282 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:54:36,282 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,282 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,282 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:54:36,282 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:36,283 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:54:36,283 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,283 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:54:36,283 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,283 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,283 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:54:36,283 INFO Base sets for lats (compound): 3
+2025-06-30 18:54:36,283 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:54:36,283 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,283 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:54:36,283 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,283 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,283 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:54:36,283 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:36,283 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:54:36,283 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,283 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:36,283 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,283 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,283 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:36,283 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:36,283 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:36,284 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,284 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:54:36,284 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:36,284 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:36,284 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:54:36,284 INFO Base sets for middle back (compound): 3
+2025-06-30 18:54:36,284 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:54:36,284 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:36,284 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:36,551 INFO Base sets for hamstrings (compound): 3
+2025-06-30 18:54:36,752 INFO Base sets for glutes (compound): 3
+2025-06-30 18:54:36,957 INFO Base sets for calves (isolation): 3
+2025-06-30 18:54:37,062 INFO Base sets for adductors (isolation): 2
+2025-06-30 18:54:37,163 INFO Base sets for abductors (isolation): 2
+2025-06-30 18:54:37,678 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:37,678 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,678 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,678 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:37,678 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,678 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:37,678 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,678 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:37,678 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,678 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,678 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:37,678 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,678 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:37,678 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,678 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:37,678 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,678 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,678 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:37,678 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,678 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:37,678 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,678 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:37,678 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,678 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,679 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:37,679 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,679 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:37,679 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,679 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:37,679 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,679 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,679 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:37,679 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,679 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:37,679 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,679 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:37,679 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,679 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,679 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:37,679 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,679 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:37,679 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,679 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:37,679 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,679 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,679 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:37,679 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,679 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:37,679 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,679 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:37,680 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,680 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,680 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:37,680 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,680 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:37,680 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,680 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:37,680 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,680 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,680 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:37,680 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,680 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:37,680 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,680 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:37,680 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,680 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,680 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:37,680 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,680 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:37,680 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,680 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,680 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,680 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,680 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,680 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,680 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,680 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,681 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,681 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,681 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,681 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:37,681 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,681 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,681 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:37,681 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,681 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:37,681 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,681 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:37,681 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,681 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,681 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:37,681 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,681 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:37,681 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,682 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:54:37,682 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,682 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,682 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:54:37,682 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:37,682 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:54:37,682 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,682 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:54:37,682 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,682 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,682 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:54:37,682 INFO Base sets for lats (compound): 3
+2025-06-30 18:54:37,683 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:54:37,683 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,683 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:54:37,683 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,683 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,683 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:54:37,683 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:37,683 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:54:37,683 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,683 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:37,683 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,683 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,683 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:37,683 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,683 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:37,683 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,683 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:54:37,683 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,683 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,683 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:54:37,683 INFO Base sets for middle back (compound): 3
+2025-06-30 18:54:37,683 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:54:37,683 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,683 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:54:37,683 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,683 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,683 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:54:37,684 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:37,684 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:54:37,684 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,684 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:37,684 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,684 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,684 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:37,684 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,684 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:37,684 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,684 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:37,684 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,684 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,684 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:37,684 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,684 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:37,684 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,684 INFO Adjusting volume for muscle=shoulders, week=1, exercise_type=compound
+2025-06-30 18:54:37,684 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,684 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,684 INFO Deload week detected for week=1, muscle=shoulders
+2025-06-30 18:54:37,685 INFO Base sets for shoulders (compound): 3
+2025-06-30 18:54:37,685 INFO Deload volume for shoulders: sets reduced by 50%
+2025-06-30 18:54:37,685 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,685 INFO Adjusting volume for muscle=chest, week=1, exercise_type=compound
+2025-06-30 18:54:37,685 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,685 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,685 INFO Deload week detected for week=1, muscle=chest
+2025-06-30 18:54:37,685 INFO Base sets for chest (compound): 4
+2025-06-30 18:54:37,685 INFO Deload volume for chest: sets reduced by 50%
+2025-06-30 18:54:37,685 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,685 INFO Adjusting volume for muscle=lats, week=1, exercise_type=compound
+2025-06-30 18:54:37,685 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,685 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,685 INFO Deload week detected for week=1, muscle=lats
+2025-06-30 18:54:37,685 INFO Base sets for lats (compound): 3
+2025-06-30 18:54:37,685 INFO Deload volume for lats: sets reduced by 50%
+2025-06-30 18:54:37,685 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,685 INFO Adjusting volume for muscle=abdominals, week=1, exercise_type=compound
+2025-06-30 18:54:37,685 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,685 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,685 INFO Deload week detected for week=1, muscle=abdominals
+2025-06-30 18:54:37,685 INFO Base sets for abdominals (compound): 3
+2025-06-30 18:54:37,685 INFO Deload volume for abdominals: sets reduced by 50%
+2025-06-30 18:54:37,685 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,685 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:37,685 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,685 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,685 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:37,686 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,686 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:37,686 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,686 INFO Adjusting volume for muscle=middle back, week=1, exercise_type=compound
+2025-06-30 18:54:37,686 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,686 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,686 INFO Deload week detected for week=1, muscle=middle back
+2025-06-30 18:54:37,686 INFO Base sets for middle back (compound): 3
+2025-06-30 18:54:37,686 INFO Deload volume for middle back: sets reduced by 50%
+2025-06-30 18:54:37,686 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,686 INFO Adjusting volume for muscle=quadriceps, week=1, exercise_type=compound
+2025-06-30 18:54:37,686 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,686 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,686 INFO Deload week detected for week=1, muscle=quadriceps
+2025-06-30 18:54:37,686 INFO Base sets for quadriceps (compound): 4
+2025-06-30 18:54:37,686 INFO Deload volume for quadriceps: sets reduced by 50%
+2025-06-30 18:54:37,686 INFO Decreasing intensity: 6-8 -> 8-10
+2025-06-30 18:54:37,686 INFO Adjusting volume for muscle=lower back, week=1, exercise_type=compound
+2025-06-30 18:54:37,686 INFO Total volume: 50.0, Max allowed: 33.6
+2025-06-30 18:54:37,686 INFO Deload triggered due to high fatigue/volume.
+2025-06-30 18:54:37,686 INFO Deload week detected for week=1, muscle=lower back
+2025-06-30 18:54:37,686 INFO Base sets for lower back (compound): 3
+2025-06-30 18:54:37,686 INFO Deload volume for lower back: sets reduced by 50%
+2025-06-30 18:54:37,686 INFO Decreasing intensity: 6-8 -> 8-10

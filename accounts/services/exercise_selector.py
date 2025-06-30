@@ -322,7 +322,7 @@ class ExerciseSelector:
         elif any(m in ['quadriceps', 'hamstrings', 'glutes', 'legs'] for m in target_muscles):
             stab_targets = ['calves']
         else:
-            stab_targets = ['abdominals']  # default
+            stab_targets = ['abdominals',"biceps"]  # default
 
         qs = Exercise.objects.filter(level__in=['beginner', 'intermediate'])
         stabilization_exercises = [
@@ -436,7 +436,7 @@ class ExerciseSelector:
             logger.info(f"Exercise: {ex.name}, secondary_muscles: {ex.secondary_muscles}")
             if ex.primary_muscles is ['chest'] or ['shoulders']:
                 complementary_muscles.update(['triceps', 'chest', 'shoulders'])
-            if ex.primary_muscles is ['back']:
+            if ex.primary_muscles is ['biceps', 'lats', 'middle back', 'lower back', 'traps',]:
                 complementary_muscles.update(['biceps', 'lats', 'middle back', 'lower back', 'traps', ])
             if ex.primary_muscles or ex.secondary_muscles is ['quadriceps'] or ['hamstrings'] or ['glutes'] or ['calves']:
                 complementary_muscles.update(['quadriceps', 'hamstrings', 'glutes', 'calves',"adductors", "abductors"])

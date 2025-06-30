@@ -75,17 +75,17 @@ class WorkoutVolumeManager:
             logger.info(f"Deload week detected for week={week}, muscle={muscle}")
             return self._get_deload_volume(muscle, exercise_type)
         base_volume = self._get_base_volume(muscle, exercise_type)
-        logger.debug(f"Base volume for {muscle}: {base_volume}")
+        logger.info(f"Base volume for {muscle}: {base_volume}")
         adjusted_volume = self._adjust_for_experience(base_volume)
-        logger.debug(f"After experience adjustment: {adjusted_volume}")
+        logger.info(f"After experience adjustment: {adjusted_volume}")
         adjusted_volume = self._adjust_for_recovery(adjusted_volume, muscle)
-        logger.debug(f"After recovery adjustment: {adjusted_volume}")
+        logger.info(f"After recovery adjustment: {adjusted_volume}")
         adjusted_volume = self._adjust_for_progression(adjusted_volume, week)
-        logger.debug(f"After progression adjustment: {adjusted_volume}")
+        logger.info(f"After progression adjustment: {adjusted_volume}")
         adjusted_volume = self._adjust_for_exercise_type(adjusted_volume, exercise_type)
-        logger.debug(f"After exercise type adjustment: {adjusted_volume}")
+        logger.info(f"After exercise type adjustment: {adjusted_volume}")
         adjusted_volume = self._adjust_for_goal(adjusted_volume, exercise_type)
-        logger.debug(f"After goal adjustment: {adjusted_volume}")
+        logger.info(f"After goal adjustment: {adjusted_volume}")
         self._update_volume_history(muscle, adjusted_volume)
         logger.info(f"Final adjusted volume for {muscle}: {adjusted_volume}")
         return adjusted_volume
@@ -107,7 +107,7 @@ class WorkoutVolumeManager:
             sets = int(sets * 0.8)
         elif self.user.goal == 'endurance':
             sets = int(sets * 1.2)
-        logger.debug(f"Base sets for {muscle} ({exercise_type}): {sets}")
+        logger.info(f"Base sets for {muscle} ({exercise_type}): {sets}")
         return {
             'sets': sets,
             'reps': self.REP_RANGES[self.user.goal][exercise_type]
@@ -119,7 +119,7 @@ class WorkoutVolumeManager:
             'intermediate': 1.0,
             'expert': 1.2
         }.get(self.settings.experience_level, 1.0)
-        logger.debug(f"Experience multiplier: {experience_multiplier}")
+        logger.info(f"Experience multiplier: {experience_multiplier}")
         return {
             'sets': int(volume['sets'] * experience_multiplier),
             'reps': volume['reps']
@@ -129,7 +129,7 @@ class WorkoutVolumeManager:
         if muscle in self.muscle_volume:
             current_volume = self.muscle_volume[muscle]
             threshold = self._get_volume_threshold(muscle)
-            logger.debug(f"Current volume for {muscle}: {current_volume}, threshold: {threshold}")
+            logger.info(f"Current volume for {muscle}: {current_volume}, threshold: {threshold}")
             if current_volume > threshold * 1.2:
                 logger.info(f"Volume for {muscle} is very high, reducing by 30%")
                 return {
@@ -167,7 +167,7 @@ class WorkoutVolumeManager:
             'isolation': 1.0,
             'accessory': 0.8
         }.get(exercise_type, 1.0)
-        logger.debug(f"Type multiplier for {exercise_type}: {type_multiplier}")
+        logger.info(f"Type multiplier for {exercise_type}: {type_multiplier}")
         return {
             'sets': int(volume['sets'] * type_multiplier),
             'reps': volume['reps']
@@ -197,7 +197,7 @@ class WorkoutVolumeManager:
             }
         }
         adjustment = goal_adjustments.get(self.user.goal, {}).get(exercise_type, {})
-        logger.debug(f"Goal adjustment for {self.user.goal} {exercise_type}: {adjustment}")
+        logger.info(f"Goal adjustment for {self.user.goal} {exercise_type}: {adjustment}")
         return {
             'sets': int(volume['sets'] * adjustment.get('sets', 1.0)),
             'reps': adjustment.get('reps', volume['reps'])
@@ -230,7 +230,7 @@ class WorkoutVolumeManager:
         max_volume = sum(
             self.VOLUME_TARGETS[self.user.goal][self.settings.experience_level]
         ) * 1.2
-        logger.debug(f"Total volume: {total_volume}, Max allowed: {max_volume}")
+        logger.info(f"Total volume: {total_volume}, Max allowed: {max_volume}")
         return total_volume > max_volume
 
     def _get_volume_threshold(self, muscle: str) -> int:
@@ -251,7 +251,7 @@ class WorkoutVolumeManager:
         if '-' in rep_range:
             min_rep, max_rep = map(int, rep_range.split('-'))
             new_range = f"{max(min_rep-1, 1)}-{max(max_rep-1, 1)}"
-            logger.debug(f"Increasing intensity: {rep_range} -> {new_range}")
+            logger.info(f"Increasing intensity: {rep_range} -> {new_range}")
             return new_range
         return rep_range
 
@@ -259,7 +259,7 @@ class WorkoutVolumeManager:
         if '-' in rep_range:
             min_rep, max_rep = map(int, rep_range.split('-'))
             new_range = f"{min_rep+2}-{max_rep+2}"
-            logger.debug(f"Decreasing intensity: {rep_range} -> {new_range}")
+            logger.info(f"Decreasing intensity: {rep_range} -> {new_range}")
             return new_range
         return rep_range
 
@@ -272,7 +272,7 @@ class WorkoutVolumeManager:
         else:
             avg_reps = int(volume['reps'])
         self.muscle_volume[muscle] += volume['sets'] * avg_reps
-        logger.debug(f"Updated muscle_volume[{muscle}] = {self.muscle_volume[muscle]}")
+        logger.info(f"Updated muscle_volume[{muscle}] = {self.muscle_volume[muscle]}")
 
     def reset_weekly_volume(self):
         logger.info("Resetting weekly volume and deload if needed.")

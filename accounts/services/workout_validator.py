@@ -49,7 +49,7 @@ class WorkoutValidator:
 
     def _validate_initialization(self):
         if not self.user or not self.settings:
-            logger.error("User and settings must be provided")
+            logger.info("User and settings must be provided")
             raise ValueError("User and settings must be provided")
             
     def set_managers(self, volume_manager, recovery_manager, exercise_selector):
@@ -83,29 +83,29 @@ class WorkoutValidator:
                 logger.info(f"recovery_errors: {recovery_errors}")
                 errors.extend(recovery_errors)
             else:
-                logger.warning("Recovery manager is not set")
+                logger.info("Recovery manager is not set")
                 errors.append("Recovery manager is not set")
             logger.info(f"validate_program result: {len(errors) == 0}, errors: {errors}")
             return len(errors) == 0, errors
         except Exception as e:
-            logger.error(f"Exception in validate_program: {str(e)}")
+            logger.v(f"Exception in validate_program: {str(e)}")
             return False, [f"Error in program validation: {str(e)}"]
 
     def _validate_structure(self, program: Dict) -> bool:
         required_keys = ['weekly_plan']
         if not all(key in program for key in required_keys):
-            logger.error("Missing required keys in program structure")
+            logger.info("Missing required keys in program structure")
             return False
         if not isinstance(program['weekly_plan'], dict):
-            logger.error("weekly_plan is not a dict")
+            logger.info("weekly_plan is not a dict")
             return False
         for day, exercises in program['weekly_plan'].items():
             if not isinstance(exercises, list):
-                logger.error(f"Exercises for day {day} is not a list")
+                logger.info(f"Exercises for day {day} is not a list")
                 return False
             for exercise in exercises:
                 if not self._validate_exercise_structure(exercise):
-                    logger.error(f"Exercise structure invalid for {exercise}")
+                    logger.info(f"Exercise structure invalid for {exercise}")
                     return False
         return True
 
@@ -119,7 +119,7 @@ class WorkoutValidator:
         else:
             valid = all(hasattr(exercise, field) for field in required_fields)
         if not valid:
-            logger.warning(f"Exercise structure missing fields: {exercise}")
+            logger.info(f"Exercise structure missing fields: {exercise}")
         return valid
 
     def _validate_exercise_balance(self, program: Dict) -> List[str]:
@@ -145,7 +145,7 @@ class WorkoutValidator:
             elif count > limits['max']:
                 errors.append(f"Number of {muscle} exercises is more than allowed")
         if errors:
-            logger.warning(f"Exercise balance errors: {errors}")
+            logger.info(f"Exercise balance errors: {errors}")
         return errors
 
     def _validate_volume(self, program: Dict) -> List[str]:
@@ -164,7 +164,7 @@ class WorkoutValidator:
             if not self._is_valid_muscle_volume(muscle, volume):
                 errors.append(f"Total volume for {muscle} is not valid")
         if errors:
-            logger.warning(f"Volume errors: {errors}")
+            logger.info(f"Volume errors: {errors}")
         return errors
 
     def _calculate_exercise_volume(self, exercise: Exercise) -> int:
@@ -178,7 +178,7 @@ class WorkoutValidator:
         sets = exercise.sets
         reps = exercise.reps
         if not isinstance(sets, int) or sets < 1 or sets > 10:
-            logger.warning(f"Invalid sets: {sets}")
+            logger.info(f"Invalid sets: {sets}")
             return False
         if isinstance(reps, str):
             try:
@@ -188,7 +188,7 @@ class WorkoutValidator:
                     logger.warning(f"Invalid reps range: {reps}")
                     return False
             except Exception as e:
-                logger.error(f"Error parsing reps: {reps} - {e}")
+                logger.info(f"Error parsing reps: {reps} - {e}")
                 return False
         return True
 
@@ -196,7 +196,7 @@ class WorkoutValidator:
         limits = self.VOLUME_LIMITS.get(muscle, {'min': 4, 'max': 12})
         valid = limits['min'] <= volume <= limits['max']
         if not valid:
-            logger.warning(f"Muscle volume for {muscle} not valid: {volume}")
+            logger.info(f"Muscle volume for {muscle} not valid: {volume}")
         return valid
 
     def _validate_sequence(self, program: Dict) -> List[str]:
@@ -223,7 +223,7 @@ class WorkoutValidator:
                     if (curr_day - prev_day).days < min_recovery:
                         errors.append(f"Rest time for {muscle} is not enough")
         if errors:
-            logger.warning(f"Sequence errors: {errors}")
+            logger.info(f"Sequence errors: {errors}")
         return errors
 
     def _get_min_recovery_days(self, muscle: str) -> int:
@@ -250,17 +250,17 @@ class WorkoutValidator:
                 if not self._is_exercise_safe(exercise):
                     errors.append(f"Exercise {exercise.exercise_name} is not compatible with physical limitations")
         if errors:
-            logger.warning(f"Limitation errors: {errors}")
+            logger.info(f"Limitation errors: {errors}")
         return errors
 
     def _is_exercise_safe(self, exercise: Exercise) -> bool:
         if hasattr(self.user, 'physical_limitations'):
             for limitation in self.user.physical_limitations:
                 if limitation in exercise.muscle_group:
-                    logger.warning(f"Exercise {exercise.exercise_name} not safe for limitation {limitation}")
+                    logger.info(f"Exercise {exercise.exercise_name} not safe for limitation {limitation}")
                     return False
         if exercise.difficulty not in ['beginner', 'intermediate']:
-            logger.warning(f"Exercise {exercise.exercise_name} difficulty not allowed: {exercise.difficulty}")
+            logger.info(f"Exercise {exercise.exercise_name} difficulty not allowed: {exercise.difficulty}")
             return False
         return True
 
@@ -273,7 +273,7 @@ class WorkoutValidator:
             if not self.recovery_manager.can_train(target_muscles, datetime.strptime(day, '%Y-%m-%d')):
                 errors.append(f"Muscles in {day} need rest")
         if errors:
-            logger.warning(f"Recovery errors: {errors}")
+            logger.info(f"Recovery errors: {errors}")
         return errors
 
     def _is_valid_mobility_exercise(self, exercise: Exercise, exercise_type: str) -> bool:
@@ -287,7 +287,7 @@ class WorkoutValidator:
             else:
                 return ex.category in ['stretching', 'mobility']
         except Exercise.DoesNotExist:
-            logger.warning(f"Exercise with id {exercise.exercise_id} does not exist")
+            logger.info(f"Exercise with id {exercise.exercise_id} does not exist")
             return False
 
     def validate_workout(self, workout: Dict) -> Tuple[bool, List[str]]:
@@ -296,7 +296,7 @@ class WorkoutValidator:
             errors = []
             if not self._validate_workout_structure(workout):
                 errors.append("Workout structure is not valid")
-                logger.warning("Workout structure is not valid")
+                logger.info("Workout structure is not valid")
                 return False, errors
             if 'exercises' in workout:
                 exercise_errors = self._validate_workout_exercises(workout['exercises'])
@@ -316,29 +316,29 @@ class WorkoutValidator:
             logger.info(f"validate_workout result: {len(errors) == 0}, errors: {errors}")
             return len(errors) == 0, errors
         except Exception as e:
-            logger.error(f"Exception in validate_workout: {str(e)}")
+            logger.info(f"Exception in validate_workout: {str(e)}")
             return False, [f"Error in workout validation: {str(e)}"]
 
     def _validate_workout_structure(self, workout: Dict) -> bool:
         required_keys = ['date', 'target_muscles']
         optional_keys = ['exercises', 'warmup', 'cooldown']
         if not all(key in workout for key in required_keys):
-            logger.warning("Workout missing required keys")
+            logger.info("Workout missing required keys")
             return False
         if not isinstance(workout['date'], str):
-            logger.warning("Workout date is not a string")
+            logger.info("Workout date is not a string")
             return False
         if not isinstance(workout['target_muscles'], list):
-            logger.warning("Workout target_muscles is not a list")
+            logger.info("Workout target_muscles is not a list")
             return False
         try:
             datetime.strptime(workout['date'], '%Y-%m-%d')
         except ValueError:
-            logger.warning("Workout date format invalid")
+            logger.info("Workout date format invalid")
             return False
         for key in optional_keys:
             if key in workout and not isinstance(workout[key], list):
-                logger.warning(f"Workout {key} is not a list")
+                logger.info(f"Workout {key} is not a list")
                 return False
         return True
 
@@ -346,33 +346,33 @@ class WorkoutValidator:
         errors = []
         if not exercises:
             errors.append("Exercise list is empty")
-            logger.warning("Exercise list is empty")
+            logger.info("Exercise list is empty")
             return errors
         for i, exercise in enumerate(exercises, 1):
             if not self._validate_exercise_structure(exercise):
                 errors.append(f"Exercise structure {i} is not valid")
-                logger.warning(f"Exercise structure {i} is not valid")
+                logger.info(f"Exercise structure {i} is not valid")
                 continue
             if not self._is_valid_exercise_volume(exercise):
                 errors.append(f"Volume of exercise {i} ({exercise.exercise_name}) is not valid")
-                logger.warning(f"Volume of exercise {i} ({exercise.exercise_name}) is not valid")
+                logger.info(f"Volume of exercise {i} ({exercise.exercise_name}) is not valid")
             if not self._is_exercise_safe(exercise):
                 errors.append(f"Exercise {i} ({exercise.exercise_name}) is not compatible with physical limitations")
-                logger.warning(f"Exercise {i} ({exercise.exercise_name}) is not compatible with physical limitations")
+                logger.info(f"Exercise {i} ({exercise.exercise_name}) is not compatible with physical limitations")
             if i > 1:
                 prev_exercise = exercises[i-2]
                 if not self._is_valid_exercise_sequence(prev_exercise, exercise):
                     errors.append(f"Exercise sequence {i-1} and {i} is not appropriate")
-                    logger.warning(f"Exercise sequence {i-1} and {i} is not appropriate")
+                    logger.info(f"Exercise sequence {i-1} and {i} is not appropriate")
         return errors
 
     def _is_valid_exercise_sequence(self, prev_exercise: Exercise, curr_exercise: Exercise) -> bool:
         if (prev_exercise.type == 'isolation' and curr_exercise.type == 'compound'):
-            logger.warning("Isolation before compound exercise found")
+            logger.info("Isolation before compound exercise found")
             return False
         if (prev_exercise.muscle_group in ['biceps', 'triceps'] and 
             curr_exercise.muscle_group in ['chest', 'back']):
-            logger.warning("Small muscle before large muscle found")
+            logger.info("Small muscle before large muscle found")
             return False
         return True
 
@@ -380,25 +380,25 @@ class WorkoutValidator:
         errors = []
         if not exercises:
             errors.append(f"{exercise_type} exercises are missing")
-            logger.warning(f"{exercise_type} exercises are missing")
+            logger.info(f"{exercise_type} exercises are missing")
             return errors
         for i, exercise in enumerate(exercises, 1):
             if not all(hasattr(exercise, field) for field in ['exercise_id', 'exercise_name', 'duration_seconds']):
                 errors.append(f"{exercise_type} exercise structure {i} is not valid")
-                logger.warning(f"{exercise_type} exercise structure {i} is not valid")
+                logger.info(f"{exercise_type} exercise structure {i} is not valid")
                 continue
             duration = exercise.duration_seconds
             if exercise_type == 'warmup':
                 if duration < 30 or duration > 300:
                     errors.append(f"Warmup duration for exercise {i} is not valid")
-                    logger.warning(f"Warmup duration for exercise {i} is not valid")
+                    logger.info(f"Warmup duration for exercise {i} is not valid")
             else:
                 if duration < 20 or duration > 180:
                     errors.append(f"Cooldown duration for exercise {i} is not valid")
-                    logger.warning(f"Cooldown duration for exercise {i} is not valid")
+                    logger.info(f"Cooldown duration for exercise {i} is not valid")
             if not self._is_valid_mobility_exercise(exercise, exercise_type):
                 errors.append(f"{exercise_type} exercise type {i} is not valid")
-                logger.warning(f"{exercise_type} exercise type {i} is not valid")
+                logger.info(f"{exercise_type} exercise type {i} is not valid")
         return errors
 
     def _is_valid_mobility_exercise(self, exercise: Exercise, exercise_type: str) -> bool:
@@ -409,5 +409,5 @@ class WorkoutValidator:
             else:
                 return ex.category in ['stretching', 'mobility']
         except Exercise.DoesNotExist:
-            logger.warning(f"Exercise with id {exercise.exercise_id} does not exist")
+            logger.info(f"Exercise with id {exercise.exercise_id} does not exist")
             return False

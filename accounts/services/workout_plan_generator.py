@@ -1,5 +1,6 @@
 import os
 os.makedirs('logs', exist_ok=True)
+from pprint import pprint
 from typing import Dict, List
 from datetime import datetime, timedelta
 from accounts.models import UserProfile, TrainingSettings
@@ -43,7 +44,7 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
             weekly_plan = {}
             current_date = datetime.now()
             week_plan = strategy.generate(1)
-            logger.debug(f"Generated raw plan before validation: {week_plan}")
+            logger.info(f"Generated raw plan before validation: {week_plan}")
             weekly_plan.update(self._add_dates_to_plan(week_plan['weekly_plan'], current_date))
             # Flatten and validate
             plain_weekly_plan = {}
@@ -96,7 +97,7 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
                                         secs = int(dur.split('s')[0].strip())
                                         exercise_dict['duration_seconds'] = secs
                                 except Exception:
-                                    logger.warning(f"Could not parse duration: {dur}")
+                                    logger.info(f"Could not parse duration: {dur}")
                         expanded.append(exercise_dict)
                     return expanded
                 else:
@@ -125,8 +126,8 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
                 plain_weekly_plan[day] = all_exercises
             is_valid, errors = self.validator.validate_program({'weekly_plan': plain_weekly_plan})
             if not is_valid:
-                logger.error(f"Validation failed: {errors}")
-                logger.error(f"Problematic plan structure: {plain_weekly_plan}")
+                logger.info(f"Validation failed: {errors}")
+                logger.info("Problematic plan structure:\n" + pprint.pformat(plain_weekly_plan, indent=2, width=120))
                 raise ValueError(f"Program is not valid: {', '.join(errors)}")
             logger.info("Workout plan validated successfully.")
             return {'weekly_plan': plain_weekly_plan}
@@ -135,11 +136,11 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
             raise ValueError(f"Error in generating workout plan: {str(e)}")
             
     def _add_dates_to_plan(self, week_plan: Dict, current_date: datetime) -> Dict:
-        logger.debug("Adding dates to weekly plan.")
+        logger.info("Adding dates to weekly plan.")
         dated_plan = {}
         for day, exercises in week_plan.items():
             if not exercises:
-                logger.warning(f"No exercises generated for day {day}!")
+                logger.info(f"No exercises generated for day {day}!")
             training_date = convert_day_to_date(day, current_date)
             main_exercises = []
             if isinstance(exercises, dict):
@@ -201,7 +202,7 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
                 logger.info(f"Found available date: {current_date}")
                 return current_date
             current_date += timedelta(days=1)
-        logger.error("Cannot find a suitable date for training after 14 attempts.")
+        logger.info("Cannot find a suitable date for training after 14 attempts.")
         raise ValueError("Cannot find a suitable date for training")
         
     def _get_split_strategy(self):
@@ -215,9 +216,9 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
             }
             strategy_class = strategies.get(self.settings.split_type)
             if not strategy_class:
-                logger.error(f"Invalid split type: {self.settings.split_type}")
+                logger.info(f"Invalid split type: {self.settings.split_type}")
                 raise ValueError(f"Invalid split type: {self.settings.split_type}")
-            logger.debug(f"Instantiating strategy class: {strategy_class.__name__}")
+            logger.info(f"Instantiating strategy class: {strategy_class.__name__}")
             return strategy_class(
                 self.user,
                 self.settings,
@@ -226,11 +227,11 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
                 self.recovery_manager
             )
         except Exception as e:
-            logger.error(f"Error in selecting strategy: {str(e)}", exc_info=True)
+            logger.info(f"Error in selecting strategy: {str(e)}", exc_info=True)
             raise ValueError(f"Error in selecting strategy: {str(e)}")
         
     def _get_plan_metadata(self, weeks: int) -> Dict:
-        logger.debug(f"Getting plan metadata for {weeks} weeks.")
+        logger.info(f"Getting plan metadata for {weeks} weeks.")
         return {
             'user_id': self.user.id,
             'created_at': datetime.now().isoformat(),
@@ -252,13 +253,13 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
             self._adjust_sequence(plan, feedback['sequence_feedback'])
         is_valid, errors = self.validator.validate_program(plan)
         if not is_valid:
-            logger.error(f"Adjusted plan is not valid: {errors}")
+            logger.info(f"Adjusted plan is not valid: {errors}")
             raise ValueError(f"Program is not valid: {', '.join(errors)}")
         logger.info("Plan adjusted and validated successfully.")
         return plan
         
     def _adjust_volume(self, plan: Dict, feedback: Dict):
-        logger.debug("Adjusting volume based on feedback.")
+        logger.info("Adjusting volume based on feedback.")
         for day, exercises in plan['weekly_plan'].items():
             for exercise in exercises:
                 muscle = exercise['muscle_group']
@@ -271,7 +272,7 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
                         exercise['reps'] = feedback[muscle]['reps']
                         
     def _adjust_intensity(self, plan: Dict, feedback: Dict):
-        logger.debug("Adjusting intensity based on feedback.")
+        logger.info("Adjusting intensity based on feedback.")
         for day, exercises in plan['weekly_plan'].items():
             for exercise in exercises:
                 if exercise['exercise_id'] in feedback:
@@ -280,7 +281,7 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
                         exercise['rest_seconds'] = feedback[exercise['exercise_id']]['rest_seconds']
                         
     def _adjust_sequence(self, plan: Dict, feedback: Dict):
-        logger.debug("Adjusting exercise sequence based on feedback.")
+        logger.info("Adjusting exercise sequence based on feedback.")
         for day, exercises in plan['weekly_plan'].items():
             if day in feedback:
                 new_sequence = feedback[day]
@@ -298,12 +299,13 @@ class WorkoutPlanGenerator(BaseWorkoutManager):
             else:
                 return 60
         except (ValueError, AttributeError):
-            logger.warning(f"Could not parse duration string: {duration_str}")
+            logger.info(f"Could not parse duration string: {duration_str}")
             return 60
     
     def save_plan_to_db(self, plan: Dict, weeks: int = 4):
         logger.info("Saving plan to database.")
         from accounts.models import WorkoutPlan, WorkoutDay, WorkoutExercise
+
         workout_plan = WorkoutPlan.objects.create(
             user=self.user.user,
             settings=self.settings,

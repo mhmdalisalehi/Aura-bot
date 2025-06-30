@@ -1,0 +1,34 @@
+2025-06-30 18:53:43,266 INFO Generating workout plan for user dante (telegram_id=mhmdalislhi)
+2025-06-30 18:53:48,778 ERROR Unexpected error: Error in generating workout plan: 'function' object has no attribute 'pformat'
+2025-06-30 18:53:48,780 ERROR Traceback (most recent call last):
+  File "c:\Users\dante\Desktop\Aura bot\accounts\services\workout_plan_generator.py", line 130, in generate_plan
+    logger.info("Problematic plan structure:\n" + pprint.pformat(plain_weekly_plan, indent=2, width=120))
+                                                  ^^^^^^^^^^^^^^
+AttributeError: 'function' object has no attribute 'pformat'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\dante\Desktop\Aura bot\generator.py", line 35, in generate_workout_plan
+    plan = generator.generate_plan()
+  File "c:\Users\dante\Desktop\Aura bot\accounts\services\workout_plan_generator.py", line 136, in generate_plan
+    raise ValueError(f"Error in generating workout plan: {str(e)}")
+ValueError: Error in generating workout plan: 'function' object has no attribute 'pformat'
+
+2025-06-30 18:54:31,789 INFO Generating workout plan for user dante (telegram_id=mhmdalislhi)
+2025-06-30 18:54:37,689 ERROR Unexpected error: Error in generating workout plan: 'function' object has no attribute 'pformat'
+2025-06-30 18:54:37,690 ERROR Traceback (most recent call last):
+  File "c:\Users\dante\Desktop\Aura bot\accounts\services\workout_plan_generator.py", line 130, in generate_plan
+    logger.info("Problematic plan structure:\n" + pprint.pformat(plain_weekly_plan, indent=2, width=120))
+                                                  ^^^^^^^^^^^^^^
+AttributeError: 'function' object has no attribute 'pformat'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\dante\Desktop\Aura bot\generator.py", line 35, in generate_workout_plan
+    plan = generator.generate_plan()
+  File "c:\Users\dante\Desktop\Aura bot\accounts\services\workout_plan_generator.py", line 136, in generate_plan
+    raise ValueError(f"Error in generating workout plan: {str(e)}")
+ValueError: Error in generating workout plan: 'function' object has no attribute 'pformat'
+
