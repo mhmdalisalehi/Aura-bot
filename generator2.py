@@ -51,13 +51,6 @@ from exercises.models import Exercise
 
 print("⚙️ تعداد تمرین‌های موجود در دیتابیس:", Exercise.objects.count())
 
-filtered = Exercise.objects.filter(
-    primary_muscles__contains=["chest"],
-    level=settings.experience_level,
-    equipment__in=settings.available_equipment
-)
-print("✅ تعداد تمرین‌های قابل انتخاب برای سینه:", filtered.count())
-
 
 # --- Format the output for Telegram and print ---
 message = format_workout_plan_for_telegram(program)

@@ -1,0 +1,22 @@
+2025-07-12 10:51:12,894 [INFO] Initialized WorkoutGenerator.
+2025-07-12 10:51:12,896 [INFO] Generating program for week 1, start_date=None
+2025-07-12 10:51:12,898 [INFO] Base volume after adjustment: 120.0
+2025-07-12 10:51:12,899 [INFO] Target sets for chest: 15
+2025-07-12 10:51:12,899 [INFO] Target sets for back: 15
+2025-07-12 10:51:12,899 [INFO] Target sets for shoulders: 9
+2025-07-12 10:51:12,900 [INFO] Target sets for biceps: 6
+2025-07-12 10:51:12,900 [INFO] Target sets for triceps: 6
+2025-07-12 10:51:12,900 [INFO] Target sets for quadriceps: 12
+2025-07-12 10:51:12,901 [INFO] Target sets for hamstrings: 9
+2025-07-12 10:51:12,901 [INFO] Target sets for glutes: 6
+2025-07-12 10:51:12,902 [INFO] Target sets for calves: 6
+2025-07-12 10:51:13,176 [INFO] Program generated successfully.
+2025-07-12 10:51:13,176 [INFO] === Weekly sets per muscle ===
+2025-07-12 10:51:13,176 [INFO] chest: 11 sets
+2025-07-12 10:51:13,176 [INFO] back: 12 sets
+2025-07-12 10:51:13,176 [INFO] shoulders: 8 sets
+2025-07-12 10:51:13,176 [INFO] biceps: 6 sets
+2025-07-12 10:51:13,176 [INFO] triceps: 6 sets
+2025-07-12 10:51:13,176 [INFO] quadriceps: 6 sets
+2025-07-12 10:51:13,176 [INFO] hamstrings: 8 sets
+2025-07-12 10:51:13,176 [INFO] glutes: 8 sets

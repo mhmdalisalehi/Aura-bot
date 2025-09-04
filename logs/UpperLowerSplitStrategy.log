@@ -1,0 +1,15 @@
+2025-07-12 10:51:12,902 [INFO] Initialized SplitStrategy.
+2025-07-12 10:51:12,903 [INFO] Generating UpperLowerSplit for week 1 and dates [datetime.date(2025, 7, 19), datetime.date(2025, 7, 14), datetime.date(2025, 7, 17), datetime.date(2025, 7, 16)]
+2025-07-12 10:51:12,903 [INFO] Building upper day for 2025-07-19
+2025-07-12 10:51:13,069 [INFO] Built upper day: 8 exercises.
+2025-07-12 10:51:13,070 [INFO] Building lower day for 2025-07-14
+2025-07-12 10:51:13,101 [INFO] Built lower day: 5 exercises.
+2025-07-12 10:51:13,102 [INFO] Building upper day for 2025-07-17
+2025-07-12 10:51:13,154 [INFO] Built upper day: 8 exercises.
+2025-07-12 10:51:13,155 [INFO] Building lower day for 2025-07-16
+2025-07-12 10:51:13,175 [INFO] Built lower day: 3 exercises.
+2025-07-12 10:51:13,175 [INFO] Adding warmup/cooldown (noop).
+2025-07-12 10:51:13,175 [INFO] Validating volume (noop).
+2025-07-12 10:51:13,176 [WARNING] quadriceps is undertrained: 6 sets
+2025-07-12 10:51:13,176 [WARNING] calves is undertrained: 0 sets
+2025-07-12 10:51:13,176 [INFO] UpperLowerSplit program generated.
