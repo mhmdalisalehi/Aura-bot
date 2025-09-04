@@ -46,6 +46,21 @@ class Command(BaseCommand):
                     'tips': data.get('tips', []),
                 }
             )
+            if not created:
+                # Update fields for existing exercise
+                exercise.primary_muscles = data.get('primaryMuscles', [])
+                exercise.secondary_muscles = data.get('secondaryMuscles', [])
+                exercise.force = data.get('force')
+                exercise.name_in_persian = data.get('name_in_persian')
+                exercise.level = data.get('level')
+                exercise.mechanic = data.get('mechanic')
+                exercise.equipment = data.get('equipment')
+                exercise.category = data.get('category')
+                exercise.instructions = data.get('instructions', [])
+                exercise.instructions_in_persian = data.get('instructions_in_persian', [])
+                exercise.description = data.get('description', '')
+                exercise.tips = data.get('tips', [])
+                exercise.save()
 
             if os.path.exists(img_folder):
                 for image_name in os.listdir(img_folder):

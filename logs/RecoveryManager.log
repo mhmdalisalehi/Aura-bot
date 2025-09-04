@@ -1,0 +1,48 @@
+2025-07-12 10:51:12,893 [INFO] Initialized RecoveryManager.
+2025-07-12 10:51:12,903 [INFO] Can train ['chest'] on 2025-07-19
+2025-07-12 10:51:13,030 [INFO] Can train ['back'] on 2025-07-19
+2025-07-12 10:51:13,043 [INFO] Can train ['shoulders'] on 2025-07-19
+2025-07-12 10:51:13,051 [INFO] Can train ['biceps'] on 2025-07-19
+2025-07-12 10:51:13,057 [INFO] Can train ['triceps'] on 2025-07-19
+2025-07-12 10:51:13,069 [INFO] Recorded training for chest on 2025-07-19
+2025-07-12 10:51:13,069 [INFO] Recorded training for chest on 2025-07-19
+2025-07-12 10:51:13,069 [INFO] Recorded training for back on 2025-07-19
+2025-07-12 10:51:13,069 [INFO] Recorded training for back on 2025-07-19
+2025-07-12 10:51:13,070 [INFO] Recorded training for shoulders on 2025-07-19
+2025-07-12 10:51:13,070 [INFO] Recorded training for biceps on 2025-07-19
+2025-07-12 10:51:13,070 [INFO] Recorded training for triceps on 2025-07-19
+2025-07-12 10:51:13,070 [INFO] Recorded training for core on 2025-07-19
+2025-07-12 10:51:13,070 [INFO] Can train ['quadriceps'] on 2025-07-14
+2025-07-12 10:51:13,083 [INFO] Can train ['hamstrings'] on 2025-07-14
+2025-07-12 10:51:13,088 [INFO] Can train ['glutes'] on 2025-07-14
+2025-07-12 10:51:13,092 [INFO] Can train ['calves'] on 2025-07-14
+2025-07-12 10:51:13,102 [INFO] Recorded training for quadriceps on 2025-07-14
+2025-07-12 10:51:13,102 [INFO] Recorded training for quadriceps on 2025-07-14
+2025-07-12 10:51:13,102 [INFO] Recorded training for hamstrings on 2025-07-14
+2025-07-12 10:51:13,102 [INFO] Recorded training for glutes on 2025-07-14
+2025-07-12 10:51:13,102 [INFO] Recorded training for calves on 2025-07-14
+2025-07-12 10:51:13,102 [WARNING] last_trained date 2025-07-19 for chest is in the future compared to 2025-07-17. Allowing training.
+2025-07-12 10:51:13,102 [INFO] Can train ['chest'] on 2025-07-17
+2025-07-12 10:51:13,115 [WARNING] last_trained date 2025-07-19 for back is in the future compared to 2025-07-17. Allowing training.
+2025-07-12 10:51:13,115 [INFO] Can train ['back'] on 2025-07-17
+2025-07-12 10:51:13,129 [WARNING] last_trained date 2025-07-19 for shoulders is in the future compared to 2025-07-17. Allowing training.
+2025-07-12 10:51:13,129 [INFO] Can train ['shoulders'] on 2025-07-17
+2025-07-12 10:51:13,137 [WARNING] last_trained date 2025-07-19 for biceps is in the future compared to 2025-07-17. Allowing training.
+2025-07-12 10:51:13,137 [INFO] Can train ['biceps'] on 2025-07-17
+2025-07-12 10:51:13,142 [WARNING] last_trained date 2025-07-19 for triceps is in the future compared to 2025-07-17. Allowing training.
+2025-07-12 10:51:13,142 [INFO] Can train ['triceps'] on 2025-07-17
+2025-07-12 10:51:13,155 [INFO] Recorded training for chest on 2025-07-17
+2025-07-12 10:51:13,155 [INFO] Recorded training for chest on 2025-07-17
+2025-07-12 10:51:13,155 [INFO] Recorded training for back on 2025-07-17
+2025-07-12 10:51:13,155 [INFO] Recorded training for back on 2025-07-17
+2025-07-12 10:51:13,155 [INFO] Recorded training for shoulders on 2025-07-17
+2025-07-12 10:51:13,155 [INFO] Recorded training for biceps on 2025-07-17
+2025-07-12 10:51:13,155 [INFO] Recorded training for triceps on 2025-07-17
+2025-07-12 10:51:13,155 [INFO] Recorded training for core on 2025-07-17
+2025-07-12 10:51:13,155 [INFO] Cannot train quadriceps on 2025-07-16: last trained 2025-07-14 (2 days ago, need 3)
+2025-07-12 10:51:13,155 [INFO] Can train ['hamstrings'] on 2025-07-16
+2025-07-12 10:51:13,162 [INFO] Can train ['glutes'] on 2025-07-16
+2025-07-12 10:51:13,167 [INFO] Can train ['calves'] on 2025-07-16
+2025-07-12 10:51:13,175 [INFO] Recorded training for hamstrings on 2025-07-16
+2025-07-12 10:51:13,175 [INFO] Recorded training for glutes on 2025-07-16
+2025-07-12 10:51:13,175 [INFO] Recorded training for calves on 2025-07-16

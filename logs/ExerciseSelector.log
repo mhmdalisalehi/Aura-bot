@@ -1,0 +1,105 @@
+2025-07-12 10:51:12,892 [INFO] Initialized ExerciseSelector.
+2025-07-12 10:51:12,904 [INFO] Expanded muscle groups ['chest'] to ['chest']
+2025-07-12 10:51:12,904 [INFO] Selecting exercises for muscles: ['chest']
+2025-07-12 10:51:13,012 [INFO] Base query count: 49
+2025-07-12 10:51:13,023 [INFO] Final exercises after all filtering: 49
+2025-07-12 10:51:13,024 [INFO] Expanded muscle groups ['chest'] to ['chest']
+2025-07-12 10:51:13,024 [INFO] Selecting exercises for muscles: ['chest']
+2025-07-12 10:51:13,026 [INFO] Base query count: 49
+2025-07-12 10:51:13,029 [INFO] Final exercises after all filtering: 49
+2025-07-12 10:51:13,030 [INFO] Expanded muscle groups ['back'] to ['lower back', 'middle back', 'traps', 'lats']
+2025-07-12 10:51:13,031 [INFO] Selecting exercises for muscles: ['lower back', 'middle back', 'traps', 'lats']
+2025-07-12 10:51:13,033 [INFO] Base query count: 58
+2025-07-12 10:51:13,037 [INFO] Final exercises after all filtering: 58
+2025-07-12 10:51:13,037 [INFO] Expanded muscle groups ['back'] to ['lower back', 'middle back', 'traps', 'lats']
+2025-07-12 10:51:13,037 [INFO] Selecting exercises for muscles: ['lower back', 'middle back', 'traps', 'lats']
+2025-07-12 10:51:13,040 [INFO] Base query count: 58
+2025-07-12 10:51:13,043 [INFO] Final exercises after all filtering: 58
+2025-07-12 10:51:13,044 [INFO] Expanded muscle groups ['shoulders'] to ['shoulders']
+2025-07-12 10:51:13,044 [INFO] Selecting exercises for muscles: ['shoulders']
+2025-07-12 10:51:13,046 [INFO] Base query count: 99
+2025-07-12 10:51:13,050 [INFO] Final exercises after all filtering: 99
+2025-07-12 10:51:13,051 [INFO] Expanded muscle groups ['biceps'] to ['biceps']
+2025-07-12 10:51:13,051 [INFO] Selecting exercises for muscles: ['biceps']
+2025-07-12 10:51:13,053 [INFO] Base query count: 45
+2025-07-12 10:51:13,057 [INFO] Final exercises after all filtering: 45
+2025-07-12 10:51:13,058 [INFO] Expanded muscle groups ['triceps'] to ['triceps']
+2025-07-12 10:51:13,058 [INFO] Selecting exercises for muscles: ['triceps']
+2025-07-12 10:51:13,060 [INFO] Base query count: 49
+2025-07-12 10:51:13,063 [INFO] Final exercises after all filtering: 49
+2025-07-12 10:51:13,063 [INFO] Expanded muscle groups ['core'] to ['lower back', 'obliques', 'abdominals']
+2025-07-12 10:51:13,063 [INFO] Selecting exercises for muscles: ['lower back', 'obliques', 'abdominals']
+2025-07-12 10:51:13,066 [INFO] Base query count: 34
+2025-07-12 10:51:13,069 [INFO] Final exercises after all filtering: 34
+2025-07-12 10:51:13,070 [INFO] Expanded muscle groups ['quadriceps'] to ['quadriceps']
+2025-07-12 10:51:13,070 [INFO] Selecting exercises for muscles: ['quadriceps']
+2025-07-12 10:51:13,072 [INFO] Base query count: 69
+2025-07-12 10:51:13,076 [INFO] Final exercises after all filtering: 69
+2025-07-12 10:51:13,076 [INFO] Expanded muscle groups ['quadriceps'] to ['quadriceps']
+2025-07-12 10:51:13,076 [INFO] Selecting exercises for muscles: ['quadriceps']
+2025-07-12 10:51:13,078 [INFO] Base query count: 69
+2025-07-12 10:51:13,083 [INFO] Final exercises after all filtering: 69
+2025-07-12 10:51:13,084 [INFO] Expanded muscle groups ['hamstrings'] to ['hamstrings']
+2025-07-12 10:51:13,084 [INFO] Selecting exercises for muscles: ['hamstrings']
+2025-07-12 10:51:13,085 [INFO] Base query count: 38
+2025-07-12 10:51:13,088 [INFO] Final exercises after all filtering: 38
+2025-07-12 10:51:13,089 [INFO] Expanded muscle groups ['glutes'] to ['glutes']
+2025-07-12 10:51:13,089 [INFO] Selecting exercises for muscles: ['glutes']
+2025-07-12 10:51:13,091 [INFO] Base query count: 7
+2025-07-12 10:51:13,092 [INFO] Final exercises after all filtering: 7
+2025-07-12 10:51:13,093 [INFO] Expanded muscle groups ['calves'] to ['calves']
+2025-07-12 10:51:13,093 [INFO] Selecting exercises for muscles: ['calves']
+2025-07-12 10:51:13,095 [INFO] Base query count: 13
+2025-07-12 10:51:13,097 [INFO] Final exercises after all filtering: 13
+2025-07-12 10:51:13,097 [INFO] Expanded muscle groups ['calves'] to ['calves']
+2025-07-12 10:51:13,097 [INFO] Selecting exercises for muscles: ['calves']
+2025-07-12 10:51:13,099 [INFO] Base query count: 13
+2025-07-12 10:51:13,101 [INFO] Final exercises after all filtering: 13
+2025-07-12 10:51:13,102 [INFO] Expanded muscle groups ['chest'] to ['chest']
+2025-07-12 10:51:13,103 [INFO] Selecting exercises for muscles: ['chest']
+2025-07-12 10:51:13,104 [INFO] Base query count: 49
+2025-07-12 10:51:13,108 [INFO] Final exercises after all filtering: 49
+2025-07-12 10:51:13,108 [INFO] Expanded muscle groups ['chest'] to ['chest']
+2025-07-12 10:51:13,108 [INFO] Selecting exercises for muscles: ['chest']
+2025-07-12 10:51:13,110 [INFO] Base query count: 49
+2025-07-12 10:51:13,115 [INFO] Final exercises after all filtering: 49
+2025-07-12 10:51:13,115 [INFO] Expanded muscle groups ['back'] to ['lower back', 'middle back', 'traps', 'lats']
+2025-07-12 10:51:13,115 [INFO] Selecting exercises for muscles: ['lower back', 'middle back', 'traps', 'lats']
+2025-07-12 10:51:13,118 [INFO] Base query count: 58
+2025-07-12 10:51:13,122 [INFO] Final exercises after all filtering: 58
+2025-07-12 10:51:13,122 [INFO] Expanded muscle groups ['back'] to ['lower back', 'middle back', 'traps', 'lats']
+2025-07-12 10:51:13,123 [INFO] Selecting exercises for muscles: ['lower back', 'middle back', 'traps', 'lats']
+2025-07-12 10:51:13,125 [INFO] Base query count: 58
+2025-07-12 10:51:13,129 [INFO] Final exercises after all filtering: 58
+2025-07-12 10:51:13,130 [INFO] Expanded muscle groups ['shoulders'] to ['shoulders']
+2025-07-12 10:51:13,130 [INFO] Selecting exercises for muscles: ['shoulders']
+2025-07-12 10:51:13,132 [INFO] Base query count: 99
+2025-07-12 10:51:13,136 [INFO] Final exercises after all filtering: 99
+2025-07-12 10:51:13,137 [INFO] Expanded muscle groups ['biceps'] to ['biceps']
+2025-07-12 10:51:13,137 [INFO] Selecting exercises for muscles: ['biceps']
+2025-07-12 10:51:13,139 [INFO] Base query count: 45
+2025-07-12 10:51:13,142 [INFO] Final exercises after all filtering: 45
+2025-07-12 10:51:13,143 [INFO] Expanded muscle groups ['triceps'] to ['triceps']
+2025-07-12 10:51:13,143 [INFO] Selecting exercises for muscles: ['triceps']
+2025-07-12 10:51:13,145 [INFO] Base query count: 49
+2025-07-12 10:51:13,149 [INFO] Final exercises after all filtering: 49
+2025-07-12 10:51:13,149 [INFO] Expanded muscle groups ['core'] to ['lower back', 'obliques', 'abdominals']
+2025-07-12 10:51:13,149 [INFO] Selecting exercises for muscles: ['lower back', 'obliques', 'abdominals']
+2025-07-12 10:51:13,151 [INFO] Base query count: 34
+2025-07-12 10:51:13,154 [INFO] Final exercises after all filtering: 34
+2025-07-12 10:51:13,156 [INFO] Expanded muscle groups ['hamstrings'] to ['hamstrings']
+2025-07-12 10:51:13,156 [INFO] Selecting exercises for muscles: ['hamstrings']
+2025-07-12 10:51:13,157 [INFO] Base query count: 38
+2025-07-12 10:51:13,162 [INFO] Final exercises after all filtering: 38
+2025-07-12 10:51:13,163 [INFO] Expanded muscle groups ['glutes'] to ['glutes']
+2025-07-12 10:51:13,163 [INFO] Selecting exercises for muscles: ['glutes']
+2025-07-12 10:51:13,165 [INFO] Base query count: 7
+2025-07-12 10:51:13,167 [INFO] Final exercises after all filtering: 7
+2025-07-12 10:51:13,167 [INFO] Expanded muscle groups ['calves'] to ['calves']
+2025-07-12 10:51:13,168 [INFO] Selecting exercises for muscles: ['calves']
+2025-07-12 10:51:13,169 [INFO] Base query count: 13
+2025-07-12 10:51:13,171 [INFO] Final exercises after all filtering: 13
+2025-07-12 10:51:13,171 [INFO] Expanded muscle groups ['calves'] to ['calves']
+2025-07-12 10:51:13,171 [INFO] Selecting exercises for muscles: ['calves']
+2025-07-12 10:51:13,173 [INFO] Base query count: 13
+2025-07-12 10:51:13,175 [INFO] Final exercises after all filtering: 13

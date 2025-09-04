@@ -1,0 +1,2 @@
+2025-07-12 10:51:12,898 [INFO] Mapping user-selected weekdays: ['شنبه', 'دوشنبه', 'پنجشنبه', 'چهارشنبه']
+2025-07-12 10:51:12,898 [INFO] Mapped dates: [datetime.date(2025, 7, 19), datetime.date(2025, 7, 14), datetime.date(2025, 7, 17), datetime.date(2025, 7, 16)]
